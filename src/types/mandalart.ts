@@ -9,7 +9,7 @@ export interface Theme {
   id: string;
   goalId: string;
   themeText: string;
-  order: number; // 1-8
+  order: number; // 0-7 (for array indexing)
   createdAt: Date;
   updatedAt: Date;
 }
@@ -19,7 +19,7 @@ export interface ActionItem {
   themeId: string;
   actionText: string;
   isCompleted: boolean;
-  order: number; // 1-8
+  order: number; // 0-7 (for array indexing)
   createdAt: Date;
   updatedAt: Date;
 }
@@ -33,4 +33,13 @@ export interface MandalartData {
 export interface KeywordSuggestion {
   text: string;
   category: 'adjective' | 'verb' | 'noun';
+  description?: string;
+}
+
+export interface MandalartProgress {
+  totalThemes: number;
+  completedThemes: number;
+  totalActions: number;
+  completedActions: number;
+  completionPercentage: number;
 }

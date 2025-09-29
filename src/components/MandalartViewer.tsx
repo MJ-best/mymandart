@@ -3,7 +3,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/u
 import { MandalartData } from "@/types/mandalart";
 import MandalartGrid from "./MandalartGrid";
 import MandalartControls from "./MandalartControls";
-import { exportMandalartAsImage } from "@/utils/mandalartExport";
+import { exportMandalartAsImage, exportMandalartAsJSON } from "@/utils/mandalartExport";
 
 interface MandalartViewerProps {
   data: MandalartData;
@@ -22,6 +22,10 @@ const MandalartViewer = ({ data, isOpen, onClose }: MandalartViewerProps) => {
     } finally {
       setIsExporting(false);
     }
+  };
+
+  const handleExportJSON = () => {
+    exportMandalartAsJSON(data);
   };
 
   const handleThemeClick = (themeIndex: number) => {
@@ -44,6 +48,7 @@ const MandalartViewer = ({ data, isOpen, onClose }: MandalartViewerProps) => {
                 isModal
                 isExporting={isExporting}
                 onExport={handleExport}
+                onExportJSON={handleExportJSON}
               />
             </div>
           </DialogHeader>
@@ -67,6 +72,7 @@ const MandalartViewer = ({ data, isOpen, onClose }: MandalartViewerProps) => {
           <MandalartControls
             isExporting={isExporting}
             onExport={handleExport}
+            onExportJSON={handleExportJSON}
             onClose={onClose}
           />
         </div>

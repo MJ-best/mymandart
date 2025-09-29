@@ -1,10 +1,12 @@
 import { useState, useEffect, useMemo } from "react";
 import { useLocalStorage } from "@/hooks/useLocalStorage";
-import { MandalartData, Goal, Theme, ActionItem } from "@/types/mandalart";
+import { MandalartData, Goal, Theme, ActionItem, MandalartProgress } from "@/types/mandalart";
+import { generateUUID } from "@/utils/uuid";
 import GoalDefinitionStep from "./steps/GoalDefinitionStep";
 import ThemeStep from "./steps/ThemeStep";
 import ActionItemsStep from "./steps/ActionItemsStep";
 import MandalartViewer from "./MandalartViewer";
+import ProgressIndicator from "./ProgressIndicator";
 
 const MandalartApp = () => {
   const [currentStep, setCurrentStep] = useState(0);
@@ -23,21 +25,24 @@ const MandalartApp = () => {
 
   // Create MandalartData structure
   const mandalartData: MandalartData = useMemo(() => {
+    const goalId = generateUUID();
     const goal: Goal = {
-      id: "main-goal",
+      id: goalId,
       centralGoal: goalText,
       createdAt: new Date(),
       updatedAt: new Date(),
     };
 
-    const themeData: Theme[] = themes.map((themeText, index) => ({
-      id: `theme-${index}`,
-      goalId: "main-goal",
-      themeText,
-      order: index,
-      createdAt: new Date(),
-      updatedAt: new Date(),
-    }));
+    const themeData: Theme[] = themes
+      .map((themeText, index) => ({
+        id: generateUUID(),
+        goalId: goalId,
+        themeText,
+        order: index,
+        createdAt: new Date(),
+        updatedAt: new Date(),
+      }))
+      .filter(theme => theme.themeText.trim());
 
     return {
       goal,
@@ -45,6 +50,23 @@ const MandalartApp = () => {
       actionItems,
     };
   }, [goalText, themes, actionItems]);
+
+  // Calculate progress
+  const progress: MandalartProgress = useMemo(() => {
+    const totalThemes = themes.filter(t => t.trim()).length;
+    const completedThemes = themes.filter(t => t.trim()).length; // All filled themes are "completed"
+    const totalActions = actionItems.filter(item => item.actionText.trim()).length;
+    const completedActions = actionItems.filter(item => item.isCompleted).length;
+    const completionPercentage = totalActions > 0 ? (completedActions / totalActions) * 100 : 0;
+
+    return {
+      totalThemes,
+      completedThemes,
+      totalActions,
+      completedActions,
+      completionPercentage,
+    };
+  }, [themes, actionItems]);
 
   const handleStepChange = (step: number) => {
     setCurrentStep(step);
@@ -108,25 +130,39 @@ const MandalartApp = () => {
       )}
       
       {currentStep === 1 && (
-        <ThemeStep
-          goalText={goalText}
-          themes={themes}
-          onChange={handleThemesChange}
-          onNext={handleNext}
-          onPrevious={handlePrevious}
-        />
+        <div className="flex gap-6">
+          <div className="flex-1">
+            <ThemeStep
+              goalText={goalText}
+              themes={themes}
+              onChange={handleThemesChange}
+              onNext={handleNext}
+              onPrevious={handlePrevious}
+            />
+          </div>
+          <div className="w-80">
+            <ProgressIndicator progress={progress} />
+          </div>
+        </div>
       )}
       
       {currentStep === 2 && (
-        <ActionItemsStep
-          goalText={goalText}
-          themes={themes.filter(t => t.trim())}
-          actionItems={actionItems}
-          onChange={handleActionItemsChange}
-          onNext={handleNext}
-          onPrevious={handlePrevious}
-          onViewMandalart={handleViewMandalart}
-        />
+        <div className="flex gap-6">
+          <div className="flex-1">
+            <ActionItemsStep
+              goalText={goalText}
+              themes={themes.filter(t => t.trim())}
+              actionItems={actionItems}
+              onChange={handleActionItemsChange}
+              onNext={handleNext}
+              onPrevious={handlePrevious}
+              onViewMandalart={handleViewMandalart}
+            />
+          </div>
+          <div className="w-80">
+            <ProgressIndicator progress={progress} />
+          </div>
+        </div>
       )}
     </div>
   );
