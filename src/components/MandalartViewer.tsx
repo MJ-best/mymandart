@@ -14,6 +14,7 @@ interface MandalartViewerProps {
 
 const MandalartViewer = ({ data, isOpen, onClose }: MandalartViewerProps) => {
   const [isExporting, setIsExporting] = useState(false);
+  const [currentView, setCurrentView] = useState<'full' | number>('full'); // 'full' or theme index
 
   // Create 9x9 grid structure
   const createMandalartGrid = () => {
@@ -123,43 +124,131 @@ const MandalartViewer = ({ data, isOpen, onClose }: MandalartViewerProps) => {
   const completedActions = data.actionItems.filter(item => item.isCompleted).length;
   const totalActions = data.actionItems.filter(item => item.actionText.trim()).length;
 
-  const MandalartGrid = () => (
-    <div 
-      id="mandalart-grid"
-      className="bg-card p-6 rounded-lg shadow-soft border"
-    >
-      <div className="mb-4 text-center">
-        <h2 className="text-2xl font-bold mb-2">나의 만다라트</h2>
-        <p className="text-sm text-muted-foreground">
-          {completedActions}/{totalActions} 액션아이템 완료
-        </p>
-      </div>
-      
-      <div className="grid grid-cols-9 gap-1 aspect-square max-w-2xl mx-auto">
-        {grid.map((row, rowIndex) => 
-          row.map((cell, colIndex) => (
-            <div
-              key={`${rowIndex}-${colIndex}`}
-              className={cn(
-                "aspect-square border text-xs flex items-center justify-center p-1 text-center leading-tight",
-                cell?.type === 'goal' && "bg-gradient-primary text-primary-foreground font-bold text-sm",
-                cell?.type === 'theme' && "bg-gradient-accent text-accent-foreground font-medium",
-                cell?.type === 'action' && !cell.isCompleted && "bg-muted/50 text-muted-foreground",
-                cell?.type === 'action' && cell.isCompleted && "bg-gradient-success text-success-foreground",
-                !cell && "bg-background"
-              )}
-            >
-              {cell?.text && (
-                <span className="break-all overflow-hidden">
-                  {cell.text.length > 20 ? `${cell.text.slice(0, 20)}...` : cell.text}
-                </span>
-              )}
-            </div>
-          ))
+  // Create theme-specific 3x3 grid
+  const createThemeGrid = (themeIndex: number) => {
+    const grid = Array(3).fill(null).map(() => Array(3).fill(null));
+    const theme = data.themes[themeIndex];
+    
+    // Center cell - theme
+    grid[1][1] = { text: theme?.themeText || '', type: 'theme', isCompleted: false };
+    
+    // Action items around the theme
+    const themeActions = data.actionItems.filter(
+      action => action.themeId === theme?.id
+    ).sort((a, b) => a.order - b.order);
+    
+    const actionPositions = [
+      [0, 0], [0, 1], [0, 2],
+      [1, 0],           [1, 2],
+      [2, 0], [2, 1], [2, 2]
+    ];
+    
+    themeActions.forEach((action, index) => {
+      if (index < 8 && actionPositions[index]) {
+        const [row, col] = actionPositions[index];
+        grid[row][col] = {
+          text: action.actionText,
+          type: 'action',
+          isCompleted: action.isCompleted
+        };
+      }
+    });
+    
+    return grid;
+  };
+
+  const handleCellClick = (cell: any, rowIndex: number, colIndex: number) => {
+    if (currentView === 'full') {
+      if (cell?.type === 'goal') {
+        // Already in full view, do nothing
+        return;
+      } else if (cell?.type === 'theme') {
+        // Find which theme was clicked
+        const themePositions = [
+          [3, 3], [3, 4], [3, 5],
+          [4, 3],         [4, 5],
+          [5, 3], [5, 4], [5, 5]
+        ];
+        const themeIndex = themePositions.findIndex(([r, c]) => r === rowIndex && c === colIndex);
+        if (themeIndex !== -1) {
+          setCurrentView(themeIndex);
+        }
+      }
+    }
+  };
+
+  const handleBackToFull = () => {
+    setCurrentView('full');
+  };
+
+  const MandalartGrid = () => {
+    const isFullView = currentView === 'full';
+    const gridData = isFullView ? grid : createThemeGrid(currentView as number);
+    const gridSize = isFullView ? 9 : 3;
+    
+    return (
+      <div 
+        id="mandalart-grid"
+        className="bg-card p-6 rounded-lg shadow-soft border"
+      >
+        <div className="mb-4 text-center">
+          <div className="flex items-center justify-center gap-4 mb-2">
+            {!isFullView && (
+              <button
+                onClick={handleBackToFull}
+                className="text-sm text-muted-foreground hover:text-foreground transition-smooth flex items-center gap-1"
+              >
+                ← 전체보기
+              </button>
+            )}
+            <h2 className="text-2xl font-bold">
+              {isFullView ? '나의 만다라트' : data.themes[currentView as number]?.themeText}
+            </h2>
+          </div>
+          <p className="text-sm text-muted-foreground">
+            {completedActions}/{totalActions} 액션아이템 완료
+          </p>
+        </div>
+        
+        <div className={cn(
+          "grid gap-1 aspect-square max-w-2xl mx-auto",
+          isFullView ? "grid-cols-9" : "grid-cols-3"
+        )}>
+          {gridData.map((row, rowIndex) => 
+            row.map((cell, colIndex) => (
+              <div
+                key={`${rowIndex}-${colIndex}`}
+                onClick={() => handleCellClick(cell, rowIndex, colIndex)}
+                className={cn(
+                  "aspect-square border text-xs flex items-center justify-center p-1 text-center leading-tight transition-smooth",
+                  cell?.type === 'goal' && "bg-gradient-primary text-primary-foreground font-bold text-sm cursor-pointer hover:opacity-80",
+                  cell?.type === 'theme' && "bg-gradient-accent text-accent-foreground font-medium cursor-pointer hover:opacity-80 hover-scale",
+                  cell?.type === 'action' && !cell.isCompleted && "bg-muted/50 text-muted-foreground",
+                  cell?.type === 'action' && cell.isCompleted && "bg-gradient-success text-success-foreground",
+                  !cell && "bg-background",
+                  !isFullView && cell?.type === 'action' && "text-sm"
+                )}
+              >
+                {cell?.text && (
+                  <span className="break-all overflow-hidden animate-fade-in">
+                    {!isFullView || cell.text.length <= 20 ? cell.text : `${cell.text.slice(0, 20)}...`}
+                  </span>
+                )}
+              </div>
+            ))
+          )}
+        </div>
+        
+        {!isFullView && (
+          <div className="mt-4 text-center">
+            <p className="text-xs text-muted-foreground">
+              💡 중앙의 테마를 클릭하거나 위의 "전체보기"를 클릭해서 전체 만다라트로 돌아갈 수 있습니다
+            </p>
+          </div>
         )}
       </div>
-    </div>
-  );
+    );
+  };
 
   if (isOpen !== undefined) {
     // Modal mode
