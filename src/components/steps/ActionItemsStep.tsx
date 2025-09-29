@@ -42,14 +42,14 @@ const ActionItemsStep = ({
   }, [localActionItems, onChange]);
 
   const getThemeActions = (themeIndex: number) => {
-    return localActionItems.filter(item => parseInt(item.themeId) === themeIndex);
+    return localActionItems.filter(item => item.themeId === `theme-${themeIndex}`);
   };
 
   const updateActionItem = (themeIndex: number, actionIndex: number, field: keyof ActionItem, value: any) => {
     setLocalActionItems(prev => {
       const newItems = [...prev];
       const itemIndex = newItems.findIndex(
-        item => parseInt(item.themeId) === themeIndex && item.order === actionIndex
+        item => item.themeId === `theme-${themeIndex}` && item.order === actionIndex
       );
 
       if (itemIndex >= 0) {
@@ -58,7 +58,7 @@ const ActionItemsStep = ({
         // Create new action item
         const newItem: ActionItem = {
           id: `${themeIndex}-${actionIndex}`,
-          themeId: themeIndex.toString(),
+          themeId: `theme-${themeIndex}`,
           actionText: field === 'actionText' ? value : "",
           isCompleted: field === 'isCompleted' ? value : false,
           order: actionIndex,
