@@ -47,6 +47,19 @@ const MandalartViewer = ({ data, isOpen, onClose }: MandalartViewerProps) => {
         // Define action positions for each theme
         const actionPositions = getActionPositions(themeIndex);
         
+        // Add theme in the center of each outer 3x3 area
+        const themeCenterPositions = [
+          [1,1], [1,4], [1,7], [4,1], [4,7], [7,1], [7,4], [7,7]
+        ];
+        if (themeCenterPositions[themeIndex]) {
+          const [row, col] = themeCenterPositions[themeIndex];
+          grid[row][col] = { 
+            text: theme.themeText, 
+            type: 'outer-theme', 
+            isCompleted: false 
+          };
+        }
+        
         themeActions.forEach((action, actionIndex) => {
           if (actionIndex < 8 && actionPositions[actionIndex]) {
             const [row, col] = actionPositions[actionIndex];
@@ -223,6 +236,7 @@ const MandalartViewer = ({ data, isOpen, onClose }: MandalartViewerProps) => {
                   "aspect-square border text-xs flex items-center justify-center p-1 text-center leading-tight transition-smooth",
                   cell?.type === 'goal' && "bg-gradient-primary text-primary-foreground font-bold text-sm cursor-pointer hover:opacity-80",
                   cell?.type === 'theme' && "bg-gradient-accent text-accent-foreground font-medium cursor-pointer hover:opacity-80 hover-scale",
+                  cell?.type === 'outer-theme' && "bg-gradient-secondary text-secondary-foreground font-medium border-2 border-accent/30",
                   cell?.type === 'action' && !cell.isCompleted && "bg-muted/50 text-muted-foreground",
                   cell?.type === 'action' && cell.isCompleted && "bg-gradient-success text-success-foreground",
                   !cell && "bg-background",
