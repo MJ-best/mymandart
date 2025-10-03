@@ -26,6 +26,14 @@ class MandalartAppScreen extends ConsumerWidget {
 
     return CupertinoPageScaffold(
       navigationBar: CupertinoNavigationBar(
+        leading: CupertinoNavigationBarBackButton(
+          onPressed: () {
+            HapticFeedback.lightImpact();
+            if (state.currentStep > 0) {
+              notifier.previousStep();
+            }
+          },
+        ),
         middle: const Text('Mandalart Journey'),
         backgroundColor: CupertinoColors.systemBackground,
         border: null,
@@ -54,11 +62,12 @@ class MandalartAppScreen extends ConsumerWidget {
                   'Step ${state.currentStep + 1} / 3',
                   style: const TextStyle(
                     fontSize: 28,
-                    fontWeight: FontWeight.w600,
+                    fontWeight: FontWeight.w400,
                     color: CupertinoColors.label,
+                    letterSpacing: 0.36,
                   ),
                 ),
-                const SizedBox(height: 16),
+                const SizedBox(height: 32),
                 if (state.currentStep == 0) _GoalStep(state.goalText, notifier.updateGoal),
                 if (state.currentStep == 1) _ThemesStep(state.themes, notifier.updateThemes),
                 if (state.currentStep == 2) _ActionsStep(state, notifier),
@@ -120,11 +129,12 @@ class MandalartAppScreen extends ConsumerWidget {
                   'Step ${state.currentStep + 1} / 3',
                   style: const TextStyle(
                     fontSize: 28,
-                    fontWeight: FontWeight.w600,
+                    fontWeight: FontWeight.w400,
                     color: CupertinoColors.label,
+                    letterSpacing: 0.36,
                   ),
                 ),
-                const SizedBox(height: 16),
+                const SizedBox(height: 32),
                 if (state.currentStep == 0) _GoalStep(state.goalText, notifier.updateGoal),
                 if (state.currentStep == 1) _ThemesStep(state.themes, notifier.updateThemes),
                 if (state.currentStep == 2) _ActionsStep(state, notifier),
@@ -214,20 +224,61 @@ class _GoalStepState extends State<_GoalStep> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        const Text(
-          '나의 목표',
-          style: TextStyle(
-            fontSize: 20,
-            fontWeight: FontWeight.w600,
-            color: CupertinoColors.label,
-          ),
+        Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: [
+            const Text(
+              '나의 목표',
+              style: TextStyle(
+                fontSize: 17,
+                fontWeight: FontWeight.w600,
+                color: CupertinoColors.label,
+                letterSpacing: -0.41,
+              ),
+            ),
+            if (_controller.text.isNotEmpty)
+              CupertinoButton(
+                padding: EdgeInsets.zero,
+                minSize: 44,
+                onPressed: () {
+                  showCupertinoDialog(
+                    context: context,
+                    builder: (context) => CupertinoAlertDialog(
+                      title: const Text('목표 초기화'),
+                      content: const Text('작성한 목표를 삭제하시겠습니까?'),
+                      actions: [
+                        CupertinoDialogAction(
+                          child: const Text('취소'),
+                          onPressed: () => Navigator.pop(context),
+                        ),
+                        CupertinoDialogAction(
+                          isDestructiveAction: true,
+                          onPressed: () {
+                            HapticFeedback.mediumImpact();
+                            _controller.clear();
+                            widget.onChange('');
+                            Navigator.pop(context);
+                          },
+                          child: const Text('삭제'),
+                        ),
+                      ],
+                    ),
+                  );
+                },
+                child: const Icon(
+                  CupertinoIcons.trash,
+                  color: CupertinoColors.destructiveRed,
+                  size: 20,
+                ),
+              ),
+          ],
         ),
-        const SizedBox(height: 12),
+        const SizedBox(height: 16),
         CupertinoTextField(
           controller: _controller,
           maxLines: 4,
           placeholder: Keywords.goalExamples[0],
-          padding: const EdgeInsets.all(12),
+          padding: const EdgeInsets.all(16),
           decoration: BoxDecoration(
             color: CupertinoColors.tertiarySystemFill,
             borderRadius: BorderRadius.circular(8),
@@ -252,7 +303,7 @@ class _GoalStepState extends State<_GoalStep> {
             ),
           ),
         ),
-        const SizedBox(height: 24),
+        const SizedBox(height: 32),
         Row(
           children: [
             const Icon(
@@ -271,13 +322,14 @@ class _GoalStepState extends State<_GoalStep> {
             ),
           ],
         ),
-        const SizedBox(height: 12),
+        const SizedBox(height: 16),
         Wrap(
           spacing: 8,
           runSpacing: 8,
           children: _randomCommunityGoals.map((goal) {
             return CupertinoButton(
-              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+              minSize: 44,
               color: CupertinoColors.systemPurple.withOpacity(0.1),
               onPressed: () {
                 HapticFeedback.selectionClick();
@@ -371,18 +423,60 @@ class _ThemesStepState extends State<_ThemesStep> {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Text(
-                        '테마 ${index + 1}',
-                        style: const TextStyle(
-                          fontSize: 15,
-                          fontWeight: FontWeight.w600,
-                          color: CupertinoColors.label,
-                        ),
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          Text(
+                            '액션타겟 ${index + 1}',
+                            style: const TextStyle(
+                              fontSize: 15,
+                              fontWeight: FontWeight.w600,
+                              color: CupertinoColors.label,
+                            ),
+                          ),
+                          if (_controllers[index].text.isNotEmpty)
+                            CupertinoButton(
+                              padding: EdgeInsets.zero,
+                              minSize: 44,
+                              onPressed: () {
+                                showCupertinoDialog(
+                                  context: context,
+                                  builder: (context) => CupertinoAlertDialog(
+                                    title: const Text('테마 초기화'),
+                                    content: Text('액션타겟 ${index + 1}을(를) 삭제하시겠습니까?'),
+                                    actions: [
+                                      CupertinoDialogAction(
+                                        child: const Text('취소'),
+                                        onPressed: () => Navigator.pop(context),
+                                      ),
+                                      CupertinoDialogAction(
+                                        isDestructiveAction: true,
+                                        onPressed: () {
+                                          HapticFeedback.mediumImpact();
+                                          _controllers[index].clear();
+                                          final next = List<String>.from(widget.themes);
+                                          next[index] = '';
+                                          widget.onChange(next);
+                                          Navigator.pop(context);
+                                        },
+                                        child: const Text('삭제'),
+                                      ),
+                                    ],
+                                  ),
+                                );
+                              },
+                              child: const Icon(
+                                CupertinoIcons.trash,
+                                color: CupertinoColors.destructiveRed,
+                                size: 18,
+                              ),
+                            ),
+                        ],
                       ),
                       const SizedBox(height: 8),
                       CupertinoTextField(
                         controller: _controllers[index],
-                        padding: const EdgeInsets.all(12),
+                        padding: const EdgeInsets.all(16),
                         decoration: BoxDecoration(
                           color: CupertinoColors.tertiarySystemFill,
                           borderRadius: BorderRadius.circular(8),
@@ -400,7 +494,8 @@ class _ThemesStepState extends State<_ThemesStep> {
                   runSpacing: 8,
                   children: Keywords.themeExamples.map((keyword) {
                     return CupertinoButton(
-                      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                      minSize: 44,
                       color: CupertinoColors.systemGrey5,
                       onPressed: () {
                         HapticFeedback.selectionClick();
@@ -568,6 +663,40 @@ class _ActionsStepState extends State<_ActionsStep> {
                         ),
                       ),
                     ),
+                    CupertinoButton(
+                      padding: EdgeInsets.zero,
+                      minSize: 44,
+                      onPressed: () {
+                        showCupertinoDialog(
+                          context: context,
+                          builder: (context) => CupertinoAlertDialog(
+                            title: const Text('액션 아이템 초기화'),
+                            content: Text('${filled[themeIndex]}의 모든 액션 아이템을 삭제하시겠습니까?'),
+                            actions: [
+                              CupertinoDialogAction(
+                                child: const Text('취소'),
+                                onPressed: () => Navigator.pop(context),
+                              ),
+                              CupertinoDialogAction(
+                                isDestructiveAction: true,
+                                onPressed: () {
+                                  HapticFeedback.mediumImpact();
+                                  widget.notifier.clearThemeActions(themeIndex);
+                                  Navigator.pop(context);
+                                },
+                                child: const Text('삭제'),
+                              ),
+                            ],
+                          ),
+                        );
+                      },
+                      child: const Icon(
+                        CupertinoIcons.trash,
+                        color: CupertinoColors.destructiveRed,
+                        size: 20,
+                      ),
+                    ),
+                    const SizedBox(width: 8),
                     Icon(
                       isExpanded ? CupertinoIcons.chevron_up : CupertinoIcons.chevron_down,
                       color: CupertinoColors.systemPurple,
@@ -661,7 +790,7 @@ class _ActionsStepState extends State<_ActionsStep> {
                               controller: _controllers[key],
                               focusNode: _focusNodes[key],
                               placeholder: Keywords.getActionsForTheme(filled[themeIndex])[actionIndex % Keywords.getActionsForTheme(filled[themeIndex]).length],
-                              padding: const EdgeInsets.all(12),
+                              padding: const EdgeInsets.all(16),
                               decoration: BoxDecoration(
                                 color: CupertinoColors.tertiarySystemFill,
                                 borderRadius: BorderRadius.circular(8),
@@ -710,9 +839,9 @@ class _ActionsStepState extends State<_ActionsStep> {
                         runSpacing: 8,
                         children: Keywords.getActionsForTheme(filled[themeIndex]).map((keyword) {
                           return CupertinoButton(
-                            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
                             color: CupertinoColors.systemGrey5,
-                            minimumSize: const Size(30, 30),
+                            minSize: 44,
                             onPressed: _focusedKey != null && _focusedKey!.startsWith('theme-$themeIndex')
                                 ? () {
                                     HapticFeedback.selectionClick();

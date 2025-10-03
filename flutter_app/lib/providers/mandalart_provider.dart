@@ -105,6 +105,40 @@ class MandalartNotifier extends StateNotifier<MandalartStateModel> {
 
   void openViewer() => state = state.copyWith(showViewer: true);
   void closeViewer() => state = state.copyWith(showViewer: false);
+
+  // 목표 초기화
+  void clearGoal() {
+    state = state.copyWith(goalText: '');
+    _persist();
+  }
+
+  // 특정 테마 초기화
+  void clearTheme(int themeIndex) {
+    final List<String> updated = List<String>.from(state.themes);
+    updated[themeIndex] = '';
+    state = state.copyWith(themes: updated);
+    _persist();
+  }
+
+  // 모든 테마 초기화
+  void clearAllThemes() {
+    state = state.copyWith(themes: List.filled(8, ''));
+    _persist();
+  }
+
+  // 특정 테마의 액션 아이템 모두 초기화
+  void clearThemeActions(int themeIndex) {
+    final themeId = 'theme-$themeIndex';
+    final List<ActionItemModel> updated = state.actionItems.where((a) => a.themeId != themeId).toList();
+    state = state.copyWith(actionItems: updated);
+    _persist();
+  }
+
+  // 모든 액션 아이템 초기화
+  void clearAllActions() {
+    state = state.copyWith(actionItems: []);
+    _persist();
+  }
 }
 
 final mandalartProvider = StateNotifierProvider<MandalartNotifier, MandalartStateModel>((ref) {

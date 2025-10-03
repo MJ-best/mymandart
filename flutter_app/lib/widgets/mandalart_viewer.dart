@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'dart:math';
 
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/foundation.dart';
@@ -10,6 +11,7 @@ import 'package:screenshot/screenshot.dart';
 import 'package:mandarart_journey/models/mandalart.dart';
 import 'package:mandarart_journey/utils/mandalart_grid.dart';
 import 'package:mandarart_journey/utils/web_downloader.dart' if (dart.library.io) 'package:mandarart_journey/utils/web_downloader_mobile.dart';
+import 'package:mandarart_journey/data/keywords.dart';
 
 class MandalartViewer extends StatefulWidget {
   final MandalartStateModel state;
@@ -23,6 +25,15 @@ class MandalartViewer extends StatefulWidget {
 class _MandalartViewerState extends State<MandalartViewer> {
   Object currentView = 'full'; // 'full' | int
   final ScreenshotController _screenshotController = ScreenshotController();
+  late Map<String, String> _randomQuote;
+
+  @override
+  void initState() {
+    super.initState();
+    // 랜덤 명언 선택
+    final random = Random();
+    _randomQuote = Keywords.motivationalQuotes[random.nextInt(Keywords.motivationalQuotes.length)];
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -117,47 +128,56 @@ class _MandalartViewerState extends State<MandalartViewer> {
                 ),
                 const SizedBox(height: 16),
                 Expanded(
-                  child: AspectRatio(
-                    aspectRatio: 1,
-                    child: Container(
-                      decoration: BoxDecoration(
-                        color: CupertinoColors.systemBackground,
-                        borderRadius: BorderRadius.circular(12),
-                        boxShadow: [
-                          BoxShadow(
-                            color: CupertinoColors.black.withValues(alpha: 0.1),
-                            blurRadius: 10,
-                            offset: const Offset(0, 2),
-                          ),
-                        ],
-                      ),
-                      child: ClipRRect(
-                        borderRadius: BorderRadius.circular(12),
-                        child: GridView.count(
-                          crossAxisCount: isFull ? 9 : 3,
-                          mainAxisSpacing: 1,
-                          crossAxisSpacing: 1,
-                          physics: const NeverScrollableScrollPhysics(),
-                          children: [
-                            for (var r = 0; r < grid.length; r++)
-                              for (var c = 0; c < grid[r].length; c++)
-                                _Cell(
-                                  cell: grid[r][c],
-                                  onTap: () {
-                                    if (isFull && grid[r][c].type == 'theme') {
-                                      HapticFeedback.lightImpact();
-                                      // map r,c to theme index (center 3x3 index)
-                                      final map = <List<int>>[
-                                        [3,3],[3,4],[3,5],
-                                        [4,3],      [4,5],
-                                        [5,3],[5,4],[5,5],
-                                      ];
-                                      final idx = map.indexWhere((p) => p[0] == r && p[1] == c);
-                                      if (idx != -1) setState(() => currentView = idx);
-                                    }
-                                  },
-                                ),
+                  child: Center(
+                    child: AspectRatio(
+                      aspectRatio: 1,
+                      child: Container(
+                        decoration: BoxDecoration(
+                          color: CupertinoColors.systemBackground,
+                          borderRadius: BorderRadius.circular(12),
+                          boxShadow: [
+                            BoxShadow(
+                              color: CupertinoColors.black.withValues(alpha: 0.1),
+                              blurRadius: 10,
+                              offset: const Offset(0, 2),
+                            ),
                           ],
+                        ),
+                        child: ClipRRect(
+                          borderRadius: BorderRadius.circular(12),
+                          child: InteractiveViewer(
+                            minScale: 0.5,
+                            maxScale: 5.0,
+                            panEnabled: true,
+                            scaleEnabled: true,
+                            boundaryMargin: const EdgeInsets.all(20),
+                            child: GridView.count(
+                              crossAxisCount: isFull ? 9 : 3,
+                              mainAxisSpacing: 1,
+                              crossAxisSpacing: 1,
+                              physics: const NeverScrollableScrollPhysics(),
+                              children: [
+                                for (var r = 0; r < grid.length; r++)
+                                  for (var c = 0; c < grid[r].length; c++)
+                                    _Cell(
+                                      cell: grid[r][c],
+                                      onTap: () {
+                                        if (isFull && grid[r][c].type == 'theme') {
+                                          HapticFeedback.lightImpact();
+                                          // map r,c to theme index (center 3x3 index)
+                                          final map = <List<int>>[
+                                            [3,3],[3,4],[3,5],
+                                            [4,3],      [4,5],
+                                            [5,3],[5,4],[5,5],
+                                          ];
+                                          final idx = map.indexWhere((p) => p[0] == r && p[1] == c);
+                                          if (idx != -1) setState(() => currentView = idx);
+                                        }
+                                      },
+                                    ),
+                              ],
+                            ),
+                          ),
                         ),
                       ),
                     ),
@@ -183,6 +203,44 @@ class _MandalartViewerState extends State<MandalartViewer> {
                       ),
                     ),
                   ),
+                const SizedBox(height: 24),
+                // 동기부여 명언
+                Container(
+                  padding: const EdgeInsets.all(20),
+                  decoration: BoxDecoration(
+                    color: CupertinoColors.systemPurple.withOpacity(0.1),
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                  child: Column(
+                    children: [
+                      const Icon(
+                        CupertinoIcons.quote_bubble,
+                        color: CupertinoColors.systemPurple,
+                        size: 24,
+                      ),
+                      const SizedBox(height: 12),
+                      Text(
+                        _randomQuote['quote']!,
+                        textAlign: TextAlign.center,
+                        style: const TextStyle(
+                          fontSize: 15,
+                          fontWeight: FontWeight.w500,
+                          color: CupertinoColors.label,
+                          height: 1.5,
+                        ),
+                      ),
+                      const SizedBox(height: 12),
+                      Text(
+                        '- ${_randomQuote['author']} -',
+                        style: const TextStyle(
+                          fontSize: 13,
+                          fontWeight: FontWeight.w600,
+                          color: CupertinoColors.systemPurple,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
               ],
             ),
           ),
