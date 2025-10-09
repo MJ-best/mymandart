@@ -9,11 +9,48 @@ import 'package:mandarart_journey/providers/mandalart_provider.dart';
 import 'package:mandarart_journey/widgets/mandalart_viewer.dart';
 import 'package:responsive_builder/responsive_builder.dart';
 
-class MandalartAppScreen extends ConsumerWidget {
+
+class MandalartAppScreen extends ConsumerStatefulWidget {
   const MandalartAppScreen({super.key});
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  ConsumerState<MandalartAppScreen> createState() => _MandalartAppScreenState();
+}
+
+class _MandalartAppScreenState extends ConsumerState<MandalartAppScreen> {
+  late final PageController _pageController;
+
+  @override
+  void initState() {
+    super.initState();
+    final initialStep = ref.read(mandalartProvider).currentStep;
+    _pageController = PageController(initialPage: initialStep);
+    ref.listen<int>(
+      mandalartProvider.select((value) => value.currentStep),
+      (previous, next) {
+        if (!_pageController.hasClients) {
+          return;
+        }
+        final currentPage = _pageController.page?.round() ?? _pageController.initialPage;
+        if (currentPage != next) {
+          _pageController.animateToPage(
+            next,
+            duration: const Duration(milliseconds: 250),
+            curve: Curves.easeOutCubic,
+          );
+        }
+      },
+    );
+  }
+
+  @override
+  void dispose() {
+    _pageController.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
     final state = ref.watch(mandalartProvider);
     final notifier = ref.read(mandalartProvider.notifier);
 
@@ -21,6 +58,13 @@ class MandalartAppScreen extends ConsumerWidget {
       return MandalartViewer(
         state: state,
         onClose: notifier.closeViewer,
+        onToggleAction: (themeIndex, actionIndex, completed) {
+          notifier.updateActionItem(
+            themeIndex: themeIndex,
+            actionIndex: actionIndex,
+            completed: completed,
+          );
+        },
       );
     }
 
@@ -34,7 +78,9 @@ class MandalartAppScreen extends ConsumerWidget {
             }
           },
         ),
-        middle: const Text('Mandalart Journey'),
+        middle: Text(
+          state.displayName.isNotEmpty ? state.displayName : '나만의 만다라트',
+        ),
         backgroundColor: CupertinoColors.systemBackground,
         border: null,
         trailing: Semantics(
@@ -51,140 +97,178 @@ class MandalartAppScreen extends ConsumerWidget {
         ),
       ),
       child: SafeArea(
-        child: ScreenTypeLayout.builder(
-          mobile: (BuildContext context) => SingleChildScrollView(
-            physics: const BouncingScrollPhysics(),
-            padding: const EdgeInsets.all(16),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  'Step ${state.currentStep + 1} / 3',
-                  style: const TextStyle(
-                    fontSize: 28,
-                    fontWeight: FontWeight.w400,
-                    color: CupertinoColors.label,
-                    letterSpacing: 0.36,
+        child: Column(
+          children: [
+            Padding(
+              padding: const EdgeInsets.fromLTRB(16, 12, 16, 0),
+              child: Row(
+                children: [
+                  _StepArrowButton(
+                    icon: CupertinoIcons.chevron_back,
+                    semanticLabel: '이전 단계로 이동',
+                    onPressed: state.currentStep > 0
+                        ? () {
+                            HapticFeedback.lightImpact();
+                            notifier.previousStep();
+                          }
+                        : null,
                   ),
-                ),
-                const SizedBox(height: 32),
-                if (state.currentStep == 0) _GoalStep(state.goalText, notifier.updateGoal),
-                if (state.currentStep == 1) _ThemesStep(state.themes, notifier.updateThemes),
-                if (state.currentStep == 2) _ActionsStep(state, notifier),
-                const SizedBox(height: 32),
-                Row(
-                  children: [
-                    Expanded(
-                      child: Semantics(
-                        label: 'Go to previous step',
-                        button: true,
-                        child: CupertinoButton(
-                          padding: const EdgeInsets.all(16),
-                          onPressed: state.currentStep > 0
-                              ? () {
-                                  HapticFeedback.lightImpact();
-                                  notifier.previousStep();
-                                }
-                              : null,
-                          color: CupertinoColors.systemGrey4,
-                          disabledColor: CupertinoColors.quaternarySystemFill,
-                          child: const Text(
-                            '이전',
-                            style: TextStyle(color: CupertinoColors.label),
-                          ),
-                        ),
+                  const SizedBox(width: 12),
+                  Expanded(
+                    child: Center(
+                      child: _StepProgressIndicator(
+                        currentStep: state.currentStep,
                       ),
                     ),
-                    const SizedBox(width: 12),
-                    Expanded(
-                      child: Semantics(
-                        label: state.currentStep < 2 ? 'Go to next step' : 'View Mandalart chart',
-                        button: true,
-                        child: CupertinoButton.filled(
-                          padding: const EdgeInsets.all(16),
-                          onPressed: () {
-                            HapticFeedback.mediumImpact();
-                            if (state.currentStep < 2) {
-                              notifier.nextStep();
-                            } else {
-                              notifier.openViewer();
-                            }
-                          },
-                          child: Text(state.currentStep < 2 ? '다음' : '만다라트 보기'),
-                        ),
-                      ),
-                    ),
-                  ],
-                )
-              ],
+                  ),
+                  const SizedBox(width: 12),
+                  _StepArrowButton(
+                    icon: CupertinoIcons.chevron_forward,
+                    semanticLabel: state.currentStep < 2
+                        ? '다음 단계로 이동'
+                        : '만다라트 보기 열기',
+                    onPressed: () {
+                      HapticFeedback.mediumImpact();
+                      if (state.currentStep < 2) {
+                        notifier.nextStep();
+                      } else {
+                        notifier.openViewer();
+                      }
+                    },
+                  ),
+                ],
+              ),
             ),
+            const SizedBox(height: 12),
+            Expanded(
+              child: ScreenTypeLayout.builder(
+                mobile: (BuildContext context) => _buildStepPager(
+                  context: context,
+                  state: state,
+                  notifier: notifier,
+                  padding: const EdgeInsets.all(16),
+                ),
+                tablet: (BuildContext context) => _buildStepPager(
+                  context: context,
+                  state: state,
+                  notifier: notifier,
+                  padding: const EdgeInsets.all(32),
+                ),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildStepPager({
+    required BuildContext context,
+    required MandalartStateModel state,
+    required MandalartNotifier notifier,
+    required EdgeInsets padding,
+  }) {
+    return PageView(
+      controller: _pageController,
+      physics: const BouncingScrollPhysics(),
+      onPageChanged: (page) {
+        if (page != state.currentStep) {
+          notifier.setStep(page);
+        }
+      },
+      children: List.generate(3, (index) {
+        return SingleChildScrollView(
+          physics: const BouncingScrollPhysics(),
+          padding: padding,
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              if (index == 0)
+                _GoalStep(state.goalText, notifier.updateGoal)
+              else if (index == 1)
+                _ThemesStep(state.themes, notifier.updateThemes)
+              else
+                _ActionsStep(state, notifier),
+              const SizedBox(height: 32),
+            ],
           ),
-          tablet: (BuildContext context) => SingleChildScrollView(
-            physics: const BouncingScrollPhysics(),
-            padding: const EdgeInsets.all(32),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  'Step ${state.currentStep + 1} / 3',
-                  style: const TextStyle(
-                    fontSize: 28,
-                    fontWeight: FontWeight.w400,
-                    color: CupertinoColors.label,
-                    letterSpacing: 0.36,
-                  ),
-                ),
-                const SizedBox(height: 32),
-                if (state.currentStep == 0) _GoalStep(state.goalText, notifier.updateGoal),
-                if (state.currentStep == 1) _ThemesStep(state.themes, notifier.updateThemes),
-                if (state.currentStep == 2) _ActionsStep(state, notifier),
-                const SizedBox(height: 32),
-                Row(
-                  children: [
-                    Expanded(
-                      child: Semantics(
-                        label: 'Go to previous step',
-                        button: true,
-                        child: CupertinoButton(
-                          padding: const EdgeInsets.all(16),
-                          onPressed: state.currentStep > 0
-                              ? () {
-                                  HapticFeedback.lightImpact();
-                                  notifier.previousStep();
-                                }
-                              : null,
-                          color: CupertinoColors.systemGrey4,
-                          disabledColor: CupertinoColors.quaternarySystemFill,
-                          child: const Text(
-                            '이전',
-                            style: TextStyle(color: CupertinoColors.label),
-                          ),
-                        ),
-                      ),
-                    ),
-                    const SizedBox(width: 12),
-                    Expanded(
-                      child: Semantics(
-                        label: state.currentStep < 2 ? 'Go to next step' : 'View Mandalart chart',
-                        button: true,
-                        child: CupertinoButton.filled(
-                          padding: const EdgeInsets.all(16),
-                          onPressed: () {
-                            HapticFeedback.mediumImpact();
-                            if (state.currentStep < 2) {
-                              notifier.nextStep();
-                            } else {
-                              notifier.openViewer();
-                            }
-                          },
-                          child: Text(state.currentStep < 2 ? '다음' : '만다라트 보기'),
-                        ),
-                      ),
-                    ),
-                  ],
-                )
-              ],
+        );
+      }),
+    );
+  }
+}
+
+class _StepProgressIndicator extends StatelessWidget {
+  const _StepProgressIndicator({required this.currentStep});
+
+  final int currentStep;
+
+  @override
+  Widget build(BuildContext context) {
+    return Semantics(
+      label: '현재 진행 단계 ${currentStep + 1} / 3',
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: List.generate(3, (index) {
+          final isActive = index <= currentStep;
+          return AnimatedContainer(
+            duration: const Duration(milliseconds: 200),
+            margin: const EdgeInsets.symmetric(horizontal: 6),
+            width: isActive ? 14 : 10,
+            height: isActive ? 14 : 10,
+            decoration: BoxDecoration(
+              shape: BoxShape.circle,
+              color: isActive
+                  ? CupertinoColors.systemPurple
+                  : CupertinoColors.systemGrey3,
             ),
+          );
+        }),
+      ),
+    );
+  }
+}
+
+class _StepArrowButton extends StatelessWidget {
+  const _StepArrowButton({
+    required this.icon,
+    required this.semanticLabel,
+    required this.onPressed,
+  });
+
+  final IconData icon;
+  final String semanticLabel;
+  final VoidCallback? onPressed;
+
+  @override
+  Widget build(BuildContext context) {
+    final isEnabled = onPressed != null;
+    final Color iconColor = isEnabled
+        ? CupertinoColors.systemPurple.resolveFrom(context)
+        : CupertinoColors.systemGrey3.resolveFrom(context);
+    final Color backgroundColor = isEnabled
+        ? CupertinoColors.systemPurple.resolveFrom(context).withOpacity(0.16)
+        : CupertinoColors.systemGrey4.resolveFrom(context).withOpacity(0.28);
+
+    return Semantics(
+      button: true,
+      enabled: isEnabled,
+      label: semanticLabel,
+      child: SizedBox(
+        width: 36,
+        height: 36,
+        child: CupertinoButton(
+          padding: EdgeInsets.zero,
+          onPressed: onPressed,
+          child: Container(
+            width: 32,
+            height: 32,
+            decoration: BoxDecoration(
+              color: backgroundColor,
+              shape: BoxShape.circle,
+            ),
+            alignment: Alignment.center,
+            child: Icon(icon, size: 16, color: iconColor),
           ),
         ),
       ),
@@ -215,7 +299,8 @@ class _GoalStepState extends State<_GoalStep> {
 
     // 랜덤하게 5개의 커뮤니티 목표 선택
     final random = Random();
-    final shuffled = List<String>.from(Keywords.communityGoals)..shuffle(random);
+    final shuffled = List<String>.from(Keywords.communityGoals)
+      ..shuffle(random);
     _randomCommunityGoals = shuffled.take(5).toList();
   }
 
@@ -239,7 +324,7 @@ class _GoalStepState extends State<_GoalStep> {
             if (_controller.text.isNotEmpty)
               CupertinoButton(
                 padding: EdgeInsets.zero,
-                minSize: 44,
+                minimumSize: const Size(44, 44),
                 onPressed: () {
                   showCupertinoDialog(
                     context: context,
@@ -304,15 +389,15 @@ class _GoalStepState extends State<_GoalStep> {
           ),
         ),
         const SizedBox(height: 32),
-        Row(
+        const Row(
           children: [
-            const Icon(
+            Icon(
               CupertinoIcons.person_2,
               size: 18,
               color: CupertinoColors.systemPurple,
             ),
-            const SizedBox(width: 8),
-            const Text(
+            SizedBox(width: 8),
+            Text(
               '다른 사람들은 이런 목표를 세우고 있어요',
               style: TextStyle(
                 fontSize: 15,
@@ -329,7 +414,7 @@ class _GoalStepState extends State<_GoalStep> {
           children: _randomCommunityGoals.map((goal) {
             return CupertinoButton(
               padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-              minSize: 44,
+              minimumSize: const Size(44, 44),
               color: CupertinoColors.systemPurple.withOpacity(0.1),
               onPressed: () {
                 HapticFeedback.selectionClick();
@@ -381,6 +466,9 @@ class _ThemesStepState extends State<_ThemesStep> {
         final next = List<String>.from(widget.themes);
         next[index] = _controllers[index].text;
         widget.onChange(next);
+        if (mounted) {
+          setState(() {});
+        }
       });
     }
   }
@@ -436,14 +524,15 @@ class _ThemesStepState extends State<_ThemesStep> {
                           ),
                           if (_controllers[index].text.isNotEmpty)
                             CupertinoButton(
-                              padding: EdgeInsets.zero,
-                              minSize: 44,
+                              padding: const EdgeInsets.all(6),
+                              minimumSize: const Size(32, 32),
                               onPressed: () {
                                 showCupertinoDialog(
                                   context: context,
                                   builder: (context) => CupertinoAlertDialog(
                                     title: const Text('테마 초기화'),
-                                    content: Text('액션타겟 ${index + 1}을(를) 삭제하시겠습니까?'),
+                                    content:
+                                        Text('액션타겟 ${index + 1}을(를) 삭제하시겠습니까?'),
                                     actions: [
                                       CupertinoDialogAction(
                                         child: const Text('취소'),
@@ -454,7 +543,8 @@ class _ThemesStepState extends State<_ThemesStep> {
                                         onPressed: () {
                                           HapticFeedback.mediumImpact();
                                           _controllers[index].clear();
-                                          final next = List<String>.from(widget.themes);
+                                          final next =
+                                              List<String>.from(widget.themes);
                                           next[index] = '';
                                           widget.onChange(next);
                                           Navigator.pop(context);
@@ -465,10 +555,19 @@ class _ThemesStepState extends State<_ThemesStep> {
                                   ),
                                 );
                               },
-                              child: const Icon(
-                                CupertinoIcons.trash,
-                                color: CupertinoColors.destructiveRed,
-                                size: 18,
+                              child: Container(
+                                width: 16,
+                                height: 16,
+                                decoration: const BoxDecoration(
+                                  shape: BoxShape.circle,
+                                  color: CupertinoColors.destructiveRed,
+                                ),
+                                alignment: Alignment.center,
+                                child: const Icon(
+                                  CupertinoIcons.xmark,
+                                  size: 10,
+                                  color: CupertinoColors.white,
+                                ),
                               ),
                             ),
                         ],
@@ -489,29 +588,32 @@ class _ThemesStepState extends State<_ThemesStep> {
                     ],
                   ),
                 ),
-                Wrap(
-                  spacing: 8,
-                  runSpacing: 8,
-                  children: Keywords.themeExamples.map((keyword) {
-                    return CupertinoButton(
-                      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-                      minSize: 44,
-                      color: CupertinoColors.systemGrey5,
-                      onPressed: () {
-                        HapticFeedback.selectionClick();
-                        _controllers[index].text = keyword;
-                      },
-                      child: Text(
-                        keyword,
-                        style: const TextStyle(
-                          fontSize: 15,
-                          color: CupertinoColors.label,
+                if (_controllers[index].text.trim().isEmpty) ...[
+                  Wrap(
+                    spacing: 8,
+                    runSpacing: 8,
+                    children: Keywords.themeExamples.map((keyword) {
+                      return CupertinoButton(
+                        padding: const EdgeInsets.symmetric(
+                            horizontal: 16, vertical: 12),
+                        minimumSize: const Size(44, 44),
+                        color: CupertinoColors.systemGrey5,
+                        onPressed: () {
+                          HapticFeedback.selectionClick();
+                          _controllers[index].text = keyword;
+                        },
+                        child: Text(
+                          keyword,
+                          style: const TextStyle(
+                            fontSize: 15,
+                            color: CupertinoColors.label,
+                          ),
                         ),
-                      ),
-                    );
-                  }).toList(),
-                ),
-                const SizedBox(height: 8),
+                      );
+                    }).toList(),
+                  ),
+                  const SizedBox(height: 8),
+                ],
               ],
             );
           }),
@@ -563,7 +665,9 @@ class _ActionsStepState extends State<_ActionsStep> {
   }
 
   void _initializeControllers() {
-    for (var themeIndex = 0; themeIndex < widget.state.themes.length; themeIndex++) {
+    for (var themeIndex = 0;
+        themeIndex < widget.state.themes.length;
+        themeIndex++) {
       final themeId = 'theme-$themeIndex';
       for (var actionIndex = 0; actionIndex < 8; actionIndex++) {
         final key = '${themeId}_$actionIndex';
@@ -618,8 +722,12 @@ class _ActionsStepState extends State<_ActionsStep> {
 
   @override
   Widget build(BuildContext context) {
-    final filled = widget.state.themes.where((t) => t.trim().isNotEmpty).toList();
-    if (filled.isEmpty) {
+    final filledThemes = widget.state.themes
+        .asMap()
+        .entries
+        .where((entry) => entry.value.trim().isNotEmpty)
+        .toList();
+    if (filledThemes.isEmpty) {
       return const Text(
         '먼저 테마를 입력해주세요.',
         style: TextStyle(
@@ -629,7 +737,11 @@ class _ActionsStepState extends State<_ActionsStep> {
       );
     }
     return Column(
-      children: List.generate(filled.length, (themeIndex) {
+      children: List.generate(filledThemes.length, (themeIndex) {
+        final themeEntry = filledThemes[themeIndex];
+        final actualThemeIndex = themeEntry.key;
+        final themeTitle = themeEntry.value;
+        final themeKeywords = Keywords.getActionsForTheme(themeTitle);
         final isExpanded = _expandedThemeIndex == themeIndex;
         return Container(
           margin: const EdgeInsets.only(bottom: 16),
@@ -655,7 +767,7 @@ class _ActionsStepState extends State<_ActionsStep> {
                   children: [
                     Expanded(
                       child: Text(
-                        filled[themeIndex],
+                        themeTitle,
                         style: const TextStyle(
                           fontSize: 22,
                           fontWeight: FontWeight.w600,
@@ -664,14 +776,15 @@ class _ActionsStepState extends State<_ActionsStep> {
                       ),
                     ),
                     CupertinoButton(
-                      padding: EdgeInsets.zero,
-                      minSize: 44,
+                      padding: const EdgeInsets.all(6),
+                      minimumSize: const Size(36, 36),
                       onPressed: () {
                         showCupertinoDialog(
                           context: context,
                           builder: (context) => CupertinoAlertDialog(
                             title: const Text('액션 아이템 초기화'),
-                            content: Text('${filled[themeIndex]}의 모든 액션 아이템을 삭제하시겠습니까?'),
+                            content: Text(
+                                '$themeTitle의 모든 액션 아이템을 삭제하시겠습니까?'),
                             actions: [
                               CupertinoDialogAction(
                                 child: const Text('취소'),
@@ -681,7 +794,8 @@ class _ActionsStepState extends State<_ActionsStep> {
                                 isDestructiveAction: true,
                                 onPressed: () {
                                   HapticFeedback.mediumImpact();
-                                  widget.notifier.clearThemeActions(themeIndex);
+                                  widget.notifier
+                                      .clearThemeActions(actualThemeIndex);
                                   Navigator.pop(context);
                                 },
                                 child: const Text('삭제'),
@@ -690,15 +804,26 @@ class _ActionsStepState extends State<_ActionsStep> {
                           ),
                         );
                       },
-                      child: const Icon(
-                        CupertinoIcons.trash,
-                        color: CupertinoColors.destructiveRed,
-                        size: 20,
+                      child: Container(
+                        width: 18,
+                        height: 18,
+                        decoration: const BoxDecoration(
+                          shape: BoxShape.circle,
+                          color: CupertinoColors.destructiveRed,
+                        ),
+                        alignment: Alignment.center,
+                        child: const Icon(
+                          CupertinoIcons.xmark,
+                          size: 10,
+                          color: CupertinoColors.white,
+                        ),
                       ),
                     ),
                     const SizedBox(width: 8),
                     Icon(
-                      isExpanded ? CupertinoIcons.chevron_up : CupertinoIcons.chevron_down,
+                      isExpanded
+                          ? CupertinoIcons.chevron_up
+                          : CupertinoIcons.chevron_down,
                       color: CupertinoColors.systemPurple,
                       size: 20,
                     ),
@@ -717,106 +842,112 @@ class _ActionsStepState extends State<_ActionsStep> {
                   padding: const EdgeInsets.all(16),
                   child: Column(
                     children: List.generate(8, (actionIndex) {
-                final themeId = 'theme-$themeIndex';
-                final key = '${themeId}_$actionIndex';
-                final existing = widget.state.actionItems.firstWhere(
-                  (a) => a.themeId == themeId && a.order == actionIndex,
-                  orElse: () => ActionItemModel(
-                    id: 'tmp',
-                    themeId: themeId,
-                    actionText: '',
-                    isCompleted: false,
-                    order: actionIndex,
-                    createdAt: DateTime.now(),
-                    updatedAt: DateTime.now(),
-                  ),
-                );
-                return Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Row(
-                      children: [
-                        Semantics(
-                          label: existing.isCompleted ? 'Mark as incomplete' : 'Mark as complete',
-                          child: CupertinoCheckbox(
-                            value: existing.isCompleted,
-                            activeColor: CupertinoColors.systemPurple,
-                            onChanged: (v) {
-                              HapticFeedback.lightImpact();
-                              widget.notifier.updateActionItem(
-                                themeIndex: themeIndex,
-                                actionIndex: actionIndex,
-                                completed: v ?? false,
-                              );
-                            },
-                          ),
+                      final themeId = 'theme-$actualThemeIndex';
+                      final key = '${themeId}_$actionIndex';
+                      final existing = widget.state.actionItems.firstWhere(
+                        (a) => a.themeId == themeId && a.order == actionIndex,
+                        orElse: () => ActionItemModel(
+                          id: 'tmp',
+                          themeId: themeId,
+                          actionText: '',
+                          isCompleted: false,
+                          order: actionIndex,
+                          createdAt: DateTime.now(),
+                          updatedAt: DateTime.now(),
                         ),
-                        const SizedBox(width: 12),
-                        Expanded(
-                          child: CupertinoContextMenu(
-                            actions: [
-                              CupertinoContextMenuAction(
-                                trailingIcon: CupertinoIcons.clear,
-                                onPressed: () {
-                                  HapticFeedback.lightImpact();
-                                  Navigator.pop(context);
-                                  _controllers[key]?.clear();
-                                  widget.notifier.updateActionItem(
-                                    themeIndex: themeIndex,
-                                    actionIndex: actionIndex,
-                                    text: '',
-                                  );
-                                },
-                                child: const Text('Clear'),
+                      );
+                      return Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Row(
+                            children: [
+                              Semantics(
+                                label: existing.isCompleted
+                                    ? 'Mark as incomplete'
+                                    : 'Mark as complete',
+                                child: CupertinoCheckbox(
+                                  value: existing.isCompleted,
+                                  activeColor: CupertinoColors.systemPurple,
+                                  onChanged: (v) {
+                                    HapticFeedback.lightImpact();
+                                    widget.notifier.updateActionItem(
+                                      themeIndex: actualThemeIndex,
+                                      actionIndex: actionIndex,
+                                      completed: v ?? false,
+                                    );
+                                  },
+                                ),
                               ),
-                              CupertinoContextMenuAction(
-                                isDestructiveAction: true,
-                                trailingIcon: CupertinoIcons.delete,
-                                onPressed: () {
-                                  HapticFeedback.mediumImpact();
-                                  Navigator.pop(context);
-                                  _controllers[key]?.clear();
-                                  widget.notifier.updateActionItem(
-                                    themeIndex: themeIndex,
-                                    actionIndex: actionIndex,
-                                    text: '',
-                                    completed: false,
-                                  );
-                                },
-                                child: const Text('Delete'),
+                              const SizedBox(width: 12),
+                              Expanded(
+                                child: CupertinoContextMenu(
+                                  actions: [
+                                    CupertinoContextMenuAction(
+                                      trailingIcon: CupertinoIcons.clear,
+                                      onPressed: () {
+                                        HapticFeedback.lightImpact();
+                                        Navigator.pop(context);
+                                        _controllers[key]?.clear();
+                                        widget.notifier.updateActionItem(
+                                          themeIndex: actualThemeIndex,
+                                          actionIndex: actionIndex,
+                                          text: '',
+                                        );
+                                      },
+                                      child: const Text('Clear'),
+                                    ),
+                                    CupertinoContextMenuAction(
+                                      isDestructiveAction: true,
+                                      trailingIcon: CupertinoIcons.delete,
+                                      onPressed: () {
+                                        HapticFeedback.mediumImpact();
+                                        Navigator.pop(context);
+                                        _controllers[key]?.clear();
+                                        widget.notifier.updateActionItem(
+                                          themeIndex: actualThemeIndex,
+                                          actionIndex: actionIndex,
+                                          text: '',
+                                          completed: false,
+                                        );
+                                      },
+                                      child: const Text('Delete'),
+                                    ),
+                                  ],
+                                  child: CupertinoTextField(
+                                    controller: _controllers[key],
+                                    focusNode: _focusNodes[key],
+                                    placeholder: themeKeywords.isNotEmpty
+                                        ? themeKeywords[actionIndex %
+                                            themeKeywords.length]
+                                        : null,
+                                    padding: const EdgeInsets.all(16),
+                                    decoration: BoxDecoration(
+                                      color: CupertinoColors.tertiarySystemFill,
+                                      borderRadius: BorderRadius.circular(8),
+                                    ),
+                                    style: const TextStyle(
+                                      fontSize: 17,
+                                      color: CupertinoColors.label,
+                                    ),
+                                    placeholderStyle: const TextStyle(
+                                      fontSize: 17,
+                                      color: CupertinoColors.secondaryLabel,
+                                    ),
+                                    onChanged: (v) =>
+                                        widget.notifier.updateActionItem(
+                                      themeIndex: actualThemeIndex,
+                                      actionIndex: actionIndex,
+                                      text: v,
+                                    ),
+                                  ),
+                                ),
                               ),
                             ],
-                            child: CupertinoTextField(
-                              controller: _controllers[key],
-                              focusNode: _focusNodes[key],
-                              placeholder: Keywords.getActionsForTheme(filled[themeIndex])[actionIndex % Keywords.getActionsForTheme(filled[themeIndex]).length],
-                              padding: const EdgeInsets.all(16),
-                              decoration: BoxDecoration(
-                                color: CupertinoColors.tertiarySystemFill,
-                                borderRadius: BorderRadius.circular(8),
-                              ),
-                              style: const TextStyle(
-                                fontSize: 17,
-                                color: CupertinoColors.label,
-                              ),
-                              placeholderStyle: const TextStyle(
-                                fontSize: 17,
-                                color: CupertinoColors.secondaryLabel,
-                              ),
-                              onChanged: (v) => widget.notifier.updateActionItem(
-                                themeIndex: themeIndex,
-                                actionIndex: actionIndex,
-                                text: v,
-                              ),
-                            ),
                           ),
-                        ),
-                      ],
-                    ),
-                    if (actionIndex < 7) const SizedBox(height: 12),
-                  ],
-                );
-              }),
+                          if (actionIndex < 7) const SizedBox(height: 12),
+                        ],
+                      );
+                    }),
                   ),
                 ),
                 const SizedBox(height: 16),
@@ -837,24 +968,33 @@ class _ActionsStepState extends State<_ActionsStep> {
                       Wrap(
                         spacing: 8,
                         runSpacing: 8,
-                        children: Keywords.getActionsForTheme(filled[themeIndex]).map((keyword) {
+                        children: themeKeywords.map((keyword) {
+                          final themeKeyPrefix = 'theme-$actualThemeIndex';
                           return CupertinoButton(
-                            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                            padding: const EdgeInsets.symmetric(
+                                horizontal: 16, vertical: 12),
                             color: CupertinoColors.systemGrey5,
-                            minSize: 44,
-                            onPressed: _focusedKey != null && _focusedKey!.startsWith('theme-$themeIndex')
-                                ? () {
-                                    HapticFeedback.selectionClick();
-                                    _controllers[_focusedKey]?.text = keyword;
-                                  }
-                                : null,
+                            minimumSize: const Size(44, 44),
+                            onPressed: () {
+                              HapticFeedback.selectionClick();
+                              final targetKey = _focusedKey != null &&
+                                      _focusedKey!.startsWith(themeKeyPrefix)
+                                  ? _focusedKey
+                                  : '${themeKeyPrefix}_0';
+                              final controller = _controllers[targetKey];
+                              if (controller != null) {
+                                controller.text = keyword;
+                                controller.selection =
+                                    TextSelection.fromPosition(
+                                  TextPosition(offset: controller.text.length),
+                                );
+                              }
+                            },
                             child: Text(
                               keyword,
-                              style: TextStyle(
+                              style: const TextStyle(
                                 fontSize: 13,
-                                color: _focusedKey != null && _focusedKey!.startsWith('theme-$themeIndex')
-                                    ? CupertinoColors.label
-                                    : CupertinoColors.secondaryLabel,
+                                color: CupertinoColors.label,
                               ),
                             ),
                           );

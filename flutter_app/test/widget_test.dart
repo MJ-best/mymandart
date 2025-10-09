@@ -9,8 +9,9 @@ void main() {
   testWidgets('App loads correctly', (WidgetTester tester) async {
     // Build our app and trigger a frame.
     await tester.pumpWidget(const ProviderScope(child: MandarartRoot()));
+    await tester.pumpAndSettle();
 
-    // Verify that the landing screen loads
-    expect(find.text('Mandalart Journey'), findsOneWidget);
+    // Verify that the landing screen loads with the expected hero title
+    expect(find.text('만다라트로 여정을 디자인하세요'), findsOneWidget);
   });
 }

@@ -14,6 +14,7 @@ class MandalartNotifier extends StateNotifier<MandalartStateModel> {
   static const _keyThemes = 'mandalart-themes';
   static const _keyActions = 'mandalart-actions';
   static const _keyStep = 'mandalart-current-step';
+  static const _keyDisplayName = 'mandalart-display-name';
 
   Future<void> _load() async {
     final prefs = await SharedPreferences.getInstance();
@@ -21,6 +22,7 @@ class MandalartNotifier extends StateNotifier<MandalartStateModel> {
     final themes = prefs.getStringList(_keyThemes) ?? List.filled(8, '');
     final actionsRaw = prefs.getString(_keyActions);
     final step = prefs.getInt(_keyStep) ?? 0;
+    final displayName = prefs.getString(_keyDisplayName) ?? '';
 
     final actions = <ActionItemModel>[];
     if (actionsRaw != null) {
@@ -37,11 +39,18 @@ class MandalartNotifier extends StateNotifier<MandalartStateModel> {
       }
     }
 
-    state = state.copyWith(goalText: goal, themes: themes, actionItems: actions, currentStep: step);
+    state = state.copyWith(
+      displayName: displayName,
+      goalText: goal,
+      themes: themes,
+      actionItems: actions,
+      currentStep: step,
+    );
   }
 
   Future<void> _persist() async {
     final prefs = await SharedPreferences.getInstance();
+    await prefs.setString(_keyDisplayName, state.displayName);
     await prefs.setString(_keyGoal, state.goalText);
     await prefs.setStringList(_keyThemes, state.themes);
     await prefs.setInt(_keyStep, state.currentStep);
@@ -59,6 +68,11 @@ class MandalartNotifier extends StateNotifier<MandalartStateModel> {
               })
           .toList()),
     );
+  }
+
+  void updateDisplayName(String value) {
+    state = state.copyWith(displayName: value);
+    _persist();
   }
 
   void updateGoal(String value) {
