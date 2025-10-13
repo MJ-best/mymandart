@@ -6,11 +6,10 @@ import 'package:flutter/services.dart';
 import 'package:screenshot/screenshot.dart';
 
 import 'package:mandarart_journey/models/mandalart.dart';
-import 'package:mandarart_journey/utils/mandalart_grid.dart';
 import 'package:mandarart_journey/data/keywords.dart';
 import 'package:mandarart_journey/services/export_service.dart';
 import 'package:mandarart_journey/services/image_service.dart';
-import 'package:mandarart_journey/widgets/viewer/grid_cell.dart';
+import 'package:mandarart_journey/widgets/viewer/a4_mandalart_layout.dart';
 
 class MandalartViewer extends StatefulWidget {
   final MandalartStateModel state;
@@ -31,6 +30,7 @@ class MandalartViewer extends StatefulWidget {
 class _MandalartViewerState extends State<MandalartViewer> {
   Object currentView = 'full'; // 'full' | int
   final ScreenshotController _screenshotController = ScreenshotController();
+  final ScreenshotController _a4ScreenshotController = ScreenshotController();
   late Map<String, String> _randomQuote;
 
   @override
@@ -44,16 +44,8 @@ class _MandalartViewerState extends State<MandalartViewer> {
 
   @override
   Widget build(BuildContext context) {
-    final isFull = currentView == 'full';
-    final grid = isFull
-        ? createMandalartGrid(widget.state)
-        : createThemeGrid(widget.state, (currentView as int));
-
-    final completed =
-        widget.state.actionItems.where((a) => a.isCompleted).length;
-    final total = widget.state.actionItems
-        .where((a) => a.actionText.trim().isNotEmpty)
-        .length;
+    final mediaQuery = MediaQuery.of(context);
+    final isLandscape = mediaQuery.orientation == Orientation.landscape;
 
     return Screenshot(
       controller: _screenshotController,
@@ -128,205 +120,132 @@ class _MandalartViewerState extends State<MandalartViewer> {
             ),
           ),
           child: SafeArea(
-            child: Padding(
-              padding: const EdgeInsets.all(16),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.center,
-                children: [
-                  Text(
-                    widget.state.displayName.trim().isNotEmpty
-                        ? widget.state.displayName.trim()
-                        : '나만의 만다라트',
-                    textAlign: TextAlign.center,
-                    style: const TextStyle(
-                      fontSize: 24,
-                      fontWeight: FontWeight.w700,
-                      color: CupertinoColors.label,
-                    ),
-                  ),
-                  const SizedBox(height: 8),
-                  if (widget.state.goalText.trim().isNotEmpty) ...[
-                    Text(
-                      widget.state.goalText.trim(),
-                      textAlign: TextAlign.center,
-                      style: const TextStyle(
-                        fontSize: 18,
-                        fontWeight: FontWeight.w600,
-                        color: CupertinoColors.label,
-                      ),
-                    ),
-                    const SizedBox(height: 12),
-                  ],
-                  Text(
-                    '$completed/$total 액션아이템 완료',
-                    textAlign: TextAlign.center,
-                    style: const TextStyle(
-                      fontSize: 16,
-                      fontWeight: FontWeight.w600,
-                      color: CupertinoColors.systemPurple,
-                    ),
-                  ),
-                  const SizedBox(height: 20),
-                  const Text(
-                    '만다라트 차트',
-                    textAlign: TextAlign.center,
-                    style: TextStyle(
-                      fontSize: 17,
-                      fontWeight: FontWeight.w600,
-                      color: CupertinoColors.secondaryLabel,
-                    ),
-                  ),
-                  const SizedBox(height: 12),
-                  Expanded(
-                    child: Center(
-                      child: AspectRatio(
-                        aspectRatio: 1,
-                        child: Container(
-                          decoration: BoxDecoration(
-                            color: CupertinoColors.systemBackground,
-                            borderRadius: BorderRadius.circular(12),
-                            boxShadow: [
-                              BoxShadow(
-                                color: CupertinoColors.black
-                                    .withValues(alpha: 0.1),
-                                blurRadius: 10,
-                                offset: const Offset(0, 2),
-                              ),
-                            ],
-                          ),
-                          child: ClipRRect(
-                            borderRadius: BorderRadius.circular(12),
-                            child: InteractiveViewer(
-                              minScale: 0.5,
-                              maxScale: 5.0,
-                              panEnabled: true,
-                              scaleEnabled: true,
-                              boundaryMargin: const EdgeInsets.all(20),
-                              child: GridView.count(
-                                crossAxisCount: isFull ? 9 : 3,
-                                mainAxisSpacing: 1,
-                                crossAxisSpacing: 1,
-                                physics: const NeverScrollableScrollPhysics(),
-                                children: [
-                                  for (var r = 0; r < grid.length; r++)
-                                    for (var c = 0; c < grid[r].length; c++)
-                                      () {
-                                        final cell = grid[r][c];
-                                        VoidCallback? handler;
+            child: isLandscape
+                ? _buildLandscapeLayout()
+                : _buildPortraitLayout(),
+          ),
+        ),
+      ),
+    );
+  }
 
-                                        if (isFull) {
-                                          if ((cell.type == 'theme' ||
-                                                  cell.type == 'outer-theme') &&
-                                              cell.themeIndex != null) {
-                                            handler = () {
-                                              HapticFeedback.lightImpact();
-                                              setState(() => currentView =
-                                                  cell.themeIndex!);
-                                            };
-                                          } else if (cell.type == 'action' &&
-                                              cell.themeIndex != null) {
-                                            handler = () {
-                                              HapticFeedback.lightImpact();
-                                              setState(() => currentView =
-                                                  cell.themeIndex!);
-                                            };
-                                          }
-                                        } else if (cell.type == 'action' &&
-                                            cell.themeIndex != null &&
-                                            cell.actionIndex != null) {
-                                          handler = () {
-                                            HapticFeedback.lightImpact();
-                                            widget.onToggleAction(
-                                              cell.themeIndex!,
-                                              cell.actionIndex!,
-                                              !cell.isCompleted,
-                                            );
-                                          };
-                                        }
+  /// 세로 모드 레이아웃
+  Widget _buildPortraitLayout() {
+    final isFull = currentView == 'full';
 
-                                        return GridCellWidget(
-                                          cell: cell,
-                                          onTap: handler,
-                                        );
-                                      }(),
-                                ],
-                              ),
-                            ),
-                          ),
-                        ),
-                      ),
-                    ),
-                  ),
-                  const SizedBox(height: 16),
-                  if (!isFull)
-                    Semantics(
-                      label: 'Return to full view',
-                      button: true,
-                      child: CupertinoButton.filled(
-                        onPressed: () {
-                          HapticFeedback.lightImpact();
-                          setState(() => currentView = 'full');
-                        },
-                        child: const Row(
-                          mainAxisSize: MainAxisSize.min,
-                          children: [
-                            Icon(CupertinoIcons.arrow_left, size: 20),
-                            SizedBox(width: 8),
-                            Text('전체보기'),
-                          ],
-                        ),
-                      ),
-                    ),
-                  const SizedBox(height: 24),
-                  const Text(
-                    '목표달성을 위한 조언',
-                    textAlign: TextAlign.center,
-                    style: TextStyle(
-                      fontSize: 17,
-                      fontWeight: FontWeight.w600,
-                      color: CupertinoColors.label,
-                    ),
-                  ),
-                  const SizedBox(height: 12),
-                  // 동기부여 명언
-                  Container(
-                    padding: const EdgeInsets.all(20),
-                    decoration: BoxDecoration(
-                      color: CupertinoColors.systemPurple.withOpacity(0.1),
-                      borderRadius: BorderRadius.circular(12),
-                    ),
-                    child: Column(
+    return Column(
+      children: [
+        // A4 만다라트 뷰어 (확대/축소 가능)
+        Expanded(
+          child: _buildA4ViewerWithZoom(),
+        ),
+
+        // 하단 정보와 버튼
+        Padding(
+          padding: const EdgeInsets.all(16),
+          child: Column(
+            children: [
+              if (!isFull)
+                Semantics(
+                  label: 'Return to full view',
+                  button: true,
+                  child: CupertinoButton.filled(
+                    onPressed: () {
+                      HapticFeedback.lightImpact();
+                      setState(() => currentView = 'full');
+                    },
+                    child: const Row(
+                      mainAxisSize: MainAxisSize.min,
                       children: [
-                        const Icon(
-                          CupertinoIcons.quote_bubble,
-                          color: CupertinoColors.systemPurple,
-                          size: 24,
-                        ),
-                        const SizedBox(height: 12),
-                        Text(
-                          _randomQuote['quote']!,
-                          textAlign: TextAlign.center,
-                          style: const TextStyle(
-                            fontSize: 15,
-                            fontWeight: FontWeight.w500,
-                            color: CupertinoColors.label,
-                            height: 1.5,
-                          ),
-                        ),
-                        const SizedBox(height: 12),
-                        Text(
-                          '- ${_randomQuote['author']} -',
-                          style: const TextStyle(
-                            fontSize: 13,
-                            fontWeight: FontWeight.w600,
-                            color: CupertinoColors.systemPurple,
-                          ),
-                        ),
+                        Icon(CupertinoIcons.arrow_left, size: 20),
+                        SizedBox(width: 8),
+                        Text('전체보기'),
                       ],
                     ),
                   ),
-                ],
-              ),
+                ),
+              const SizedBox(height: 12),
+              _buildMotivationalQuote(),
+            ],
+          ),
+        ),
+      ],
+    );
+  }
+
+  /// 가로 모드 레이아웃
+  Widget _buildLandscapeLayout() {
+    final isFull = currentView == 'full';
+
+    return Row(
+      children: [
+        // 왼쪽: A4 만다라트 뷰어
+        Expanded(
+          flex: 3,
+          child: _buildA4ViewerWithZoom(),
+        ),
+
+        // 오른쪽: 정보와 버튼
+        Expanded(
+          flex: 2,
+          child: SingleChildScrollView(
+            padding: const EdgeInsets.all(16),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                if (!isFull)
+                  Semantics(
+                    label: 'Return to full view',
+                    button: true,
+                    child: CupertinoButton.filled(
+                      onPressed: () {
+                        HapticFeedback.lightImpact();
+                        setState(() => currentView = 'full');
+                      },
+                      child: const Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          Icon(CupertinoIcons.arrow_left, size: 20),
+                          SizedBox(width: 8),
+                          Text('전체보기'),
+                        ],
+                      ),
+                    ),
+                  ),
+                const SizedBox(height: 20),
+                _buildMotivationalQuote(),
+              ],
+            ),
+          ),
+        ),
+      ],
+    );
+  }
+
+  /// A4 크기 레이아웃을 화면에 맞게 축소하여 표시
+  Widget _buildA4ViewerWithZoom() {
+    return Container(
+      color: CupertinoColors.systemGrey6,
+      child: Center(
+        child: InteractiveViewer(
+          minScale: 0.5,
+          maxScale: 5.0,
+          panEnabled: true,
+          scaleEnabled: true,
+          boundaryMargin: const EdgeInsets.all(40),
+          child: Screenshot(
+            controller: _a4ScreenshotController,
+            child: A4MandalartLayout(
+              state: widget.state,
+              currentView: currentView,
+              onThemeClick: (themeIndex) {
+                HapticFeedback.lightImpact();
+                setState(() => currentView = themeIndex);
+              },
+              onToggleAction: (themeIndex, actionIndex, completed) {
+                HapticFeedback.lightImpact();
+                widget.onToggleAction(themeIndex, actionIndex, completed);
+              },
             ),
           ),
         ),
@@ -334,7 +253,88 @@ class _MandalartViewerState extends State<MandalartViewer> {
     );
   }
 
+  /// 동기부여 명언 위젯
+  Widget _buildMotivationalQuote() {
+    return Container(
+      padding: const EdgeInsets.all(20),
+      decoration: BoxDecoration(
+        color: CupertinoColors.systemPurple.withOpacity(0.1),
+        borderRadius: BorderRadius.circular(12),
+      ),
+      child: Column(
+        children: [
+          const Icon(
+            CupertinoIcons.quote_bubble,
+            color: CupertinoColors.systemPurple,
+            size: 24,
+          ),
+          const SizedBox(height: 12),
+          Text(
+            _randomQuote['quote']!,
+            textAlign: TextAlign.center,
+            style: const TextStyle(
+              fontSize: 15,
+              fontWeight: FontWeight.w500,
+              color: CupertinoColors.label,
+              height: 1.5,
+            ),
+          ),
+          const SizedBox(height: 12),
+          Text(
+            '- ${_randomQuote['author']} -',
+            style: const TextStyle(
+              fontSize: 13,
+              fontWeight: FontWeight.w600,
+              color: CupertinoColors.systemPurple,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
   void _showWallpaperOptions({required bool isDownload}) {
+    // 먼저 컨텐츠 타입 선택
+    showCupertinoModalPopup(
+      context: context,
+      builder: (context) => CupertinoActionSheet(
+        title: Text(isDownload ? '다운로드 컨텐츠 선택' : '저장 컨텐츠 선택'),
+        message: const Text('어떤 내용을 저장하시겠습니까?'),
+        actions: [
+          CupertinoActionSheetAction(
+            onPressed: () {
+              Navigator.pop(context);
+              Future.microtask(() => _showSizeOptions(
+                    isDownload: isDownload,
+                    isA4Only: true,
+                  ));
+            },
+            child: const Text('만다라트만'),
+          ),
+          CupertinoActionSheetAction(
+            onPressed: () {
+              Navigator.pop(context);
+              Future.microtask(() => _showSizeOptions(
+                    isDownload: isDownload,
+                    isA4Only: false,
+                  ));
+            },
+            child: const Text('전체 화면 (명언 포함)'),
+          ),
+        ],
+        cancelButton: CupertinoActionSheetAction(
+          onPressed: () => Navigator.pop(context),
+          isDefaultAction: true,
+          child: const Text('취소'),
+        ),
+      ),
+    );
+  }
+
+  void _showSizeOptions({
+    required bool isDownload,
+    required bool isA4Only,
+  }) {
     showCupertinoModalPopup(
       context: context,
       builder: (context) => CupertinoActionSheet(
@@ -344,8 +344,11 @@ class _MandalartViewerState extends State<MandalartViewer> {
             CupertinoActionSheetAction(
               onPressed: () {
                 Navigator.pop(context);
-                Future.microtask(
-                    () => _handleWallpaperExport(preset, isDownload));
+                Future.microtask(() => _handleWallpaperExport(
+                      preset,
+                      isDownload,
+                      isA4Only,
+                    ));
               },
               child: Text(ImageService.getPresetLabel(preset)),
             ),
@@ -362,9 +365,14 @@ class _MandalartViewerState extends State<MandalartViewer> {
   Future<void> _handleWallpaperExport(
     WallpaperPreset preset,
     bool isDownload,
+    bool isA4Only,
   ) async {
     try {
-      final image = await ImageService.captureWithPreset(_screenshotController, preset);
+      // A4만 저장할지 전체 화면을 저장할지에 따라 다른 controller 사용
+      final controller = isA4Only ? _a4ScreenshotController : _screenshotController;
+      final contentType = isA4Only ? '만다라트' : '전체 화면';
+
+      final image = await ImageService.captureWithPreset(controller, preset);
       if (image == null) {
         if (mounted) {
           _showCupertinoAlert('이미지 캡처에 실패했습니다. 다시 시도해주세요.');
@@ -376,7 +384,7 @@ class _MandalartViewerState extends State<MandalartViewer> {
         if (kIsWeb) {
           ImageService.downloadWeb(image, ImageService.getFileNameForPreset(preset));
           if (mounted) {
-            _showCupertinoAlert('이미지 다운로드가 시작되었습니다.');
+            _showCupertinoAlert('$contentType 이미지 다운로드가 시작되었습니다.');
           }
         }
         return;
@@ -385,7 +393,7 @@ class _MandalartViewerState extends State<MandalartViewer> {
       await ImageService.saveToGallery(image);
       if (mounted) {
         HapticFeedback.mediumImpact();
-        _showCupertinoAlert('${ImageService.getPresetLabel(preset)} 이미지가 갤러리에 저장되었습니다.');
+        _showCupertinoAlert('$contentType ${ImageService.getPresetLabel(preset)} 이미지가 갤러리에 저장되었습니다.');
       }
     } catch (error) {
       if (mounted) {
