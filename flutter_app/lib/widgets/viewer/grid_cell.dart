@@ -1,0 +1,116 @@
+import 'package:flutter/cupertino.dart';
+import 'package:mandarart_journey/utils/mandalart_grid.dart';
+
+class GridCellWidget extends StatelessWidget {
+  final GridCell cell;
+  final VoidCallback? onTap;
+  const GridCellWidget({super.key, required this.cell, this.onTap});
+
+  @override
+  Widget build(BuildContext context) {
+    Color bg;
+    Color fg = CupertinoColors.label;
+    double fontSize;
+    switch (cell.type) {
+      case 'goal':
+        bg = CupertinoColors.systemPurple;
+        fg = CupertinoColors.white;
+        fontSize = 18;
+        break;
+      case 'theme':
+        bg = CupertinoColors.systemPurple.withOpacity(0.7);
+        fg = CupertinoColors.white;
+        fontSize = 16;
+        break;
+      case 'outer-theme':
+        bg = CupertinoColors.systemPurple.withOpacity(0.4);
+        fg = CupertinoColors.white;
+        fontSize = 14;
+        break;
+      case 'action':
+        bg = cell.isCompleted
+            ? CupertinoColors.systemPurple.withOpacity(0.6)
+            : CupertinoColors.tertiarySystemFill;
+        fg = cell.isCompleted ? CupertinoColors.white : CupertinoColors.label;
+        fontSize = 13;
+        break;
+      default:
+        bg = CupertinoColors.systemBackground;
+        fontSize = 13;
+    }
+
+    return GestureDetector(
+      onTap: onTap,
+      child: Container(
+        alignment: Alignment.center,
+        padding: const EdgeInsets.all(4),
+        decoration: BoxDecoration(
+          color: bg,
+          border: Border.all(
+            color: CupertinoColors.separator.withOpacity(0.3),
+          ),
+        ),
+        child: LayoutBuilder(
+          builder: (context, constraints) {
+            final text = cell.text?.trim() ?? '';
+            if (text.isEmpty ||
+                constraints.maxWidth <= 0 ||
+                constraints.maxHeight <= 0) {
+              return const SizedBox.shrink();
+            }
+
+            final maxWidth = constraints.maxWidth;
+            final maxHeight = constraints.maxHeight;
+            double targetFontSize = fontSize;
+            const double minFontSize = 8.0;
+
+            TextPainter painterFor(double size) {
+              final painter = TextPainter(
+                text: TextSpan(
+                  text: text,
+                  style: TextStyle(
+                    color: fg,
+                    fontSize: size,
+                    height: 1.2,
+                    fontWeight: cell.type == 'goal'
+                        ? FontWeight.w700
+                        : FontWeight.w500,
+                  ),
+                ),
+                textAlign: TextAlign.center,
+                textDirection: TextDirection.ltr,
+                maxLines: null,
+              );
+              painter.layout(maxWidth: maxWidth);
+              return painter;
+            }
+
+            var painter = painterFor(targetFontSize);
+            while ((painter.width > maxWidth || painter.height > maxHeight) &&
+                targetFontSize > minFontSize) {
+              targetFontSize = (targetFontSize - 1).clamp(minFontSize, fontSize);
+              painter = painterFor(targetFontSize);
+              if (targetFontSize == minFontSize) {
+                break;
+              }
+            }
+
+            return Text(
+              text,
+              textAlign: TextAlign.center,
+              softWrap: true,
+              maxLines: null,
+              style: TextStyle(
+                color: fg,
+                fontSize: targetFontSize,
+                height: 1.2,
+                fontWeight:
+                    cell.type == 'goal' ? FontWeight.w700 : FontWeight.w500,
+              ),
+            );
+          },
+        ),
+      ),
+    );
+  }
+}
