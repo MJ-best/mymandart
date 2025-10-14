@@ -4,6 +4,7 @@ import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:mandarart_journey/providers/mandalart_provider.dart';
+import 'package:mandarart_journey/providers/theme_provider.dart';
 
 class LandingScreen extends ConsumerStatefulWidget {
   const LandingScreen({super.key});
@@ -47,6 +48,7 @@ class _LandingScreenState extends ConsumerState<LandingScreen> {
         middle: Text(title),
         backgroundColor: CupertinoColors.systemBackground,
         border: null,
+        trailing: _buildThemeToggleButton(),
       ),
       child: SafeArea(
         child: SingleChildScrollView(
@@ -196,6 +198,45 @@ class _LandingScreenState extends ConsumerState<LandingScreen> {
               ),
             ],
           ),
+        ),
+      ),
+    );
+  }
+
+  /// 다크모드 토글 버튼
+  Widget _buildThemeToggleButton() {
+    final themeState = ref.watch(themeProvider);
+    final IconData icon;
+    final String label;
+
+    switch (themeState.mode) {
+      case ThemeMode.light:
+        icon = CupertinoIcons.sun_max_fill;
+        label = 'Light mode';
+        break;
+      case ThemeMode.dark:
+        icon = CupertinoIcons.moon_fill;
+        label = 'Dark mode';
+        break;
+      case ThemeMode.system:
+        icon = CupertinoIcons.device_phone_portrait;
+        label = 'System mode';
+        break;
+    }
+
+    return Semantics(
+      label: 'Toggle theme: $label',
+      button: true,
+      child: CupertinoButton(
+        padding: EdgeInsets.zero,
+        onPressed: () {
+          HapticFeedback.lightImpact();
+          ref.read(themeProvider.notifier).toggleTheme();
+        },
+        child: Icon(
+          icon,
+          color: CupertinoColors.systemPurple,
+          size: 24,
         ),
       ),
     );

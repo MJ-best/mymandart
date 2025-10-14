@@ -226,29 +226,45 @@ class _MandalartViewerState extends State<MandalartViewer> {
   Widget _buildA4ViewerWithZoom() {
     return Container(
       color: CupertinoColors.systemGrey6,
-      child: Center(
-        child: InteractiveViewer(
-          minScale: 0.5,
-          maxScale: 5.0,
-          panEnabled: true,
-          scaleEnabled: true,
-          boundaryMargin: const EdgeInsets.all(40),
-          child: Screenshot(
-            controller: _a4ScreenshotController,
-            child: A4MandalartLayout(
-              state: widget.state,
-              currentView: currentView,
-              onThemeClick: (themeIndex) {
-                HapticFeedback.lightImpact();
-                setState(() => currentView = themeIndex);
-              },
-              onToggleAction: (themeIndex, actionIndex, completed) {
-                HapticFeedback.lightImpact();
-                widget.onToggleAction(themeIndex, actionIndex, completed);
-              },
+      child: Stack(
+        children: [
+          // 화면에 표시되는 위젯 (다크모드 적용)
+          Center(
+            child: InteractiveViewer(
+              minScale: 0.5,
+              maxScale: 5.0,
+              panEnabled: true,
+              scaleEnabled: true,
+              boundaryMargin: const EdgeInsets.all(40),
+              child: A4MandalartLayout(
+                state: widget.state,
+                currentView: currentView,
+                onThemeClick: (themeIndex) {
+                  HapticFeedback.lightImpact();
+                  setState(() => currentView = themeIndex);
+                },
+                onToggleAction: (themeIndex, actionIndex, completed) {
+                  HapticFeedback.lightImpact();
+                  widget.onToggleAction(themeIndex, actionIndex, completed);
+                },
+                forScreenshot: false, // 화면에는 다크모드 적용
+              ),
             ),
           ),
-        ),
+          // 스크린샷용 위젯 (항상 밝은 배경, 화면에는 숨김)
+          Offstage(
+            child: Screenshot(
+              controller: _a4ScreenshotController,
+              child: A4MandalartLayout(
+                state: widget.state,
+                currentView: currentView,
+                onThemeClick: (themeIndex) {},
+                onToggleAction: (themeIndex, actionIndex, completed) {},
+                forScreenshot: true, // 스크린샷은 밝은 배경
+              ),
+            ),
+          ),
+        ],
       ),
     );
   }
