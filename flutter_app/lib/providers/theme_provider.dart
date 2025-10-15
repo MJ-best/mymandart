@@ -4,9 +4,6 @@ import 'package:shared_preferences/shared_preferences.dart';
 
 /// 테마 모드 열거형
 enum ThemeMode {
-  /// 시스템 설정 따름
-  system,
-
   /// 항상 밝은 테마
   light,
 
@@ -17,11 +14,9 @@ enum ThemeMode {
 /// 테마 상태 모델
 class ThemeState {
   final ThemeMode mode;
-  final Brightness systemBrightness;
 
   const ThemeState({
     required this.mode,
-    required this.systemBrightness,
   });
 
   /// 실제 적용될 brightness 계산
@@ -31,18 +26,14 @@ class ThemeState {
         return Brightness.light;
       case ThemeMode.dark:
         return Brightness.dark;
-      case ThemeMode.system:
-        return systemBrightness;
     }
   }
 
   ThemeState copyWith({
     ThemeMode? mode,
-    Brightness? systemBrightness,
   }) {
     return ThemeState(
       mode: mode ?? this.mode,
-      systemBrightness: systemBrightness ?? this.systemBrightness,
     );
   }
 }
@@ -53,8 +44,7 @@ class ThemeNotifier extends StateNotifier<ThemeState> {
 
   ThemeNotifier()
       : super(const ThemeState(
-          mode: ThemeMode.system,
-          systemBrightness: Brightness.light,
+          mode: ThemeMode.light,
         )) {
     _loadThemeMode();
   }
@@ -67,7 +57,7 @@ class ThemeNotifier extends StateNotifier<ThemeState> {
       if (modeString != null) {
         final mode = ThemeMode.values.firstWhere(
           (e) => e.name == modeString,
-          orElse: () => ThemeMode.system,
+          orElse: () => ThemeMode.light,
         );
         state = state.copyWith(mode: mode);
       }
@@ -87,20 +77,11 @@ class ThemeNotifier extends StateNotifier<ThemeState> {
     }
   }
 
-  /// 시스템 brightness 업데이트
-  void updateSystemBrightness(Brightness brightness) {
-    if (state.systemBrightness != brightness) {
-      state = state.copyWith(systemBrightness: brightness);
-    }
-  }
-
-  /// 다음 테마 모드로 순환 전환 (light → dark → system → light)
+  /// light/dark 토글 (light ↔ dark)
   Future<void> toggleTheme() async {
-    final nextMode = switch (state.mode) {
-      ThemeMode.light => ThemeMode.dark,
-      ThemeMode.dark => ThemeMode.system,
-      ThemeMode.system => ThemeMode.light,
-    };
+    final nextMode = state.mode == ThemeMode.light
+        ? ThemeMode.dark
+        : ThemeMode.light;
     await setThemeMode(nextMode);
   }
 }

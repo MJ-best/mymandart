@@ -10,6 +10,7 @@ void main() {
 }
 
 final _router = GoRouter(
+  initialLocation: '/create',
   routes: [
     GoRoute(
       path: '/',
@@ -22,45 +23,11 @@ final _router = GoRouter(
   ],
 );
 
-class MandarartRoot extends ConsumerStatefulWidget {
+class MandarartRoot extends ConsumerWidget {
   const MandarartRoot({super.key});
 
   @override
-  ConsumerState<MandarartRoot> createState() => _MandarartRootState();
-}
-
-class _MandarartRootState extends ConsumerState<MandarartRoot>
-    with WidgetsBindingObserver {
-  @override
-  void initState() {
-    super.initState();
-    WidgetsBinding.instance.addObserver(this);
-    // 빌드 후에 시스템 brightness 업데이트
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      _updateSystemBrightness();
-    });
-  }
-
-  @override
-  void dispose() {
-    WidgetsBinding.instance.removeObserver(this);
-    super.dispose();
-  }
-
-  @override
-  void didChangePlatformBrightness() {
-    super.didChangePlatformBrightness();
-    _updateSystemBrightness();
-  }
-
-  void _updateSystemBrightness() {
-    final brightness =
-        WidgetsBinding.instance.platformDispatcher.platformBrightness;
-    ref.read(themeProvider.notifier).updateSystemBrightness(brightness);
-  }
-
-  @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     // 현재 테마 상태 가져오기
     final themeState = ref.watch(themeProvider);
     final brightness = themeState.effectiveBrightness;

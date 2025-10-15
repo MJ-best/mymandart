@@ -3,35 +3,40 @@ import 'dart:math';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:screenshot/screenshot.dart';
 
 import 'package:mandarart_journey/models/mandalart.dart';
 import 'package:mandarart_journey/data/keywords.dart';
 import 'package:mandarart_journey/services/export_service.dart';
 import 'package:mandarart_journey/services/image_service.dart';
+import 'package:mandarart_journey/providers/theme_provider.dart';
 import 'package:mandarart_journey/widgets/viewer/a4_mandalart_layout.dart';
 
-class MandalartViewer extends StatefulWidget {
+class MandalartViewer extends ConsumerStatefulWidget {
   final MandalartStateModel state;
   final VoidCallback onClose;
+  final VoidCallback? onNavigateToActions;
   final void Function(int themeIndex, int actionIndex, bool completed)
       onToggleAction;
   const MandalartViewer({
     super.key,
     required this.state,
     required this.onClose,
+    this.onNavigateToActions,
     required this.onToggleAction,
   });
 
   @override
-  State<MandalartViewer> createState() => _MandalartViewerState();
+  ConsumerState<MandalartViewer> createState() => _MandalartViewerState();
 }
 
-class _MandalartViewerState extends State<MandalartViewer> {
+class _MandalartViewerState extends ConsumerState<MandalartViewer> {
   Object currentView = 'full'; // 'full' | int
   final ScreenshotController _screenshotController = ScreenshotController();
   final ScreenshotController _a4ScreenshotController = ScreenshotController();
   late Map<String, String> _randomQuote;
+  bool _isTodoExpanded = false;
 
   @override
   void initState() {
@@ -66,6 +71,7 @@ class _MandalartViewerState extends State<MandalartViewer> {
             trailing: Row(
               mainAxisSize: MainAxisSize.min,
               children: [
+                _buildThemeToggleButton(),
                 if (!kIsWeb)
                   Semantics(
                     label: 'Save image to gallery',
@@ -135,38 +141,48 @@ class _MandalartViewerState extends State<MandalartViewer> {
 
     return Column(
       children: [
-        // A4 만다라트 뷰어 (확대/축소 가능)
+        // 2/3: A4 만다라트 뷰어 (확대/축소 가능)
         Expanded(
+          flex: 2,
           child: _buildA4ViewerWithZoom(),
         ),
 
-        // 하단 정보와 버튼
-        Padding(
-          padding: const EdgeInsets.all(16),
-          child: Column(
-            children: [
-              if (!isFull)
-                Semantics(
-                  label: 'Return to full view',
-                  button: true,
-                  child: CupertinoButton.filled(
-                    onPressed: () {
-                      HapticFeedback.lightImpact();
-                      setState(() => currentView = 'full');
-                    },
-                    child: const Row(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        Icon(CupertinoIcons.arrow_left, size: 20),
-                        SizedBox(width: 8),
-                        Text('전체보기'),
-                      ],
+        // 1/3: 하단 정보 영역 (TODO + 명언)
+        Expanded(
+          flex: 1,
+          child: SingleChildScrollView(
+            child: Padding(
+              padding: const EdgeInsets.all(16),
+              child: Column(
+                children: [
+                  if (!isFull)
+                    Semantics(
+                      label: 'Return to full view',
+                      button: true,
+                      child: CupertinoButton.filled(
+                        onPressed: () {
+                          HapticFeedback.lightImpact();
+                          setState(() => currentView = 'full');
+                        },
+                        child: const Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            Icon(CupertinoIcons.arrow_left, size: 20),
+                            SizedBox(width: 8),
+                            Text('전체보기'),
+                          ],
+                        ),
+                      ),
                     ),
-                  ),
-                ),
-              const SizedBox(height: 12),
-              _buildMotivationalQuote(),
-            ],
+                  if (!isFull) const SizedBox(height: 12),
+                  // TODO 리스트 미리보기 (확장 시 명언이 아래로 밀림)
+                  _buildTodoListPreview(),
+                  const SizedBox(height: 12),
+                  // 명언 (더보기 확장 시 스크롤로 가려짐)
+                  _buildMotivationalQuote(),
+                ],
+              ),
+            ),
           ),
         ),
       ],
@@ -185,7 +201,7 @@ class _MandalartViewerState extends State<MandalartViewer> {
           child: _buildA4ViewerWithZoom(),
         ),
 
-        // 오른쪽: 정보와 버튼
+        // 오른쪽: TODO 리스트, 정보와 버튼
         Expanded(
           flex: 2,
           child: SingleChildScrollView(
@@ -212,6 +228,9 @@ class _MandalartViewerState extends State<MandalartViewer> {
                       ),
                     ),
                   ),
+                const SizedBox(height: 20),
+                // TODO 리스트 추가
+                _buildTodoList(),
                 const SizedBox(height: 20),
                 _buildMotivationalQuote(),
               ],
@@ -267,6 +286,330 @@ class _MandalartViewerState extends State<MandalartViewer> {
         ],
       ),
     );
+  }
+
+  /// 세로모드용 TODO 리스트 미리보기 위젯 (3개 + 확장 가능)
+  Widget _buildTodoListPreview() {
+    final incompleteActions = widget.state.actionItems
+        .where((action) => !action.isCompleted && action.actionText.trim().isNotEmpty)
+        .toList();
+
+    if (incompleteActions.isEmpty) {
+      return Container(
+        padding: const EdgeInsets.all(20),
+        decoration: BoxDecoration(
+          color: CupertinoColors.systemGreen.withOpacity(0.1),
+          borderRadius: BorderRadius.circular(12),
+          border: Border.all(
+            color: CupertinoColors.systemGreen.withOpacity(0.3),
+          ),
+        ),
+        child: const Column(
+          children: [
+            Icon(
+              CupertinoIcons.checkmark_seal_fill,
+              color: CupertinoColors.systemGreen,
+              size: 32,
+            ),
+            SizedBox(height: 8),
+            Text(
+              '모든 할 일 완료!',
+              textAlign: TextAlign.center,
+              style: TextStyle(
+                fontSize: 16,
+                fontWeight: FontWeight.w600,
+                color: CupertinoColors.systemGreen,
+              ),
+            ),
+          ],
+        ),
+      );
+    }
+
+    // 확장 여부에 따라 표시할 개수 결정
+    final displayCount = _isTodoExpanded
+        ? (incompleteActions.length > 10 ? 10 : incompleteActions.length)
+        : (incompleteActions.length > 3 ? 3 : incompleteActions.length);
+
+    return Container(
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: CupertinoColors.systemPurple.withOpacity(0.05),
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(
+          color: CupertinoColors.systemPurple.withOpacity(0.2),
+        ),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              const Icon(
+                CupertinoIcons.list_bullet,
+                color: CupertinoColors.systemPurple,
+                size: 20,
+              ),
+              const SizedBox(width: 8),
+              Text(
+                incompleteActions.length <= 3
+                    ? '오늘 집중할 ${incompleteActions.length}가지'
+                    : '오늘 집중할 3가지',
+                style: const TextStyle(
+                  fontSize: 16,
+                  fontWeight: FontWeight.w600,
+                  color: CupertinoColors.systemPurple,
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 12),
+          ...incompleteActions.take(displayCount).map((action) {
+            final themeIndex = _getThemeIndexForAction(action);
+            final actionIndex = _getActionIndexForTheme(action, themeIndex);
+
+            return Padding(
+              padding: const EdgeInsets.only(bottom: 8),
+              child: GestureDetector(
+                onTap: () {
+                  HapticFeedback.lightImpact();
+                  widget.onToggleAction(themeIndex, actionIndex, true);
+                },
+                child: Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+                  decoration: BoxDecoration(
+                    color: CupertinoColors.systemBackground.resolveFrom(context),
+                    borderRadius: BorderRadius.circular(8),
+                    border: Border.all(
+                      color: CupertinoColors.separator.resolveFrom(context),
+                    ),
+                  ),
+                  child: Row(
+                    children: [
+                      Icon(
+                        CupertinoIcons.circle,
+                        size: 18,
+                        color: CupertinoColors.systemGrey.resolveFrom(context),
+                      ),
+                      const SizedBox(width: 10),
+                      Expanded(
+                        child: Text(
+                          action.actionText,
+                          style: TextStyle(
+                            fontSize: 14,
+                            color: CupertinoColors.label.resolveFrom(context),
+                          ),
+                          maxLines: 2,
+                          overflow: TextOverflow.ellipsis,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+            );
+          }),
+          // 더 보기 / 접기 버튼
+          if (incompleteActions.length > 3)
+            CupertinoButton(
+              padding: const EdgeInsets.symmetric(vertical: 8),
+              onPressed: () {
+                HapticFeedback.selectionClick();
+                setState(() {
+                  _isTodoExpanded = !_isTodoExpanded;
+                });
+              },
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Text(
+                    _isTodoExpanded
+                        ? '접기'
+                        : '더 보기 (${incompleteActions.length - 3}개 더)',
+                    style: const TextStyle(
+                      fontSize: 14,
+                      color: CupertinoColors.systemPurple,
+                      fontWeight: FontWeight.w600,
+                    ),
+                  ),
+                  const SizedBox(width: 4),
+                  Icon(
+                    _isTodoExpanded
+                        ? CupertinoIcons.chevron_up
+                        : CupertinoIcons.chevron_down,
+                    color: CupertinoColors.systemPurple,
+                    size: 14,
+                  ),
+                ],
+              ),
+            ),
+          if (_isTodoExpanded && incompleteActions.length > 10) ...[
+            const SizedBox(height: 4),
+            Text(
+              '외 ${incompleteActions.length - 10}개 더...',
+              style: TextStyle(
+                fontSize: 13,
+                color: CupertinoColors.secondaryLabel.resolveFrom(context),
+              ),
+            ),
+          ],
+        ],
+      ),
+    );
+  }
+
+  /// TODO 리스트 위젯
+  Widget _buildTodoList() {
+    final incompleteActions = widget.state.actionItems
+        .where((action) => !action.isCompleted && action.actionText.trim().isNotEmpty)
+        .toList();
+
+    if (incompleteActions.isEmpty) {
+      return Container(
+        padding: const EdgeInsets.all(20),
+        decoration: BoxDecoration(
+          color: CupertinoColors.systemGreen.withOpacity(0.1),
+          borderRadius: BorderRadius.circular(12),
+          border: Border.all(
+            color: CupertinoColors.systemGreen.withOpacity(0.3),
+          ),
+        ),
+        child: const Column(
+          children: [
+            Icon(
+              CupertinoIcons.checkmark_seal_fill,
+              color: CupertinoColors.systemGreen,
+              size: 32,
+            ),
+            SizedBox(height: 8),
+            Text(
+              '모든 할 일 완료!',
+              textAlign: TextAlign.center,
+              style: TextStyle(
+                fontSize: 16,
+                fontWeight: FontWeight.w600,
+                color: CupertinoColors.systemGreen,
+              ),
+            ),
+          ],
+        ),
+      );
+    }
+
+    return Container(
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: CupertinoColors.systemPurple.withOpacity(0.05),
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(
+          color: CupertinoColors.systemPurple.withOpacity(0.2),
+        ),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              const Icon(
+                CupertinoIcons.list_bullet,
+                color: CupertinoColors.systemPurple,
+                size: 20,
+              ),
+              const SizedBox(width: 8),
+              Text(
+                '오늘 집중할 일 (${incompleteActions.length > 10 ? 10 : incompleteActions.length}개)',
+                style: const TextStyle(
+                  fontSize: 16,
+                  fontWeight: FontWeight.w600,
+                  color: CupertinoColors.systemPurple,
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 12),
+          ...incompleteActions.take(10).map((action) {
+            final themeIndex = _getThemeIndexForAction(action);
+            final actionIndex = _getActionIndexForTheme(action, themeIndex);
+
+            return Padding(
+              padding: const EdgeInsets.only(bottom: 8),
+              child: GestureDetector(
+                onTap: () {
+                  HapticFeedback.lightImpact();
+                  widget.onToggleAction(themeIndex, actionIndex, true);
+                },
+                child: Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+                  decoration: BoxDecoration(
+                    color: CupertinoColors.systemBackground.resolveFrom(context),
+                    borderRadius: BorderRadius.circular(8),
+                    border: Border.all(
+                      color: CupertinoColors.separator.resolveFrom(context),
+                    ),
+                  ),
+                  child: Row(
+                    children: [
+                      Icon(
+                        CupertinoIcons.circle,
+                        size: 18,
+                        color: CupertinoColors.systemGrey.resolveFrom(context),
+                      ),
+                      const SizedBox(width: 10),
+                      Expanded(
+                        child: Text(
+                          action.actionText,
+                          style: TextStyle(
+                            fontSize: 14,
+                            color: CupertinoColors.label.resolveFrom(context),
+                          ),
+                          maxLines: 2,
+                          overflow: TextOverflow.ellipsis,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+            );
+          }),
+          if (incompleteActions.length > 10) ...[
+            const SizedBox(height: 4),
+            Text(
+              '외 ${incompleteActions.length - 10}개 더...',
+              style: TextStyle(
+                fontSize: 13,
+                color: CupertinoColors.secondaryLabel.resolveFrom(context),
+              ),
+            ),
+          ],
+        ],
+      ),
+    );
+  }
+
+  /// 액션 아이템의 테마 인덱스 가져오기
+  int _getThemeIndexForAction(ActionItemModel action) {
+    // themeId를 기반으로 테마 인덱스 찾기
+    for (int i = 0; i < widget.state.actionItems.length; i++) {
+      if (widget.state.actionItems[i].id == action.id) {
+        return i ~/ 8; // 각 테마당 8개의 액션 아이템
+      }
+    }
+    return 0;
+  }
+
+  /// 테마 내에서 액션 아이템의 인덱스 가져오기
+  int _getActionIndexForTheme(ActionItemModel action, int themeIndex) {
+    final themeActions = widget.state.actionItems
+        .where((a) => a.themeId == action.themeId)
+        .toList();
+
+    for (int i = 0; i < themeActions.length; i++) {
+      if (themeActions[i].id == action.id) {
+        return i;
+      }
+    }
+    return 0;
   }
 
   /// 동기부여 명언 위젯
@@ -437,6 +780,30 @@ class _MandalartViewerState extends State<MandalartViewer> {
             onPressed: () => Navigator.of(context).pop(),
           ),
         ],
+      ),
+    );
+  }
+
+  Widget _buildThemeToggleButton() {
+    final themeState = ref.watch(themeProvider);
+    final bool isLight = themeState.mode == ThemeMode.light;
+    final IconData icon = isLight ? CupertinoIcons.sun_max_fill : CupertinoIcons.moon_fill;
+    final String label = isLight ? 'Light mode' : 'Dark mode';
+
+    return Semantics(
+      label: 'Toggle theme: $label',
+      button: true,
+      child: CupertinoButton(
+        padding: EdgeInsets.zero,
+        onPressed: () {
+          HapticFeedback.lightImpact();
+          ref.read(themeProvider.notifier).toggleTheme();
+        },
+        child: Icon(
+          icon,
+          color: CupertinoColors.systemPurple,
+          size: 24,
+        ),
       ),
     );
   }

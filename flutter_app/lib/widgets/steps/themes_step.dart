@@ -3,9 +3,15 @@ import 'package:flutter/services.dart';
 import 'package:mandarart_journey/data/keywords.dart';
 
 class ThemesStep extends StatefulWidget {
+  final String goalText;
   final List<String> themes;
   final void Function(List<String>) onChange;
-  const ThemesStep({super.key, required this.themes, required this.onChange});
+  const ThemesStep({
+    super.key,
+    required this.goalText,
+    required this.themes,
+    required this.onChange,
+  });
 
   @override
   State<ThemesStep> createState() => _ThemesStepState();
@@ -58,9 +64,105 @@ class _ThemesStepState extends State<ThemesStep> {
 
   @override
   Widget build(BuildContext context) {
+    final hasGoal = widget.goalText.trim().isNotEmpty;
+
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
+        // 중앙 목표 표시 - "확장되는 느낌" 전달
+        if (hasGoal) ...[
+          Container(
+            padding: const EdgeInsets.all(20),
+            decoration: BoxDecoration(
+              gradient: LinearGradient(
+                colors: [
+                  CupertinoColors.systemPurple.withOpacity(0.15),
+                  CupertinoColors.systemIndigo.withOpacity(0.1),
+                ],
+                begin: Alignment.topLeft,
+                end: Alignment.bottomRight,
+              ),
+              borderRadius: BorderRadius.circular(16),
+              border: Border.all(
+                color: CupertinoColors.systemPurple.withOpacity(0.3),
+                width: 2,
+              ),
+            ),
+            child: Column(
+              children: [
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Container(
+                      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                      decoration: BoxDecoration(
+                        color: CupertinoColors.systemPurple,
+                        borderRadius: BorderRadius.circular(20),
+                      ),
+                      child: const Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          Icon(
+                            CupertinoIcons.star_fill,
+                            color: CupertinoColors.white,
+                            size: 14,
+                          ),
+                          SizedBox(width: 6),
+                          Text(
+                            '중심 목표',
+                            style: TextStyle(
+                              fontSize: 13,
+                              fontWeight: FontWeight.w600,
+                              color: CupertinoColors.white,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 16),
+                Text(
+                  widget.goalText.trim(),
+                  textAlign: TextAlign.center,
+                  style: const TextStyle(
+                    fontSize: 20,
+                    fontWeight: FontWeight.w700,
+                    color: CupertinoColors.label,
+                    height: 1.4,
+                  ),
+                ),
+                const SizedBox(height: 16),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Icon(
+                      CupertinoIcons.arrow_down,
+                      color: CupertinoColors.systemPurple.withOpacity(0.6),
+                      size: 20,
+                    ),
+                    const SizedBox(width: 8),
+                    Text(
+                      '이 목표를 실현하기 위한 8가지 핵심 영역',
+                      style: TextStyle(
+                        fontSize: 14,
+                        fontWeight: FontWeight.w500,
+                        color: CupertinoColors.secondaryLabel.resolveFrom(context),
+                      ),
+                    ),
+                    const SizedBox(width: 8),
+                    Icon(
+                      CupertinoIcons.arrow_down,
+                      color: CupertinoColors.systemPurple.withOpacity(0.6),
+                      size: 20,
+                    ),
+                  ],
+                ),
+              ],
+            ),
+          ),
+          const SizedBox(height: 24),
+        ],
         Wrap(
           runSpacing: 12,
           children: List.generate(8, (index) {

@@ -109,25 +109,106 @@ class _ActionsStepState extends State<ActionsStep> {
       );
     }
     return Column(
-      children: List.generate(filledThemes.length, (themeIndex) {
-        final themeEntry = filledThemes[themeIndex];
-        final actualThemeIndex = themeEntry.key;
-        final themeTitle = themeEntry.value;
-        final themeKeywords = Keywords.getActionsForTheme(themeTitle);
-        final isExpanded = _expandedThemeIndex == themeIndex;
-        return Container(
-          margin: const EdgeInsets.only(bottom: 16),
-          decoration: BoxDecoration(
-            color: CupertinoColors.secondarySystemGroupedBackground,
-            borderRadius: BorderRadius.circular(12),
-            border: Border.all(
-              color: CupertinoColors.separator.withOpacity(0.3),
+      children: [
+        // 목표 표시 - 연결성 강화
+        if (widget.state.goalText.trim().isNotEmpty) ...[
+          Container(
+            padding: const EdgeInsets.all(16),
+            decoration: BoxDecoration(
+              gradient: LinearGradient(
+                colors: [
+                  CupertinoColors.systemPurple.withOpacity(0.1),
+                  CupertinoColors.systemIndigo.withOpacity(0.05),
+                ],
+                begin: Alignment.topLeft,
+                end: Alignment.bottomRight,
+              ),
+              borderRadius: BorderRadius.circular(12),
+              border: Border.all(
+                color: CupertinoColors.systemPurple.withOpacity(0.2),
+              ),
+            ),
+            child: Column(
+              children: [
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Container(
+                      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                      decoration: BoxDecoration(
+                        color: CupertinoColors.systemPurple.withOpacity(0.15),
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                      child: const Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          Icon(
+                            CupertinoIcons.star_fill,
+                            color: CupertinoColors.systemPurple,
+                            size: 12,
+                          ),
+                          SizedBox(width: 4),
+                          Text(
+                            '중심 목표',
+                            style: TextStyle(
+                              fontSize: 12,
+                              fontWeight: FontWeight.w600,
+                              color: CupertinoColors.systemPurple,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 10),
+                Text(
+                  widget.state.goalText.trim(),
+                  textAlign: TextAlign.center,
+                  style: const TextStyle(
+                    fontSize: 16,
+                    fontWeight: FontWeight.w600,
+                    color: CupertinoColors.label,
+                  ),
+                ),
+                const SizedBox(height: 10),
+                Text(
+                  '${filledThemes.length}개의 핵심 영역이 각각 8가지 구체적 행동으로 확장됩니다',
+                  textAlign: TextAlign.center,
+                  style: TextStyle(
+                    fontSize: 13,
+                    color: CupertinoColors.secondaryLabel.resolveFrom(context),
+                  ),
+                ),
+              ],
             ),
           ),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              CupertinoButton(
+          const SizedBox(height: 24),
+        ],
+        ...List.generate(filledThemes.length, (themeIndex) {
+          final themeEntry = filledThemes[themeIndex];
+          final actualThemeIndex = themeEntry.key;
+          final themeTitle = themeEntry.value;
+          final themeKeywords = Keywords.getActionsForTheme(themeTitle);
+          final isExpanded = _expandedThemeIndex == themeIndex;
+          return Container(
+            margin: const EdgeInsets.only(bottom: 16),
+            decoration: BoxDecoration(
+              color: isExpanded
+                  ? CupertinoColors.systemPurple.withOpacity(0.05)
+                  : CupertinoColors.secondarySystemGroupedBackground,
+              borderRadius: BorderRadius.circular(12),
+              border: Border.all(
+                color: isExpanded
+                    ? CupertinoColors.systemPurple.withOpacity(0.3)
+                    : CupertinoColors.separator.withOpacity(0.3),
+                width: isExpanded ? 2 : 1,
+              ),
+            ),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                CupertinoButton(
                 padding: const EdgeInsets.all(16),
                 onPressed: () {
                   HapticFeedback.selectionClick();
@@ -208,6 +289,35 @@ class _ActionsStepState extends State<ActionsStep> {
                   child: Container(
                     height: 1,
                     color: CupertinoColors.separator.withOpacity(0.3),
+                  ),
+                ),
+                // 확장 메시지 추가
+                Padding(
+                  padding: const EdgeInsets.all(16),
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Icon(
+                        CupertinoIcons.arrow_down_circle_fill,
+                        color: CupertinoColors.systemPurple.withOpacity(0.6),
+                        size: 16,
+                      ),
+                      const SizedBox(width: 8),
+                      Text(
+                        '이 영역을 달성하기 위한 8가지 구체적 행동',
+                        style: TextStyle(
+                          fontSize: 13,
+                          fontWeight: FontWeight.w500,
+                          color: CupertinoColors.secondaryLabel.resolveFrom(context),
+                        ),
+                      ),
+                      const SizedBox(width: 8),
+                      Icon(
+                        CupertinoIcons.arrow_down_circle_fill,
+                        color: CupertinoColors.systemPurple.withOpacity(0.6),
+                        size: 16,
+                      ),
+                    ],
                   ),
                 ),
                 Padding(
@@ -381,6 +491,7 @@ class _ActionsStepState extends State<ActionsStep> {
           ),
         );
       }),
+      ],
     );
   }
 }

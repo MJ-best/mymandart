@@ -51,8 +51,8 @@ class _GoalStepState extends State<GoalStep> {
             ),
             if (_controller.text.isNotEmpty)
               CupertinoButton(
-                padding: EdgeInsets.zero,
-                minimumSize: const Size(44, 44),
+                padding: const EdgeInsets.all(6),
+                minimumSize: const Size(32, 32),
                 onPressed: () {
                   showCupertinoDialog(
                     context: context,
@@ -78,10 +78,19 @@ class _GoalStepState extends State<GoalStep> {
                     ),
                   );
                 },
-                child: const Icon(
-                  CupertinoIcons.trash,
-                  color: CupertinoColors.destructiveRed,
-                  size: 20,
+                child: Container(
+                  width: 18,
+                  height: 18,
+                  decoration: const BoxDecoration(
+                    shape: BoxShape.circle,
+                    color: CupertinoColors.destructiveRed,
+                  ),
+                  alignment: Alignment.center,
+                  child: const Icon(
+                    CupertinoIcons.xmark,
+                    size: 11,
+                    color: CupertinoColors.white,
+                  ),
                 ),
               ),
           ],
