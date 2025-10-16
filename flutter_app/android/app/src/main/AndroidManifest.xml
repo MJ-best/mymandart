@@ -1,6 +1,6 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android">
     <application
-        android:label="mandarart_journey"
+        android:label="나의 만다라트노트"
         android:name="${applicationName}"
         android:icon="@mipmap/ic_launcher">
         <activity

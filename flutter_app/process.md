@@ -1434,3 +1434,228 @@ ref.listen<bool>(
 - **WidgetsBinding.addPostFrameCallback**: 안전한 PageController 업데이트
 - **Expanded with flex**: 2:1 비율로 레이아웃 분할
 - **SingleChildScrollView**: TODO 확장 시 스크롤 가능
+
+---
+
+## 2025-10-16 - 배포 준비 및 설정
+
+### 작업 내용
+앱 배포를 위한 기본 설정 및 환경 구성 완료
+
+### 변경 사항
+
+#### 1. 앱 이름 변경
+**한국어 이름**: "나의 만다라트노트"
+**영어 이름**: "My Mandara Note"
+
+**변경된 파일:**
+- `android/app/src/main/AndroidManifest.xml:3`: Android 앱 이름 → "나의 만다라트노트"
+- `ios/Runner/Info.plist:8`: iOS 앱 이름 (CFBundleDisplayName) → "나의 만다라트노트"
+- `ios/Runner/Info.plist:16`: iOS 번들 이름 (CFBundleName) → "My Mandara Note"
+- `macos/Runner/Configs/AppInfo.xcconfig:8`: macOS 앱 이름 → "My Mandara Note"
+
+#### 2. 패키지명 변경
+**새 패키지명**: `com.mandaranote.app`
+
+**변경된 파일:**
+- `android/app/build.gradle.kts:9`: Android namespace → "com.mandaranote.app"
+- `android/app/build.gradle.kts:24`: Android applicationId → "com.mandaranote.app"
+- `android/app/src/main/kotlin/com/mandaranote/app/MainActivity.kt`: 새로운 패키지 구조로 MainActivity 이동
+- `ios/Runner.xcodeproj/project.pbxproj`: iOS 번들 ID → "com.mandaranote.app" (모든 빌드 구성)
+- `macos/Runner/Configs/AppInfo.xcconfig:11`: macOS 번들 ID → "com.mandaranote.app"
+
+**디렉토리 구조 변경:**
+```
+android/app/src/main/kotlin/
+  com/example/mandarart_journey/  → 삭제
+  com/mandaranote/app/             → 생성
+    MainActivity.kt
+```
+
+#### 3. 앱 버전 업데이트
+- `pubspec.yaml:4`: 버전 변경 `0.1.0+1` → `1.0.0+1`
+- 첫 정식 릴리즈를 위한 1.0.0 버전 설정
+
+#### 4. Android Release 서명 설정
+
+**새로 생성된 파일:**
+- `android/key.properties.example`: Keystore 설정 템플릿
+  ```properties
+  storePassword=your_keystore_password_here
+  keyPassword=your_key_password_here
+  keyAlias=upload
+  storeFile=../upload-keystore.jks
+  ```
+
+**변경된 파일:**
+- `android/app/build.gradle.kts`:
+  - Import 추가: `java.util.Properties`, `java.io.FileInputStream`
+  - Keystore properties 로딩 로직 추가
+  - signingConfigs 블록 추가 (release 구성)
+  - buildTypes에서 release 서명 설정
+  ```kotlin
+  // key.properties 파일이 있으면 release 서명 사용
+  // 없으면 debug 서명 사용 (개발용)
+  signingConfig = if (keystorePropertiesFile.exists()) {
+      signingConfigs.getByName("release")
+  } else {
+      signingConfigs.getByName("debug")
+  }
+  ```
+
+**보안:**
+- `.gitignore`에 이미 `key.properties`, `**/*.keystore`, `**/*.jks` 포함되어 있음
+- 실제 keystore 파일과 비밀번호는 버전 관리에서 제외
+
+#### 5. 배포 가이드 작성
+
+**새로 생성된 파일:**
+- `DEPLOYMENT_GUIDE.md`: 상세한 배포 가이드 문서
+
+**포함된 내용:**
+1. **Android Keystore 생성 및 서명 설정**
+   - Keystore 생성 명령어
+   - key.properties 설정 방법
+   - Release APK/AAB 빌드 방법
+
+2. **커스텀 아이콘 설정**
+   - flutter_launcher_icons 사용 방법 (권장)
+   - pubspec.yaml 설정 예시
+   - 수동 설정 방법 (각 해상도별 파일 위치)
+   - Android 아이콘: mipmap-mdpi ~ xxxhdpi
+   - iOS 아이콘: 20x20 ~ 1024x1024 (모든 크기)
+
+3. **배포 전 체크리스트**
+   - [ ] 앱 이름 확인
+   - [ ] 패키지명 확인
+   - [ ] 버전 확인
+   - [ ] Android keystore 설정
+   - [ ] 커스텀 아이콘 설정
+   - [ ] Release 빌드 테스트
+   - [ ] 모든 플랫폼 작동 확인
+
+4. **Google Play Console 업로드**
+   - 앱 생성 절차
+   - AAB 파일 업로드 위치
+   - 심사 제출 단계
+
+5. **App Store Connect 업로드 (iOS)**
+   - 앱 생성 절차
+   - Xcode Archive 방법
+   - 심사 제출 단계
+
+6. **참고 자료 링크**
+   - Flutter 공식 배포 가이드
+   - Android 앱 서명 문서
+   - iOS 앱 배포 문서
+
+### 빌드 테스트 결과
+
+#### Android Debug 빌드
+```bash
+flutter build apk --debug
+```
+- ✅ 성공: `build/app/outputs/flutter-apk/app-debug.apk`
+- ✅ 패키지명 변경 적용됨: com.mandaranote.app
+- ✅ 앱 이름 변경 적용됨: "나의 만다라트노트"
+
+**에러 수정:**
+- 초기 빌드 실패: Gradle KTS에서 `java.util.Properties` import 누락
+- 해결: 파일 상단에 import 문 추가
+  ```kotlin
+  import java.util.Properties
+  import java.io.FileInputStream
+  ```
+
+#### iOS Debug 빌드
+```bash
+flutter build ios --debug --no-codesign
+```
+- ✅ 성공: `build/ios/iphoneos/Runner.app`
+- ✅ 패키지명 변경 적용됨: com.mandaranote.app
+- ✅ 앱 이름 변경 적용됨: "나의 만다라트노트"
+- ⚠️  경고: 코드 서명 없음 (실제 디바이스 배포 시 필요)
+
+### 다음 단계
+
+#### Google Play 배포
+1. **Keystore 생성**
+   ```bash
+   cd android
+   keytool -genkey -v -keystore upload-keystore.jks -keyalg RSA -keysize 2048 -validity 10000 -alias upload
+   ```
+
+2. **key.properties 설정**
+   - `android/key.properties.example`을 복사하여 `android/key.properties` 생성
+   - 실제 비밀번호와 경로 입력
+
+3. **Release AAB 빌드**
+   ```bash
+   flutter build appbundle --release
+   ```
+
+4. **Google Play Console 업로드**
+   - `build/app/outputs/bundle/release/app-release.aab` 업로드
+
+#### App Store 배포
+1. **Apple Developer 계정 설정**
+   - Bundle ID 등록: com.mandaranote.app
+   - 프로비저닝 프로파일 생성
+
+2. **Xcode에서 Archive**
+   - Xcode로 프로젝트 열기
+   - Product > Archive 실행
+
+3. **App Store Connect 업로드**
+   - Archive를 App Store Connect에 업로드
+   - 앱 정보 및 스크린샷 등록
+
+#### 커스텀 아이콘 설정
+- 1024x1024px PNG 아이콘 준비
+- flutter_launcher_icons 플러그인 사용 권장
+- 상세 방법은 `DEPLOYMENT_GUIDE.md` 참조
+
+### 변경 파일 요약
+**새로 생성:**
+- `android/key.properties.example`
+- `android/app/src/main/kotlin/com/mandaranote/app/MainActivity.kt`
+- `DEPLOYMENT_GUIDE.md`
+
+**수정:**
+- `pubspec.yaml`: 버전 변경
+- `android/app/build.gradle.kts`: 패키지명, 서명 설정
+- `android/app/src/main/AndroidManifest.xml`: 앱 이름
+- `ios/Runner/Info.plist`: 앱 이름
+- `ios/Runner.xcodeproj/project.pbxproj`: 번들 ID (모든 구성)
+- `macos/Runner/Configs/AppInfo.xcconfig`: 앱 이름, 번들 ID
+
+**삭제:**
+- `android/app/src/main/kotlin/com/example/` 디렉토리
+
+### 주요 개선 사항
+
+1. **프로덕션 준비 완료**
+   - 고유한 패키지명으로 스토어 등록 가능
+   - 정식 버전 번호 (1.0.0) 설정
+   - 앱 이름이 한국어로 명확히 표시
+
+2. **보안 강화**
+   - Release 빌드용 서명 설정 완료
+   - Keystore 파일 보안 (gitignore)
+   - 개발용 debug 서명과 프로덕션용 release 서명 분리
+
+3. **배포 문서화**
+   - 단계별 배포 가이드 제공
+   - 커스텀 아이콘 설정 방법 설명
+   - 체크리스트로 누락 방지
+
+4. **멀티 플랫폼 지원**
+   - Android: Google Play 배포 준비 완료
+   - iOS: App Store 배포 준비 완료
+   - macOS: 앱 이름 및 번들 ID 설정 완료
+
+### 기술적 특징
+- **Gradle KTS**: Kotlin DSL로 Android 빌드 설정
+- **Keystore Properties**: 외부 파일로 민감 정보 관리
+- **조건부 서명**: key.properties 존재 여부에 따라 서명 방식 선택
+- **Flutter 빌드**: 플랫폼별 네이티브 빌드 시스템 통합

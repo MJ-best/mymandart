@@ -1,4 +1,4 @@
-package com.example.mandarart_journey
+package com.mandaranote.app
 
 import io.flutter.embedding.android.FlutterActivity
 
