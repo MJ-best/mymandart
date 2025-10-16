@@ -15,9 +15,23 @@ class MandalartNotifier extends StateNotifier<MandalartStateModel> {
   static const _keyActions = 'mandalart-actions';
   static const _keyStep = 'mandalart-current-step';
   static const _keyDisplayName = 'mandalart-display-name';
+  static const _keySavedMandalartIds = 'saved-mandalart-ids';
+  static const _keyCurrentMandalartId = 'current-mandalart-id';
+  static const _keyCurrentMandalartCreatedAt = 'current-mandalart-created-at';
+
+  String? _currentMandalartId;
+  DateTime? _currentMandalartCreatedAt;
 
   Future<void> _load() async {
     final prefs = await SharedPreferences.getInstance();
+
+    // 현재 만다라트 ID와 생성일 로드
+    _currentMandalartId = prefs.getString(_keyCurrentMandalartId);
+    final createdAtStr = prefs.getString(_keyCurrentMandalartCreatedAt);
+    if (createdAtStr != null) {
+      _currentMandalartCreatedAt = DateTime.tryParse(createdAtStr);
+    }
+
     final goal = prefs.getString(_keyGoal) ?? '';
     final themes = prefs.getStringList(_keyThemes) ?? List.filled(8, '');
     final actionsRaw = prefs.getString(_keyActions);
@@ -152,6 +166,137 @@ class MandalartNotifier extends StateNotifier<MandalartStateModel> {
   void clearAllActions() {
     state = state.copyWith(actionItems: []);
     _persist();
+  }
+
+  // === 저장된 만다라트 관리 메서드 ===
+
+  /// 현재 만다라트를 저장합니다
+  Future<String> saveCurrentMandalart() async {
+    final prefs = await SharedPreferences.getInstance();
+
+    // ID가 없으면 새로 생성, 있으면 기존 ID 사용
+    final id = _currentMandalartId ?? const Uuid().v4();
+    final createdAt = _currentMandalartCreatedAt ?? DateTime.now();
+
+    // 만다라트 데이터 저장
+    final mandalartJson = jsonEncode(state.toJson());
+    await prefs.setString('mandalart_data_$id', mandalartJson);
+
+    // 메타데이터 생성 및 저장
+    final meta = SavedMandalartMeta.fromState(id, state, createdAt);
+    await prefs.setString('mandalart_meta_$id', jsonEncode(meta.toJson()));
+
+    // 저장된 만다라트 ID 목록 업데이트
+    final savedIds = prefs.getStringList(_keySavedMandalartIds) ?? [];
+    if (!savedIds.contains(id)) {
+      savedIds.add(id);
+      await prefs.setStringList(_keySavedMandalartIds, savedIds);
+    }
+
+    // 현재 만다라트 ID 및 생성일 저장
+    _currentMandalartId = id;
+    _currentMandalartCreatedAt = createdAt;
+    await prefs.setString(_keyCurrentMandalartId, id);
+    await prefs.setString(_keyCurrentMandalartCreatedAt, createdAt.toIso8601String());
+
+    return id;
+  }
+
+  /// 저장된 만다라트 목록을 가져옵니다
+  Future<List<SavedMandalartMeta>> getSavedMandalarts() async {
+    final prefs = await SharedPreferences.getInstance();
+    final savedIds = prefs.getStringList(_keySavedMandalartIds) ?? [];
+
+    final List<SavedMandalartMeta> metaList = [];
+    for (final id in savedIds) {
+      final metaJson = prefs.getString('mandalart_meta_$id');
+      if (metaJson != null) {
+        try {
+          final meta = SavedMandalartMeta.fromJson(jsonDecode(metaJson) as Map<String, dynamic>);
+          metaList.add(meta);
+        } catch (e) {
+          // 파싱 오류 시 무시
+        }
+      }
+    }
+
+    // 최신순 정렬
+    metaList.sort((a, b) => b.updatedAt.compareTo(a.updatedAt));
+    return metaList;
+  }
+
+  /// 특정 만다라트를 불러옵니다
+  Future<void> loadMandalart(String id) async {
+    final prefs = await SharedPreferences.getInstance();
+    final dataJson = prefs.getString('mandalart_data_$id');
+
+    if (dataJson != null) {
+      try {
+        final data = MandalartStateModel.fromJson(jsonDecode(dataJson) as Map<String, dynamic>);
+
+        // 메타데이터에서 생성일 가져오기
+        final metaJson = prefs.getString('mandalart_meta_$id');
+        DateTime? createdAt;
+        if (metaJson != null) {
+          try {
+            final meta = SavedMandalartMeta.fromJson(jsonDecode(metaJson) as Map<String, dynamic>);
+            createdAt = meta.createdAt;
+          } catch (e) {
+            // 파싱 오류 시 무시
+          }
+        }
+
+        state = data;
+        _currentMandalartId = id;
+        _currentMandalartCreatedAt = createdAt ?? DateTime.now();
+
+        // 현재 작업 중인 만다라트로 설정
+        await prefs.setString(_keyCurrentMandalartId, id);
+        await prefs.setString(_keyCurrentMandalartCreatedAt, (_currentMandalartCreatedAt ?? DateTime.now()).toIso8601String());
+
+        // 기본 저장소에도 저장 (호환성)
+        await _persist();
+      } catch (e) {
+        // 파싱 오류 시 무시
+      }
+    }
+  }
+
+  /// 저장된 만다라트를 삭제합니다
+  Future<void> deleteMandalart(String id) async {
+    final prefs = await SharedPreferences.getInstance();
+
+    // 데이터 및 메타데이터 삭제
+    await prefs.remove('mandalart_data_$id');
+    await prefs.remove('mandalart_meta_$id');
+
+    // ID 목록에서 제거
+    final savedIds = prefs.getStringList(_keySavedMandalartIds) ?? [];
+    savedIds.remove(id);
+    await prefs.setStringList(_keySavedMandalartIds, savedIds);
+
+    // 현재 만다라트가 삭제된 경우 초기화
+    if (_currentMandalartId == id) {
+      _currentMandalartId = null;
+      _currentMandalartCreatedAt = null;
+      await prefs.remove(_keyCurrentMandalartId);
+      await prefs.remove(_keyCurrentMandalartCreatedAt);
+    }
+  }
+
+  /// 새 만다라트를 시작합니다
+  Future<void> startNewMandalart() async {
+    final prefs = await SharedPreferences.getInstance();
+
+    // 현재 상태 초기화
+    state = MandalartStateModel.initial();
+    _currentMandalartId = null;
+    _currentMandalartCreatedAt = null;
+
+    // 저장소 초기화
+    await prefs.remove(_keyCurrentMandalartId);
+    await prefs.remove(_keyCurrentMandalartCreatedAt);
+    await _persist();
   }
 }
 

@@ -9,7 +9,7 @@ class GridCellWidget extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     Color bg;
-    Color fg = CupertinoColors.label;
+    Color fg;
     double fontSize;
     switch (cell.type) {
       case 'goal':
@@ -30,12 +30,15 @@ class GridCellWidget extends StatelessWidget {
       case 'action':
         bg = cell.isCompleted
             ? CupertinoColors.systemPurple.withOpacity(0.6)
-            : CupertinoColors.tertiarySystemFill;
-        fg = cell.isCompleted ? CupertinoColors.white : CupertinoColors.label;
+            : CupertinoColors.tertiarySystemFill.resolveFrom(context);
+        fg = cell.isCompleted
+            ? CupertinoColors.white
+            : CupertinoColors.label.resolveFrom(context);
         fontSize = 13;
         break;
       default:
-        bg = CupertinoColors.systemBackground;
+        bg = CupertinoColors.systemBackground.resolveFrom(context);
+        fg = CupertinoColors.label.resolveFrom(context);
         fontSize = 13;
     }
 
@@ -47,7 +50,7 @@ class GridCellWidget extends StatelessWidget {
         decoration: BoxDecoration(
           color: bg,
           border: Border.all(
-            color: CupertinoColors.separator.withOpacity(0.3),
+            color: CupertinoColors.separator.resolveFrom(context).withOpacity(0.3),
           ),
         ),
         child: LayoutBuilder(

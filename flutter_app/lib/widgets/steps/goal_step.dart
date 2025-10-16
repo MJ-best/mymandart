@@ -2,6 +2,7 @@ import 'dart:math';
 
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/services.dart';
+import 'package:go_router/go_router.dart';
 import 'package:mandarart_journey/data/keywords.dart';
 
 class GoalStep extends StatefulWidget {
@@ -166,6 +167,44 @@ class _GoalStepState extends State<GoalStep> {
               ),
             );
           }).toList(),
+        ),
+        const SizedBox(height: 32),
+        // 이전의 만다라트 보기 버튼
+        GestureDetector(
+          onTap: () {
+            HapticFeedback.lightImpact();
+            context.push('/saved-mandalarts');
+          },
+          child: Container(
+            padding: const EdgeInsets.all(16),
+            decoration: BoxDecoration(
+              color: CupertinoColors.systemGrey6,
+              borderRadius: BorderRadius.circular(12),
+              border: Border.all(
+                color: CupertinoColors.systemGrey3,
+                width: 1,
+              ),
+            ),
+            child: const Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Icon(
+                  CupertinoIcons.folder,
+                  color: CupertinoColors.systemGrey,
+                  size: 20,
+                ),
+                SizedBox(width: 8),
+                Text(
+                  '이전의 만다라트 보기',
+                  style: TextStyle(
+                    fontSize: 16,
+                    fontWeight: FontWeight.w600,
+                    color: CupertinoColors.label,
+                  ),
+                ),
+              ],
+            ),
+          ),
         ),
       ],
     );

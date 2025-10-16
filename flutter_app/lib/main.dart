@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:mandarart_journey/screens/mandalart_app.dart';
 import 'package:mandarart_journey/screens/landing_screen.dart';
+import 'package:mandarart_journey/screens/saved_mandalarts_screen.dart';
 import 'package:mandarart_journey/providers/theme_provider.dart';
 
 void main() {
@@ -19,6 +20,10 @@ final _router = GoRouter(
     GoRoute(
       path: '/create',
       builder: (context, state) => const MandalartAppScreen(),
+    ),
+    GoRoute(
+      path: '/saved-mandalarts',
+      builder: (context, state) => const SavedMandalartsScreen(),
     ),
   ],
 );

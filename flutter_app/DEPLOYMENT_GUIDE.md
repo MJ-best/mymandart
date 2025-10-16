@@ -36,7 +36,7 @@ flutter build apk --release
 
 # AAB 빌드 (Google Play 업로드용)
 flutter build appbundle --release
-```
+```cl
 
 ## 2. 커스텀 아이콘 설정
 

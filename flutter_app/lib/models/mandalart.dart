@@ -63,6 +63,30 @@ class ActionItemModel {
       updatedAt: DateTime.now(),
     );
   }
+
+  Map<String, dynamic> toJson() {
+    return {
+      'id': id,
+      'themeId': themeId,
+      'actionText': actionText,
+      'isCompleted': isCompleted,
+      'order': order,
+      'createdAt': createdAt.toIso8601String(),
+      'updatedAt': updatedAt.toIso8601String(),
+    };
+  }
+
+  factory ActionItemModel.fromJson(Map<String, dynamic> json) {
+    return ActionItemModel(
+      id: json['id'] as String,
+      themeId: json['themeId'] as String,
+      actionText: json['actionText'] as String,
+      isCompleted: json['isCompleted'] as bool,
+      order: json['order'] as int,
+      createdAt: DateTime.parse(json['createdAt'] as String),
+      updatedAt: DateTime.parse(json['updatedAt'] as String),
+    );
+  }
 }
 
 class MandalartStateModel {
@@ -106,6 +130,89 @@ class MandalartStateModel {
       actionItems: actionItems ?? this.actionItems,
       currentStep: currentStep ?? this.currentStep,
       showViewer: showViewer ?? this.showViewer,
+    );
+  }
+
+  Map<String, dynamic> toJson() {
+    return {
+      'displayName': displayName,
+      'goalText': goalText,
+      'themes': themes,
+      'actionItems': actionItems.map((a) => a.toJson()).toList(),
+      'currentStep': currentStep,
+    };
+  }
+
+  factory MandalartStateModel.fromJson(Map<String, dynamic> json) {
+    return MandalartStateModel(
+      displayName: json['displayName'] as String? ?? '',
+      goalText: json['goalText'] as String? ?? '',
+      themes: (json['themes'] as List<dynamic>?)?.cast<String>() ?? List.filled(8, ''),
+      actionItems: (json['actionItems'] as List<dynamic>?)
+              ?.map((item) => ActionItemModel.fromJson(item as Map<String, dynamic>))
+              .toList() ??
+          [],
+      currentStep: json['currentStep'] as int? ?? 0,
+      showViewer: false,
+    );
+  }
+}
+
+/// 저장된 만다라트의 메타데이터
+class SavedMandalartMeta {
+  final String id;
+  final String displayName;
+  final String goalText;
+  final int completedCount;
+  final int totalCount;
+  final DateTime createdAt;
+  final DateTime updatedAt;
+
+  const SavedMandalartMeta({
+    required this.id,
+    required this.displayName,
+    required this.goalText,
+    required this.completedCount,
+    required this.totalCount,
+    required this.createdAt,
+    required this.updatedAt,
+  });
+
+  Map<String, dynamic> toJson() {
+    return {
+      'id': id,
+      'displayName': displayName,
+      'goalText': goalText,
+      'completedCount': completedCount,
+      'totalCount': totalCount,
+      'createdAt': createdAt.toIso8601String(),
+      'updatedAt': updatedAt.toIso8601String(),
+    };
+  }
+
+  factory SavedMandalartMeta.fromJson(Map<String, dynamic> json) {
+    return SavedMandalartMeta(
+      id: json['id'] as String,
+      displayName: json['displayName'] as String? ?? '',
+      goalText: json['goalText'] as String? ?? '',
+      completedCount: json['completedCount'] as int? ?? 0,
+      totalCount: json['totalCount'] as int? ?? 0,
+      createdAt: DateTime.parse(json['createdAt'] as String),
+      updatedAt: DateTime.parse(json['updatedAt'] as String),
+    );
+  }
+
+  factory SavedMandalartMeta.fromState(String id, MandalartStateModel state, DateTime createdAt) {
+    final completed = state.actionItems.where((a) => a.isCompleted).length;
+    final total = state.actionItems.where((a) => a.actionText.trim().isNotEmpty).length;
+    return SavedMandalartMeta(
+      id: id,
+      displayName: state.displayName,
+      goalText: state.goalText,
+      completedCount: completed,
+      totalCount: total,
+      createdAt: createdAt,
+      updatedAt: DateTime.now(),
     );
   }
 }

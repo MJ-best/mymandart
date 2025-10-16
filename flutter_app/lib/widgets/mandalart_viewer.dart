@@ -11,6 +11,7 @@ import 'package:mandarart_journey/data/keywords.dart';
 import 'package:mandarart_journey/services/export_service.dart';
 import 'package:mandarart_journey/services/image_service.dart';
 import 'package:mandarart_journey/providers/theme_provider.dart';
+import 'package:mandarart_journey/providers/mandalart_provider.dart';
 import 'package:mandarart_journey/widgets/viewer/a4_mandalart_layout.dart';
 
 class MandalartViewer extends ConsumerStatefulWidget {
@@ -60,17 +61,30 @@ class _MandalartViewerState extends ConsumerState<MandalartViewer> {
         switchOutCurve: Curves.easeIn,
         child: CupertinoPageScaffold(
           key: ValueKey(currentView),
-          backgroundColor: CupertinoColors.systemGroupedBackground,
+          backgroundColor: CupertinoColors.systemGroupedBackground.resolveFrom(context),
           navigationBar: CupertinoNavigationBar(
             middle: Text(
               widget.state.displayName.trim().isNotEmpty
                   ? widget.state.displayName.trim()
                   : '만다라트 차트',
             ),
-            backgroundColor: CupertinoColors.systemBackground,
+            backgroundColor: CupertinoColors.systemBackground.resolveFrom(context),
             trailing: Row(
               mainAxisSize: MainAxisSize.min,
               children: [
+                // 저장 버튼
+                Semantics(
+                  label: 'Save mandalart',
+                  button: true,
+                  child: CupertinoButton(
+                    padding: EdgeInsets.zero,
+                    onPressed: () {
+                      HapticFeedback.lightImpact();
+                      _saveMandalart();
+                    },
+                    child: const Icon(CupertinoIcons.floppy_disk),
+                  ),
+                ),
                 _buildThemeToggleButton(),
                 if (!kIsWeb)
                   Semantics(
@@ -244,7 +258,7 @@ class _MandalartViewerState extends ConsumerState<MandalartViewer> {
   /// A4 크기 레이아웃을 화면에 맞게 축소하여 표시
   Widget _buildA4ViewerWithZoom() {
     return Container(
-      color: CupertinoColors.systemGrey6,
+      color: CupertinoColors.systemGrey6.resolveFrom(context),
       child: Stack(
         children: [
           // 화면에 표시되는 위젯 (다크모드 적용)
@@ -806,5 +820,19 @@ class _MandalartViewerState extends ConsumerState<MandalartViewer> {
         ),
       ),
     );
+  }
+
+  Future<void> _saveMandalart() async {
+    try {
+      await ref.read(mandalartProvider.notifier).saveCurrentMandalart();
+      if (mounted) {
+        HapticFeedback.mediumImpact();
+        _showCupertinoAlert('만다라트가 저장되었습니다.');
+      }
+    } catch (error) {
+      if (mounted) {
+        _showCupertinoAlert('저장 중 오류가 발생했습니다. 다시 시도해주세요.');
+      }
+    }
   }
 }
