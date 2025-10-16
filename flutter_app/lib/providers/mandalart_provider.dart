@@ -170,13 +170,13 @@ class MandalartNotifier extends StateNotifier<MandalartStateModel> {
 
   // === 저장된 만다라트 관리 메서드 ===
 
-  /// 현재 만다라트를 저장합니다
+  /// 현재 만다라트를 새로운 항목으로 저장합니다
   Future<String> saveCurrentMandalart() async {
     final prefs = await SharedPreferences.getInstance();
 
-    // ID가 없으면 새로 생성, 있으면 기존 ID 사용
-    final id = _currentMandalartId ?? const Uuid().v4();
-    final createdAt = _currentMandalartCreatedAt ?? DateTime.now();
+    // 항상 새로운 ID 생성 (여러 개 저장을 위해)
+    final id = const Uuid().v4();
+    final createdAt = DateTime.now();
 
     // 만다라트 데이터 저장
     final mandalartJson = jsonEncode(state.toJson());
@@ -188,10 +188,8 @@ class MandalartNotifier extends StateNotifier<MandalartStateModel> {
 
     // 저장된 만다라트 ID 목록 업데이트
     final savedIds = prefs.getStringList(_keySavedMandalartIds) ?? [];
-    if (!savedIds.contains(id)) {
-      savedIds.add(id);
-      await prefs.setStringList(_keySavedMandalartIds, savedIds);
-    }
+    savedIds.add(id);
+    await prefs.setStringList(_keySavedMandalartIds, savedIds);
 
     // 현재 만다라트 ID 및 생성일 저장
     _currentMandalartId = id;

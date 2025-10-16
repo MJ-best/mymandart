@@ -5,6 +5,7 @@ import 'package:go_router/go_router.dart';
 
 import 'package:mandarart_journey/models/mandalart.dart';
 import 'package:mandarart_journey/providers/mandalart_provider.dart';
+import 'package:mandarart_journey/screens/landing_screen.dart';
 
 class SavedMandalartsScreen extends ConsumerStatefulWidget {
   const SavedMandalartsScreen({super.key});
@@ -39,13 +40,13 @@ class _SavedMandalartsScreenState extends ConsumerState<SavedMandalartsScreen> {
       navigationBar: CupertinoNavigationBar(
         middle: const Text('저장된 만다라트'),
         backgroundColor: CupertinoColors.systemBackground.resolveFrom(context),
-        trailing: CupertinoButton(
+        leading: CupertinoButton(
           padding: EdgeInsets.zero,
           onPressed: () {
             HapticFeedback.lightImpact();
             context.pop();
           },
-          child: const Icon(CupertinoIcons.xmark),
+          child: const Icon(CupertinoIcons.chevron_left),
         ),
       ),
       child: SafeArea(
@@ -98,6 +99,73 @@ class _SavedMandalartsScreenState extends ConsumerState<SavedMandalartsScreen> {
     return CustomScrollView(
       slivers: [
         const SliverPadding(padding: EdgeInsets.only(top: 16)),
+        // 새 만다라트 시작 버튼
+        SliverToBoxAdapter(
+          child: Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+            child: GestureDetector(
+              onTap: () {
+                HapticFeedback.lightImpact();
+                showCupertinoModalPopup(
+                  context: context,
+                  builder: (dialogContext) => LandingScreen(
+                    isModal: true,
+                    onComplete: () async {
+                      await ref.read(mandalartProvider.notifier).startNewMandalart();
+                      if (mounted && context.mounted) {
+                        context.pop(); // 저장된 만다라트 화면 닫기
+                      }
+                    },
+                  ),
+                );
+              },
+              child: Container(
+                padding: const EdgeInsets.all(16),
+                decoration: BoxDecoration(
+                  gradient: LinearGradient(
+                    colors: [
+                      CupertinoColors.systemPurple.withOpacity(0.15),
+                      CupertinoColors.systemIndigo.withOpacity(0.1),
+                    ],
+                    begin: Alignment.topLeft,
+                    end: Alignment.bottomRight,
+                  ),
+                  borderRadius: BorderRadius.circular(12),
+                  border: Border.all(
+                    color: CupertinoColors.systemPurple.withOpacity(0.3),
+                    width: 2,
+                  ),
+                ),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Container(
+                      padding: const EdgeInsets.all(8),
+                      decoration: const BoxDecoration(
+                        color: CupertinoColors.systemPurple,
+                        shape: BoxShape.circle,
+                      ),
+                      child: const Icon(
+                        CupertinoIcons.add,
+                        color: CupertinoColors.white,
+                        size: 20,
+                      ),
+                    ),
+                    const SizedBox(width: 12),
+                    const Text(
+                      '새 만다라트 시작',
+                      style: TextStyle(
+                        fontSize: 18,
+                        fontWeight: FontWeight.w600,
+                        color: CupertinoColors.systemPurple,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+          ),
+        ),
         SliverList(
           delegate: SliverChildBuilderDelegate(
             (context, index) {
@@ -165,10 +233,19 @@ class _SavedMandalartsScreenState extends ConsumerState<SavedMandalartsScreen> {
                     HapticFeedback.mediumImpact();
                     _showDeleteDialog(meta);
                   },
-                  child: Icon(
-                    CupertinoIcons.trash,
-                    size: 20,
-                    color: CupertinoColors.destructiveRed.resolveFrom(context),
+                  child: Container(
+                    width: 20,
+                    height: 20,
+                    decoration: const BoxDecoration(
+                      shape: BoxShape.circle,
+                      color: CupertinoColors.destructiveRed,
+                    ),
+                    alignment: Alignment.center,
+                    child: const Icon(
+                      CupertinoIcons.xmark,
+                      size: 12,
+                      color: CupertinoColors.white,
+                    ),
                   ),
                 ),
               ],
@@ -212,10 +289,10 @@ class _SavedMandalartsScreenState extends ConsumerState<SavedMandalartsScreen> {
                 const SizedBox(width: 12),
                 Text(
                   '$progressPercent%',
-                  style: const TextStyle(
+                  style: TextStyle(
                     fontSize: 14,
                     fontWeight: FontWeight.w600,
-                    color: CupertinoColors.systemPurple,
+                    color: CupertinoColors.systemPurple.resolveFrom(context),
                   ),
                 ),
               ],
@@ -275,7 +352,7 @@ class _SavedMandalartsScreenState extends ConsumerState<SavedMandalartsScreen> {
 
     if (mounted) {
       context.pop(); // 로딩 다이얼로그 닫기
-      context.go('/create'); // 만다라트 작성 화면으로 이동
+      context.pop(); // 저장된 만다라트 화면 닫기 (이전 화면으로 돌아감)
     }
   }
 

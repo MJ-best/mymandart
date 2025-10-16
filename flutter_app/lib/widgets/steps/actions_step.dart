@@ -17,7 +17,6 @@ class _ActionsStepState extends State<ActionsStep> {
   final Map<String, TextEditingController> _controllers = {};
   final Map<String, FocusNode> _focusNodes = {};
   int? _expandedThemeIndex;
-  String? _focusedKey;
 
   @override
   void initState() {
@@ -64,11 +63,6 @@ class _ActionsStepState extends State<ActionsStep> {
           );
         });
         final focusNode = FocusNode();
-        focusNode.addListener(() {
-          if (focusNode.hasFocus) {
-            setState(() => _focusedKey = key);
-          }
-        });
         _controllers[key] = controller;
         _focusNodes[key] = focusNode;
       }
@@ -438,49 +432,32 @@ class _ActionsStepState extends State<ActionsStep> {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      const Text(
-                        '추천 액션',
-                        style: TextStyle(
-                          fontSize: 15,
-                          fontWeight: FontWeight.w600,
-                          color: CupertinoColors.secondaryLabel,
-                        ),
+                      Row(
+                        children: [
+                          Icon(
+                            CupertinoIcons.lightbulb,
+                            size: 16,
+                            color: CupertinoColors.secondaryLabel.resolveFrom(context),
+                          ),
+                          const SizedBox(width: 8),
+                          Text(
+                            '액션 아이디어',
+                            style: TextStyle(
+                              fontSize: 15,
+                              fontWeight: FontWeight.w600,
+                              color: CupertinoColors.secondaryLabel.resolveFrom(context),
+                            ),
+                          ),
+                        ],
                       ),
                       const SizedBox(height: 8),
-                      Wrap(
-                        spacing: 8,
-                        runSpacing: 8,
-                        children: themeKeywords.map((keyword) {
-                          final themeKeyPrefix = 'theme-$actualThemeIndex';
-                          return CupertinoButton(
-                            padding: const EdgeInsets.symmetric(
-                                horizontal: 16, vertical: 12),
-                            color: CupertinoColors.systemGrey5.resolveFrom(context),
-                            minimumSize: const Size(44, 44),
-                            onPressed: () {
-                              HapticFeedback.selectionClick();
-                              final targetKey = _focusedKey != null &&
-                                      _focusedKey!.startsWith(themeKeyPrefix)
-                                  ? _focusedKey
-                                  : '${themeKeyPrefix}_0';
-                              final controller = _controllers[targetKey];
-                              if (controller != null) {
-                                controller.text = keyword;
-                                controller.selection =
-                                    TextSelection.fromPosition(
-                                  TextPosition(offset: controller.text.length),
-                                );
-                              }
-                            },
-                            child: Text(
-                              keyword,
-                              style: TextStyle(
-                                fontSize: 13,
-                                color: CupertinoColors.label.resolveFrom(context),
-                              ),
-                            ),
-                          );
-                        }).toList(),
+                      Text(
+                        themeKeywords.join(' · '),
+                        style: TextStyle(
+                          fontSize: 14,
+                          color: CupertinoColors.tertiaryLabel.resolveFrom(context),
+                          height: 1.5,
+                        ),
                       ),
                       const SizedBox(height: 12),
                     ],

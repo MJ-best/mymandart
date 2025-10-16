@@ -8,7 +8,11 @@ import 'package:mandarart_journey/data/keywords.dart';
 class GoalStep extends StatefulWidget {
   final String value;
   final void Function(String) onChange;
-  const GoalStep({super.key, required this.value, required this.onChange});
+  const GoalStep({
+    super.key,
+    required this.value,
+    required this.onChange,
+  });
 
   @override
   State<GoalStep> createState() => _GoalStepState();
@@ -146,27 +150,13 @@ class _GoalStepState extends State<GoalStep> {
           ],
         ),
         const SizedBox(height: 16),
-        Wrap(
-          spacing: 8,
-          runSpacing: 8,
-          children: _randomCommunityGoals.map((goal) {
-            return CupertinoButton(
-              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-              minimumSize: const Size(44, 44),
-              color: CupertinoColors.systemPurple.withOpacity(0.1),
-              onPressed: () {
-                HapticFeedback.selectionClick();
-                _controller.text = goal;
-              },
-              child: Text(
-                goal,
-                style: const TextStyle(
-                  fontSize: 14,
-                  color: CupertinoColors.systemPurple,
-                ),
-              ),
-            );
-          }).toList(),
+        Text(
+          _randomCommunityGoals.join(' · '),
+          style: TextStyle(
+            fontSize: 14,
+            color: CupertinoColors.tertiaryLabel.resolveFrom(context),
+            height: 1.5,
+          ),
         ),
         const SizedBox(height: 32),
         // 이전의 만다라트 보기 버튼

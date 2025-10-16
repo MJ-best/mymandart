@@ -238,7 +238,10 @@ class _MandalartAppScreenState extends ConsumerState<MandalartAppScreen> {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               if (index == 0)
-                GoalStep(value: state.goalText, onChange: notifier.updateGoal)
+                GoalStep(
+                  value: state.goalText,
+                  onChange: notifier.updateGoal,
+                )
               else if (index == 1)
                 ThemesStep(
                   goalText: state.goalText,

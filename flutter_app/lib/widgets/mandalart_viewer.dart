@@ -4,6 +4,7 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
 import 'package:screenshot/screenshot.dart';
 
 import 'package:mandarart_journey/models/mandalart.dart';
@@ -827,7 +828,9 @@ class _MandalartViewerState extends ConsumerState<MandalartViewer> {
       await ref.read(mandalartProvider.notifier).saveCurrentMandalart();
       if (mounted) {
         HapticFeedback.mediumImpact();
-        _showCupertinoAlert('만다라트가 저장되었습니다.');
+        // 저장 후 저장된 만다라트 페이지로 이동
+        widget.onClose(); // 먼저 뷰어 닫기
+        context.push('/saved-mandalarts');
       }
     } catch (error) {
       if (mounted) {

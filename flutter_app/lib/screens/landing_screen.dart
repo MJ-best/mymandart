@@ -8,7 +8,8 @@ import 'package:mandarart_journey/providers/theme_provider.dart';
 
 class LandingScreen extends ConsumerStatefulWidget {
   final bool isModal;
-  const LandingScreen({super.key, this.isModal = false});
+  final VoidCallback? onComplete;
+  const LandingScreen({super.key, this.isModal = false, this.onComplete});
 
   @override
   ConsumerState<LandingScreen> createState() => _LandingScreenState();
@@ -49,16 +50,7 @@ class _LandingScreenState extends ConsumerState<LandingScreen> {
         middle: Text(title),
         backgroundColor: CupertinoColors.systemBackground,
         border: null,
-        leading: widget.isModal
-            ? CupertinoButton(
-                padding: EdgeInsets.zero,
-                onPressed: () {
-                  HapticFeedback.lightImpact();
-                  Navigator.of(context).pop();
-                },
-                child: const Icon(CupertinoIcons.xmark_circle),
-              )
-            : null,
+        leading: widget.isModal ? const SizedBox.shrink() : null,
         trailing: _buildThemeToggleButton(),
       ),
       child: SafeArea(
@@ -201,6 +193,9 @@ class _LandingScreenState extends ConsumerState<LandingScreen> {
                     FocusScope.of(context).unfocus();
                     if (widget.isModal) {
                       Navigator.of(context).pop();
+                      if (widget.onComplete != null) {
+                        widget.onComplete!();
+                      }
                     } else {
                       GoRouter.of(context).go('/create');
                     }
