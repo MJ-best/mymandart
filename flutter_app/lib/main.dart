@@ -10,7 +10,7 @@ void main() {
 }
 
 final _router = GoRouter(
-  initialLocation: '/create',
+  initialLocation: '/',
   routes: [
     GoRoute(
       path: '/',
