@@ -645,10 +645,10 @@ class _MandalartViewerState extends ConsumerState<MandalartViewer> {
           Text(
             _randomQuote['quote']!,
             textAlign: TextAlign.center,
-            style: const TextStyle(
+            style: TextStyle(
               fontSize: 15,
               fontWeight: FontWeight.w500,
-              color: CupertinoColors.label,
+              color: CupertinoColors.label.resolveFrom(context),
               height: 1.5,
             ),
           ),

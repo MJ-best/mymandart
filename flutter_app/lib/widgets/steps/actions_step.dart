@@ -165,10 +165,10 @@ class _ActionsStepState extends State<ActionsStep> {
                 Text(
                   widget.state.goalText.trim(),
                   textAlign: TextAlign.center,
-                  style: const TextStyle(
+                  style: TextStyle(
                     fontSize: 16,
                     fontWeight: FontWeight.w600,
-                    color: CupertinoColors.label,
+                    color: CupertinoColors.label.resolveFrom(context),
                   ),
                 ),
                 const SizedBox(height: 10),
@@ -196,12 +196,12 @@ class _ActionsStepState extends State<ActionsStep> {
             decoration: BoxDecoration(
               color: isExpanded
                   ? CupertinoColors.systemPurple.withOpacity(0.05)
-                  : CupertinoColors.secondarySystemGroupedBackground,
+                  : CupertinoColors.secondarySystemGroupedBackground.resolveFrom(context),
               borderRadius: BorderRadius.circular(12),
               border: Border.all(
                 color: isExpanded
                     ? CupertinoColors.systemPurple.withOpacity(0.3)
-                    : CupertinoColors.separator.withOpacity(0.3),
+                    : CupertinoColors.separator.resolveFrom(context).withOpacity(0.3),
                 width: isExpanded ? 2 : 1,
               ),
             ),
@@ -221,10 +221,10 @@ class _ActionsStepState extends State<ActionsStep> {
                     Expanded(
                       child: Text(
                         themeTitle,
-                        style: const TextStyle(
+                        style: TextStyle(
                           fontSize: 22,
                           fontWeight: FontWeight.w600,
-                          color: CupertinoColors.label,
+                          color: CupertinoColors.label.resolveFrom(context),
                         ),
                       ),
                     ),
@@ -288,7 +288,7 @@ class _ActionsStepState extends State<ActionsStep> {
                   padding: const EdgeInsets.symmetric(horizontal: 16),
                   child: Container(
                     height: 1,
-                    color: CupertinoColors.separator.withOpacity(0.3),
+                    color: CupertinoColors.separator.resolveFrom(context).withOpacity(0.3),
                   ),
                 ),
                 // 확장 메시지 추가
@@ -404,16 +404,16 @@ class _ActionsStepState extends State<ActionsStep> {
                                         : null,
                                     padding: const EdgeInsets.all(16),
                                     decoration: BoxDecoration(
-                                      color: CupertinoColors.tertiarySystemFill,
+                                      color: CupertinoColors.tertiarySystemFill.resolveFrom(context),
                                       borderRadius: BorderRadius.circular(8),
                                     ),
-                                    style: const TextStyle(
+                                    style: TextStyle(
                                       fontSize: 17,
-                                      color: CupertinoColors.label,
+                                      color: CupertinoColors.label.resolveFrom(context),
                                     ),
-                                    placeholderStyle: const TextStyle(
+                                    placeholderStyle: TextStyle(
                                       fontSize: 17,
-                                      color: CupertinoColors.secondaryLabel,
+                                      color: CupertinoColors.secondaryLabel.resolveFrom(context),
                                     ),
                                     onChanged: (v) =>
                                         widget.notifier.updateActionItem(
@@ -455,7 +455,7 @@ class _ActionsStepState extends State<ActionsStep> {
                           return CupertinoButton(
                             padding: const EdgeInsets.symmetric(
                                 horizontal: 16, vertical: 12),
-                            color: CupertinoColors.systemGrey5,
+                            color: CupertinoColors.systemGrey5.resolveFrom(context),
                             minimumSize: const Size(44, 44),
                             onPressed: () {
                               HapticFeedback.selectionClick();
@@ -474,9 +474,9 @@ class _ActionsStepState extends State<ActionsStep> {
                             },
                             child: Text(
                               keyword,
-                              style: const TextStyle(
+                              style: TextStyle(
                                 fontSize: 13,
-                                color: CupertinoColors.label,
+                                color: CupertinoColors.label.resolveFrom(context),
                               ),
                             ),
                           );
