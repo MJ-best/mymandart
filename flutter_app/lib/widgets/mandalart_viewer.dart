@@ -604,10 +604,11 @@ class _MandalartViewerState extends ConsumerState<MandalartViewer> {
 
   /// 액션 아이템의 테마 인덱스 가져오기
   int _getThemeIndexForAction(ActionItemModel action) {
-    // themeId를 기반으로 테마 인덱스 찾기
-    for (int i = 0; i < widget.state.actionItems.length; i++) {
-      if (widget.state.actionItems[i].id == action.id) {
-        return i ~/ 8; // 각 테마당 8개의 액션 아이템
+    final parts = action.themeId.split('-');
+    if (parts.length >= 2) {
+      final parsed = int.tryParse(parts.last);
+      if (parsed != null) {
+        return parsed;
       }
     }
     return 0;
@@ -615,16 +616,7 @@ class _MandalartViewerState extends ConsumerState<MandalartViewer> {
 
   /// 테마 내에서 액션 아이템의 인덱스 가져오기
   int _getActionIndexForTheme(ActionItemModel action, int themeIndex) {
-    final themeActions = widget.state.actionItems
-        .where((a) => a.themeId == action.themeId)
-        .toList();
-
-    for (int i = 0; i < themeActions.length; i++) {
-      if (themeActions[i].id == action.id) {
-        return i;
-      }
-    }
-    return 0;
+    return action.order.clamp(0, 7);
   }
 
   /// 동기부여 명언 위젯
