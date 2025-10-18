@@ -47,10 +47,10 @@ class _LandingScreenState extends ConsumerState<LandingScreen> {
 
     return CupertinoPageScaffold(
       navigationBar: CupertinoNavigationBar(
+        leading: widget.isModal ? const SizedBox.shrink() : null,
         middle: Text(title),
         backgroundColor: CupertinoColors.systemBackground,
         border: null,
-        leading: widget.isModal ? const SizedBox.shrink() : null,
         trailing: _buildThemeToggleButton(),
       ),
       child: SafeArea(
@@ -66,15 +66,7 @@ class _LandingScreenState extends ConsumerState<LandingScreen> {
                   width: 120,
                   height: 120,
                   decoration: BoxDecoration(
-                    shape: BoxShape.circle,
-                    gradient: const LinearGradient(
-                      colors: <Color>[
-                        CupertinoColors.systemPurple,
-                        CupertinoColors.systemIndigo,
-                      ],
-                      begin: Alignment.topLeft,
-                      end: Alignment.bottomRight,
-                    ),
+                    borderRadius: BorderRadius.circular(26),
                     boxShadow: [
                       BoxShadow(
                         color: iconShadow,
@@ -83,10 +75,14 @@ class _LandingScreenState extends ConsumerState<LandingScreen> {
                       ),
                     ],
                   ),
-                  child: const Icon(
-                    CupertinoIcons.square_grid_2x2_fill,
-                    color: CupertinoColors.white,
-                    size: 56,
+                  child: ClipRRect(
+                    borderRadius: BorderRadius.circular(26),
+                    child: Image.asset(
+                      'assets/icon/app_icon.png',
+                      width: 120,
+                      height: 120,
+                      fit: BoxFit.cover,
+                    ),
                   ),
                 ),
               ),

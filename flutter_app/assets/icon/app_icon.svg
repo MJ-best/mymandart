@@ -1,0 +1,29 @@
+<svg width="1024" height="1024" viewBox="0 0 1024 1024" xmlns="http://www.w3.org/2000/svg">
+  <!-- Background -->
+  <rect width="1024" height="1024" rx="180" fill="#8B5CF6"/>
+
+  <!-- 3x3 Grid representing Mandalart structure -->
+  <g transform="translate(256, 256)">
+    <!-- Outer grid lines -->
+    <line x1="0" y1="170.67" x2="512" y2="170.67" stroke="white" stroke-width="4" opacity="0.6"/>
+    <line x1="0" y1="341.33" x2="512" y2="341.33" stroke="white" stroke-width="4" opacity="0.6"/>
+    <line x1="170.67" y1="0" x2="170.67" y2="512" stroke="white" stroke-width="4" opacity="0.6"/>
+    <line x1="341.33" y1="0" x2="341.33" y2="512" stroke="white" stroke-width="4" opacity="0.6"/>
+
+    <!-- Center square highlight -->
+    <rect x="170.67" y="170.67" width="170.66" height="170.66" fill="white" opacity="0.2"/>
+
+    <!-- Center circle -->
+    <circle cx="256" cy="256" r="60" fill="white"/>
+
+    <!-- Small dots in each outer cell -->
+    <circle cx="85" cy="85" r="12" fill="white" opacity="0.8"/>
+    <circle cx="256" cy="85" r="12" fill="white" opacity="0.8"/>
+    <circle cx="427" cy="85" r="12" fill="white" opacity="0.8"/>
+    <circle cx="85" cy="256" r="12" fill="white" opacity="0.8"/>
+    <circle cx="427" cy="256" r="12" fill="white" opacity="0.8"/>
+    <circle cx="85" cy="427" r="12" fill="white" opacity="0.8"/>
+    <circle cx="256" cy="427" r="12" fill="white" opacity="0.8"/>
+    <circle cx="427" cy="427" r="12" fill="white" opacity="0.8"/>
+  </g>
+</svg>

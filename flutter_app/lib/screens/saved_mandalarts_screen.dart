@@ -38,7 +38,24 @@ class _SavedMandalartsScreenState extends ConsumerState<SavedMandalartsScreen> {
     return CupertinoPageScaffold(
       backgroundColor: CupertinoColors.systemGroupedBackground.resolveFrom(context),
       navigationBar: CupertinoNavigationBar(
-        middle: const Text('저장된 만다라트'),
+        middle: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Padding(
+              padding: const EdgeInsets.only(right: 8.0),
+              child: ClipRRect(
+                borderRadius: BorderRadius.circular(5),
+                child: Image.asset(
+                  'assets/icon/app_icon.png',
+                  width: 24,
+                  height: 24,
+                  fit: BoxFit.cover,
+                ),
+              ),
+            ),
+            const Text('저장된 만다라트'),
+          ],
+        ),
         backgroundColor: CupertinoColors.systemBackground.resolveFrom(context),
         leading: CupertinoButton(
           padding: EdgeInsets.zero,
