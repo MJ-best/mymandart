@@ -2,20 +2,19 @@
 from PIL import Image, ImageDraw
 
 def create_mandarat_icon(size=1024):
-    """Create Mandarat icon: purple rounded square with white inner square"""
-    # Create image with transparent background
-    img = Image.new('RGBA', (size, size), color=(0, 0, 0, 0))
+    """Create Mandarat icon: white background with centered purple rounded square"""
+    # Create image with white background
+    img = Image.new('RGB', (size, size), color=(255, 255, 255))
     draw = ImageDraw.Draw(img)
     
     # Purple color (from design)
-    purple = (139, 92, 246, 255)  # #8B5CF6
-    white = (255, 255, 255, 255)
+    purple = (139, 92, 246)  # #8B5CF6
     
-    # Rounded rectangle parameters
-    margin = size // 12  # outer margin
-    radius = size // 8   # corner radius
+    # Centered purple rounded rectangle with larger margin
+    margin = size // 4.5  # larger margin to make purple square smaller
+    radius = size // 12   # corner radius
     
-    # Draw rounded rectangle (outer)
+    # Draw centered purple rounded rectangle
     x0, y0 = margin, margin
     x1, y1 = size - margin, size - margin
     
@@ -23,20 +22,6 @@ def create_mandarat_icon(size=1024):
         [(x0, y0), (x1, y1)],
         radius=radius,
         fill=purple
-    )
-    
-    # Draw inner white square
-    inner_margin = size // 3.5
-    inner_x0 = inner_margin
-    inner_y0 = inner_margin
-    inner_x1 = size - inner_margin
-    inner_y1 = size - inner_margin
-    
-    inner_radius = size // 20
-    draw.rounded_rectangle(
-        [(inner_x0, inner_y0), (inner_x1, inner_y1)],
-        radius=inner_radius,
-        fill=white
     )
     
     return img
