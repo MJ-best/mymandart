@@ -1,0 +1,311 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mandarat - 포스터</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            background: #f0f0f0;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen',
+                'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue', sans-serif;
+            padding: 20px;
+        }
+
+        /* 포스터 컨테이너 - 모바일 비율 (9:16) */
+        .poster {
+            width: 450px;
+            height: 800px;
+            background: linear-gradient(135deg, #8B5CF6 0%, #7C3AED 100%);
+            border-radius: 40px;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            align-items: center;
+            padding: 60px 30px;
+            color: white;
+            text-align: center;
+            position: relative;
+            overflow: hidden;
+            box-shadow: 0 30px 60px rgba(0, 0, 0, 0.3);
+        }
+
+        /* 배경 장식 */
+        .poster::before {
+            content: '';
+            position: absolute;
+            top: -200px;
+            right: -100px;
+            width: 400px;
+            height: 400px;
+            background: rgba(255, 255, 255, 0.15);
+            border-radius: 50%;
+        }
+
+        .poster::after {
+            content: '';
+            position: absolute;
+            bottom: -150px;
+            left: -100px;
+            width: 350px;
+            height: 350px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 50%;
+        }
+
+        .poster-content {
+            position: relative;
+            z-index: 1;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            height: 100%;
+            width: 100%;
+        }
+
+        /* 상단 - 아이콘 및 이름 */
+        .poster-header {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            margin-bottom: 30px;
+        }
+
+        .poster-icon {
+            width: 100px;
+            height: 100px;
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 28px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 20px;
+            box-shadow: 0 15px 40px rgba(0, 0, 0, 0.2);
+        }
+
+        .poster-icon-inner {
+            width: 80px;
+            height: 80px;
+            background: linear-gradient(135deg, #8B5CF6 0%, #7C3AED 100%);
+            border-radius: 20px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 40px;
+            font-weight: bold;
+            color: white;
+        }
+
+        .poster-name {
+            font-size: 42px;
+            font-weight: 800;
+            letter-spacing: 1px;
+        }
+
+        /* 중간 - 메인 메시지 */
+        .poster-main {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            margin: 30px 0;
+        }
+
+        .poster-tagline {
+            font-size: 14px;
+            font-weight: 500;
+            opacity: 0.9;
+            margin-bottom: 15px;
+            letter-spacing: 0.5px;
+        }
+
+        .poster-title {
+            font-size: 32px;
+            font-weight: 800;
+            line-height: 1.3;
+            margin-bottom: 25px;
+            word-break: keep-all;
+        }
+
+        .poster-subtitle {
+            font-size: 18px;
+            font-weight: 600;
+            opacity: 0.95;
+            line-height: 1.5;
+            margin-bottom: 30px;
+            word-break: keep-all;
+        }
+
+        /* 3가지 기능 */
+        .poster-features {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 12px;
+            width: 100%;
+            margin-bottom: 30px;
+        }
+
+        .feature-mini {
+            background: rgba(255, 255, 255, 0.15);
+            backdrop-filter: blur(10px);
+            padding: 12px 15px;
+            border-radius: 12px;
+            font-size: 13px;
+            font-weight: 600;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .feature-mini::before {
+            content: '✓ ';
+            margin-right: 5px;
+        }
+
+        /* 하단 - CTA */
+        .poster-footer {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+            width: 100%;
+            margin-top: auto;
+        }
+
+        .poster-cta {
+            background: white;
+            color: #8B5CF6;
+            padding: 14px 20px;
+            border-radius: 25px;
+            border: none;
+            font-size: 14px;
+            font-weight: 700;
+            cursor: pointer;
+            transition: transform 0.2s;
+        }
+
+        .poster-cta:hover {
+            transform: scale(1.02);
+        }
+
+        .poster-cta-secondary {
+            background: rgba(255, 255, 255, 0.2);
+            color: white;
+            border: 2px solid white;
+            padding: 12px 20px;
+            border-radius: 25px;
+            font-size: 13px;
+            font-weight: 600;
+            cursor: pointer;
+        }
+
+        /* 배리에이션들 */
+        .poster-variants {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 20px;
+            margin-top: 40px;
+            width: 100%;
+        }
+
+        .variant {
+            text-align: center;
+            font-size: 12px;
+            color: #666;
+        }
+
+        /* 데스크톱에서 포스터 미리보기 */
+        @media (max-width: 768px) {
+            .poster {
+                width: 100%;
+                height: auto;
+                aspect-ratio: 9 / 16;
+                max-height: 90vh;
+            }
+
+            .poster-title {
+                font-size: 24px;
+            }
+
+            .poster-subtitle {
+                font-size: 14px;
+            }
+        }
+
+        /* 다운로드 버튼 */
+        .download-section {
+            text-align: center;
+            margin-top: 30px;
+            color: #1a1a1a;
+        }
+
+        .download-btn {
+            background: #8B5CF6;
+            color: white;
+            padding: 12px 30px;
+            border-radius: 25px;
+            border: none;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .download-btn:hover {
+            background: #7C3AED;
+        }
+    </style>
+</head>
+<body>
+    <div>
+        <div class="poster">
+            <div class="poster-content">
+                <!-- 헤더 -->
+                <div class="poster-header">
+                    <div class="poster-icon">
+                        <div class="poster-icon-inner">M</div>
+                    </div>
+                    <div class="poster-name">Mandarat</div>
+                </div>
+
+                <!-- 메인 콘텐츠 -->
+                <div class="poster-main">
+                    <div class="poster-tagline">메이저리그 MVP의 전략</div>
+                    <div class="poster-title">꿈을 이루는<br/>유일한 방법</div>
+                    <div class="poster-subtitle">오타니처럼 꿈꾸고<br/>Mandarat으로 이루세요</div>
+
+                    <!-- 3가지 기능 -->
+                    <div class="poster-features">
+                        <div class="feature-mini">꿈을 설계하다</div>
+                        <div class="feature-mini">매일 실행하다</div>
+                        <div class="feature-mini">진행을 확인하다</div>
+                    </div>
+                </div>
+
+                <!-- 푸터 -->
+                <div class="poster-footer">
+                    <button class="poster-cta">지금 다운로드</button>
+                    <button class="poster-cta-secondary">자세히 보기</button>
+                </div>
+            </div>
+        </div>
+
+        <div class="download-section">
+            <p style="margin-bottom: 15px;">🎨 포스터 버전 (우클릭 > 이미지 저장)</p>
+            <button class="download-btn">PNG로 다운로드 (스크린샷)</button>
+        </div>
+    </div>
+</body>
+</html>

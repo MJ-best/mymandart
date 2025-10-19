@@ -1,0 +1,631 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mandarat - 다중 포스터</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            background: #f5f5f5;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen',
+                'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue', sans-serif;
+            padding: 20px;
+        }
+
+        .container {
+            position: relative;
+            width: 450px;
+            height: 800px;
+            perspective: 1000px;
+        }
+
+        .posters-wrapper {
+            position: relative;
+            width: 100%;
+            height: 100%;
+            overflow: hidden;
+            border-radius: 40px;
+        }
+
+        /* 포스터 스타일 */
+        .poster {
+            width: 100%;
+            height: 100%;
+            border-radius: 40px;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            align-items: center;
+            padding: 60px 30px;
+            color: white;
+            text-align: center;
+            position: absolute;
+            top: 0;
+            left: 0;
+            opacity: 0;
+            transform: translateX(100%);
+            transition: all 0.6s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+            box-shadow: 0 30px 60px rgba(0, 0, 0, 0.3);
+        }
+
+        .poster.active {
+            opacity: 1;
+            transform: translateX(0);
+            z-index: 10;
+        }
+
+        .poster.prev {
+            transform: translateX(-100%);
+        }
+
+        /* 공통 배경 */
+        .poster-bg-purple {
+            background: linear-gradient(135deg, #8B5CF6 0%, #7C3AED 100%);
+        }
+
+        .poster-bg-light {
+            background: linear-gradient(135deg, #f5f3ff 0%, #ffffff 100%);
+            color: #1a1a1a;
+        }
+
+        .poster-bg-feature {
+            background: linear-gradient(135deg, #8B5CF6 0%, #7C3AED 100%);
+        }
+
+        /* 배경 장식 */
+        .poster::before {
+            content: '';
+            position: absolute;
+            top: -200px;
+            right: -100px;
+            width: 400px;
+            height: 400px;
+            background: rgba(255, 255, 255, 0.15);
+            border-radius: 50%;
+            z-index: 0;
+        }
+
+        .poster::after {
+            content: '';
+            position: absolute;
+            bottom: -150px;
+            left: -100px;
+            width: 350px;
+            height: 350px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 50%;
+            z-index: 0;
+        }
+
+        .poster-bg-light::before {
+            background: rgba(139, 92, 246, 0.08);
+        }
+
+        .poster-bg-light::after {
+            background: rgba(139, 92, 246, 0.05);
+        }
+
+        .poster-content {
+            position: relative;
+            z-index: 1;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            height: 100%;
+            width: 100%;
+        }
+
+        /* 포스터 요소들 */
+        .poster-icon {
+            width: 100px;
+            height: 100px;
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 30px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 20px;
+            box-shadow: 0 15px 40px rgba(0, 0, 0, 0.2);
+        }
+
+        .poster-icon img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            border-radius: 30px;
+        }
+
+        /* 앱 아이콘 SVG 일관성 */
+        .app-icon-svg {
+            width: 100%;
+            height: 100%;
+        }
+
+        .poster-name {
+            font-size: 42px;
+            font-weight: 800;
+            letter-spacing: 1px;
+            margin-bottom: 10px;
+        }
+
+        .poster-tagline {
+            font-size: 12px;
+            font-weight: 500;
+            opacity: 0.85;
+            letter-spacing: 1px;
+            text-transform: uppercase;
+            margin-bottom: 30px;
+        }
+
+        .poster-title {
+            font-size: 32px;
+            font-weight: 800;
+            line-height: 1.3;
+            margin-bottom: 15px;
+            word-break: keep-all;
+        }
+
+        .poster-subtitle {
+            font-size: 16px;
+            font-weight: 500;
+            opacity: 0.95;
+            line-height: 1.5;
+            margin-bottom: 20px;
+            word-break: keep-all;
+        }
+
+        .poster-description {
+            font-size: 15px;
+            font-weight: 400;
+            opacity: 0.9;
+            line-height: 1.6;
+            margin-bottom: 20px;
+            word-break: keep-all;
+        }
+
+        .poster-number {
+            font-size: 60px;
+            font-weight: 800;
+            opacity: 0.2;
+            position: absolute;
+            top: 20px;
+            right: 20px;
+        }
+
+        /* 기능 카드 */
+        .feature-icon {
+            font-size: 50px;
+            margin-bottom: 20px;
+        }
+
+        /* CTA 버튼 */
+        .poster-buttons {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+            width: 100%;
+            margin-top: auto;
+        }
+
+        .poster-button {
+            padding: 14px 30px;
+            border-radius: 25px;
+            border: none;
+            font-size: 16px;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .button-primary {
+            background: white;
+            color: #8B5CF6;
+        }
+
+        .button-primary:hover {
+            transform: scale(1.02);
+        }
+
+        .button-secondary {
+            background: rgba(255, 255, 255, 0.2);
+            color: white;
+            border: 2px solid white;
+        }
+
+        .button-secondary:hover {
+            background: rgba(255, 255, 255, 0.3);
+        }
+
+        /* 네비게이션 */
+        .nav-container {
+            position: absolute;
+            bottom: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            z-index: 20;
+            display: flex;
+            gap: 8px;
+            align-items: center;
+        }
+
+        .nav-dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.5);
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .nav-dot.active {
+            background: white;
+            width: 24px;
+            border-radius: 4px;
+        }
+
+        .nav-arrow {
+            position: absolute;
+            top: 50%;
+            transform: translateY(-50%);
+            font-size: 30px;
+            color: rgba(0, 0, 0, 0.4);
+            cursor: pointer;
+            user-select: none;
+            z-index: 15;
+            transition: all 0.3s;
+        }
+
+        .nav-arrow:hover {
+            color: rgba(0, 0, 0, 0.7);
+        }
+
+        .nav-arrow.prev-btn {
+            left: -40px;
+        }
+
+        .nav-arrow.next-btn {
+            right: -40px;
+        }
+
+        .nav-arrow.disabled {
+            opacity: 0.3;
+            cursor: not-allowed;
+        }
+
+        /* 숨겨진 텍스트 */
+        .poster-bg-light .poster-tagline {
+            color: #8B5CF6;
+        }
+
+        .poster-bg-light .poster-title {
+            color: #1a1a1a;
+        }
+
+        .poster-bg-light .poster-subtitle {
+            color: #555;
+        }
+
+        .poster-bg-light .poster-description {
+            color: #666;
+        }
+
+        /* 반응형 */
+        @media (max-width: 768px) {
+            .container {
+                width: 100%;
+                max-width: 400px;
+                height: auto;
+                aspect-ratio: 9 / 16;
+            }
+
+            .poster {
+                padding: 40px 20px;
+            }
+
+            .poster-title {
+                font-size: 24px;
+            }
+
+            .poster-subtitle {
+                font-size: 14px;
+            }
+
+            .nav-arrow {
+                display: none;
+            }
+
+            .nav-container {
+                bottom: 15px;
+            }
+        }
+
+        /* 정보 배경 */
+        .info-bg {
+            background: linear-gradient(135deg, #f5f3ff 0%, #faf8ff 100%);
+            color: #1a1a1a;
+        }
+
+        .info-bg .poster-number {
+            color: #8B5CF6;
+            opacity: 0.15;
+        }
+
+        .info-bg::before {
+            background: rgba(139, 92, 246, 0.05);
+        }
+
+        .info-bg::after {
+            background: rgba(139, 92, 246, 0.03);
+        }
+
+        /* Story 배경 */
+        .story-bg {
+            background: linear-gradient(135deg, #8B5CF6 0%, #7C3AED 100%);
+        }
+
+        /* 스토리 텍스트 */
+        .story-text {
+            font-size: 15px;
+            line-height: 1.8;
+            margin-bottom: 15px;
+            opacity: 0.95;
+        }
+
+        .story-highlight {
+            font-weight: 700;
+            font-size: 18px;
+            margin-top: 20px;
+            opacity: 1;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- 포스터들 -->
+        <div class="posters-wrapper">
+            <!-- 페이지 1: 소개 -->
+            <div class="poster poster-bg-purple active">
+                <div class="poster-number">01</div>
+                <div class="poster-content">
+                    <div style="flex: 1; display: flex; flex-direction: column; justify-content: center; align-items: center; width: 100%;">
+                        <div class="poster-icon">
+                            <img src="data:image/png;base64,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yuIBPMZhHwDeJgoAV7DQAKdx4AeAxwgCwBksLMChHPoB4FhiAHAUiwnwFAd+ALiWIAA8yuIBPMZhHwDeJgoAV7DQAKdx4AeAxwgCwBksLMChHPoB4FhiAHAUiwnwFAd+ALiWIAA8yuIBPMZhHwDeJgoAV7DQAKdx4AeAxwgCwBksLMChHPoB4FhiAHAUiwnwFAd+ALiWIAA8yuIBPMZhHwDeJgoAV7DQAKdx4AeAxwgCwBksLMChHPoB4FhiAHAUiwnwFAd+ALiWIAA8yuIBPMZhHwDeJgoAV7DQAKdx4AeAxwgCwBksLMChHPoB4FhiAHAUiwnwFAd+ALiWIAA8yuIBPMZhHwDeJgoAV7DQAKdx4AeAxwgCwBksLMChHPoB4FhiAHAUiwnwFAd+ALiWIAA8yuIBPMZhHwDeJgoAV7DQAKdx4AeAxwgCwBksLMChHPoB4FhiAHAUiwnwFAd+ALiWIAA8yuIBPMZhHwDeJgoAV7DQAKdx4AeAxwgCwBksLMChHPoB4FhiAHAUiwnwFAd+ALiWIAA8yuIBPMZhHwDeJgoAV7DQAKdx4AeAxwgCwBksLMChHPoB4FhiAHAUiwnwFAd+ALiWIAA8yuIBPMZhHwDeJgoAV7DQAKdx4AeAxwgCwBksLMChHPoB4FhiAHAUiwnwFAd+ALiWIAA8yuIBPMZhHwDeJgoAV7DQAKdx4AeAxwgCwBksLMChHPoB4FhiAHAUiwnwFAd+ALiWIAA8yuIBPMZhHwDeJgoAV7DQAKdx4AeAxwgCwBksLMChHPoB4FhiAHAUiwnwFAd+ALiWIAA8yuIBPMZhHwDeJgoAV7DQAKdx4AeAxwgCwBksLMChHPoB4FhiAHAUiwnwFAd+ALiWIAA8yuIBPMZhHwDeJgoAV7DQAKdx4AeAxwgCwBksLMChHPoB4FhiAHAUiwnwFAd+ALiWIAA8yuIBPMZhHwDeJgoAV7DQAKdx4AeAxwgCwBksLMChHPoB4FhiAHAUiwnwFAd+ALiWIAA8yuIBPMZhHwDeJgoAV7DQAKdx4AeAxwgCwBksLMChHPoB4FhiAHAUiwnwFAd+ALiWIAA8yuIBPMZhHwDeJgoAV7DQAKdx4AeAxwgCwBksLMChHPoB4FhiAHAUiwnwFAd+ALiWIAA8yuIBPMZhHwDeJgoAV7DQAKdx4AeAxwgCwBksLMChHPoB4FhiAHAUiwnwFAd+ALiWIAA8yuIBPMZhHwDeJgoAV7DQAKdx4AeAxwgCwBksLMChHPoB4FhiAHAUiwnwFAd+ALiWIAA8yuIBPMZhHwDeJgoAV7DQAKdx4AeAxwgCwBksLMChHPoB4FhiAHAUiwnwFAd+ALiWIAA8yuIBPMZhHwDeJgoAV7DQAKdx4AeAxwgCwBksLMChHPoB4FhiAHAUiwnwFAd+ALiWIAA8yuIBPMZhHwDeJgoAV7DQAKdx4AeAxwgCwBksLMChHPoB4FhiAHAUiwnwFAd+ALiWIAA8yuIBPMZhHwDeJgoAV7DQAKdx4AeAxwgCwBksLMChHPoB4FhiAHAUiwnwFAd+ALiWIAA8yuIBPMZhHwDeJgoAV7DQAKdx4AeAxwgCwBksLMChHPoB4FhiAHAUiwnwFAd+ALiWIAA8yuIBPMZhHwDeJgoAV7DQAKdx4AeAxwgCwBksLMChHPoB4FhiAHAUiwnwFAd+ALiWIAA8yuIBPMZhHwDeJgoAV7DQAKdx4AeAxwgCwBksLMChHPoB4FhiAHAUiwnwFAd+ALiWIAA8yuIBPMZhHwDeJgoAV7DQAKdx4AeAxwgCwBksLMChHPoB4FhiAHAUiwnwFAd+ALiWIAA8yuIBPMZhHwDeJgoAV7DQAKdx4AeAxwgCwBksLMChHPoB4FhiAHAUiwnwFAd+ALiWIAA8yuIBPMZhHwDeJgoAV7DQAKdx4AeAxwgCwBksLMChHPoB4FhiAHAUiwnwFAd+ALiWIAA8yuIBPMZhHwDeJgoAV7DQAKdx4AeAxwgCwBksLMChHPoB4FhiAHAUiwnwFAd+ALiWIAA8yuIBPMZhHwDeJgoAV7DQAKdx4AeAxwgCwBksLMChHPoB4FhiAHAUiwnwFAd+ALiWIAA8yuIBPMZhHwDeJgoAV7DQAKdx4AeAxwgCwBksLMChHPoB4FhiAHAUiwnwFAd+ALiWIAA8yuIBPMZhHwDeJgoAV7DQAKdx4AeAxwgCwBksLMChHPoB4FhiAHAUiwnwFAd+ALiWIAA8yuIBPMZhHwDeJgoAV7DQAKdx4AeAxwgCwBksLMChHPoB4FhiAHAUiwnwFAd+ALiWIAA8yuIBPMZhHwDeJgoAV7DQAKdx4AeAxwgCwBksLMChHPoB4FhiAHAUiwnwFAd+ALiWIAA8yuIBPMZhHwDeJgoAV7DQAKdx4AeAxwgCwBksLMChHPoB4FhiAHAUiwnwFAd+ALiWIAA8yuIBPMZhHwDeJgoAV7DQAKdx4AeAxwgCwBksLMChHPoB4FhiAHAUiwnwFAd+ALiWIAA8yuIBPMZhHwDeJgoAV7DQAKdx4AeAxwgCwBksLMChHPoB4FhiAHAUiwnwFAd+ALiWIAA8yuIBPMZhHwDeJgoAV7DQAKdx4AeAxwgCwBksLMChHPoB4FhiAHAUiwnwFAd+ALiWIAA8yuIBPMZhHwDeJgoAV7DQAKdx4AeAxwgCwBksLMChHPoB4FhiAHAUiwnwFAd+ALiWIAA8yuIBPMZhHwDeJgoAV7DQAKdx4AeAxwgCwBksLMChHPoB4FhiAHAUiwnwFAd+ALiWIAA8yuIBPMZhHwDeJgoAV7DQAKdx4AeAxwgCwBksLMChHPoB4FhiAHAUiwnwFAd+ALiWIAA8yuIBPMZhHwDeJgoAV7DQAKdx4AeAxwgCwBksLMChHPoB4FhiAHAUiwnwFAd+ALiWIAA8yuIBPMZhHwDeJgoAV7DQAKdx4AeAxwgCwBksLMChHPoB4FhiAHAUiwnwFAd+ALiWIAA8yuIBPMZhHwDeJgoAV7DQAKdx4AeAxwgCwBksLMChHPoB4FhiAHAUiwnwFAd+ALiWIAA8yuIBPMZhHwDeJgoAV7DQAKdx4AeAxwgCwBksLMChHPoB4FhiAHAUiwnwFAd+ALiWIAA8yuIBPMZhHwDeJgoAV7DQAKdx4AeAxwgCwBksLMChHPoB4FhiAHAUiwnwFAd+ALiWIAA8yuIBPMZhHwDeJgoAV7DQAKdx4AeAxwgCwBksLMChHPoB4FhiAHAUiwnwFAd+ALiWIAA8yuIBPMZhHwDeJgoAV7DQAKdx4AeAxwgCwBksLMChHPoB4FhiAHAUiwnwFAd+ALiWIAA8yuIBPMZhHwDeJgoAV7DQAKdx4AeAxwgCwBksLMChHPoB4FhiAHAUiwnwFAd+ALiWIAA8yuIBPMZhHwDeJgoAV7DQAKdx4AeAxwgCwBksLMChHPoB4FhiAHAUiwnwFAd+ALiWIAA8yuIBPMZhHwDeJgoAV7DQAKdx4AeAxwgCwBksLMChHPoB4FhiAHAUiwnwFAd+ALiWIAA8yuIBPMZhHwDeJgoAV7DQAKdx4AeAxwgCwBksLMChHPoB4FhiAHAUiwnwFAd+ALiWIAA8yuIBPMZhHwDeJgoAV7DQAKdx4AeAxwgCwBksLMChHPoB4FhiAHAUiwnwFAd+ALiWIAA8yuIBPMZhHwDeJgoAV7DQAKdx4AeAxwgCwBksLMChHPoB4FhiAHAUiwnwFAd+ALiWIAA8yuIBPMZhHwDeJgoAV7DQAKdx4AeAxwgCwBksLMChHPoB4FhiAHAUiwnwFAd+ALiWIAA8yuIBPMZhHwDeJgoAV7DQAKdx4AeAxwgCwBksLMChHPoB4FhiAHAUiwnwFAd+ALiWIAA8yuIBPMZhHwDeJgoAV7DQAKdx4AeAxwgCwBksLMChHPoB4FhiAHAUiwnwFAd+ALiWIAA8yuIBPMZhHwDeJgoAV7DQAKdx4AeAxwgCwBksLMChHPoB4FhiAHAUiwnwFAd+ALiWIAA8yuIBPMZhHwDeJgoAV7DQAKdx4AeAxwgCwBksLMChHPoB4FhiAHAUiwnwFAd+ALiWIAA8yuIBPMZhHwDeJgoAV7DQAKdx4AeAxwgCwBksLMChHPoB4FhiAHAUiwnwFAd+ALiWIAA8yuIBPMZhHwDeJgoAV7DQAKdx4AeAxwgCwBksLMChHPoB4FhiAHAUiwnwFAd+ALiWIAA8yuIBPMZhHwDeJgoAV7DQAKdx4AeAxwgCwBksLMChHPoB4FhiAHAUiwnwFAd+ALiWIAA8yuIBPMZhHwDeJgoAV7DQAKdx4AeAxwgCwBksLMChHPoB4FhiAHAUiwnwFAd+ALiWIAA8yuIBPMZhHwDeJgoAV7DQAKdx4AeAxwgCwBksLMChHPoB4FhiAHAUiwnwFAd+ALiWIAA8yuIBPMZhHwDeJgoAV7DQAKdx4AeAxwgCwBksLMChHPoB4FhiAHAUiwnwFAd+ALiWIAA8yuIBPMZhHwDeJgoAV7DQAKdx4AeAxwgCwBksLMChHPoB4FhiAHAUiwnwFAd+ALiWIAA8yuIBPMZhHwDeJgoAV7DQAKdx4AeAxwgCwBksLMChHPoB4FhiAHAUiwnwFAd+ALiWIAA8yuIBPMZhHwDeJgoAV7DQAKdx4AeAxwgCwBksLMChHPoB4FhiAHAUiwnwFAd+ALiWIAA8yuIBPMZhHwDeJgoAV7DQAKdx4AeAxwgCwBksLMChHPoB4FhiAHAUiwnwFAd+ALiWIAA8yuIBPMZhHwDeJgoAV7DQAKdx4AeAxwgCwBksLMChHPoB4FhiAHAUiwnwFAd+ALiWIAA8yuIBPMZhHwDeJgoAV7DQAKdx4AeAxwgCwBksLMChHPoB4FhiAHAUiwnwFAd+ALiWIAA8yuIBPMZhHwDeJgoAV7DQAKdx4AeAxwgCwBksLMChHPoB4FhiAHAUiwnwFAd+ALiWIAA8yuIBPMZhHwDeJgoAV7DQAKdx4AeAxwgCwBksLMChHPoB4FhiAHAUiwnwFAd+ALiWIAA8yuIBPMZhHwDeJgoAV7DQAKdx44AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA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" alt="Mandarat Icon"/>
+                        </div>
+                        <div class="poster-name">Mandarat</div>
+                        <div class="poster-tagline">당신의 꿈을 응원합니다</div>
+                    </div>
+                    <div style="text-align: center; flex: 1; display: flex; flex-direction: column; justify-content: flex-end;">
+                        <div class="poster-title">꿈을 이루는<br/>유일한 방법</div>
+                        <div class="poster-subtitle" style="margin: 20px 0;">오타니처럼 꿈꾸고<br/>Mandarat으로 이루세요</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 페이지 2: 스토리 -->
+            <div class="poster story-bg">
+                <div class="poster-number">02</div>
+                <div class="poster-content">
+                    <div style="flex: 1; display: flex; flex-direction: column; justify-content: center; align-items: center; width: 100%;">
+                        <div style="font-size: 70px; margin-bottom: 25px;">🎯</div>
+                        <div class="poster-title" style="font-size: 28px; margin-bottom: 30px;">메이저리그 MVP의<br/>선택</div>
+                        <div class="story-text">
+                            고교생 오타니 쇼헤이는<br/>단 한 장의 종이에<br/>만다라트을 그렸습니다
+                        </div>
+                        <div class="story-text" style="font-size: 14px; opacity: 0.85;">
+                            중심의 목표부터<br/>64개의 실행 목표까지
+                        </div>
+                        <div class="story-highlight">
+                            그리고 모두 이루었습니다
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 페이지 3: 기능 1 -->
+            <div class="poster poster-bg-purple">
+                <div class="poster-number">03</div>
+                <div class="poster-content">
+                    <div style="flex: 1; display: flex; flex-direction: column; justify-content: center; align-items: center; width: 100%;">
+                        <div class="feature-icon">🎨</div>
+                        <div class="poster-title">꿈을 설계하다</div>
+                        <div style="margin: 30px 0; opacity: 0.9;">
+                            <div style="font-size: 40px; margin-bottom: 10px; font-weight: 800;">64</div>
+                            <div style="font-size: 16px;">개의 작은 목표로 분해</div>
+                        </div>
+                        <div class="poster-description">
+                            큰 꿈이 너무 멀게 느껴져도<br/>64개의 작은 발걸음으로 나누면<br/>명확한 방향이 생깁니다
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 페이지 4: 기능 2 -->
+            <div class="poster poster-bg-purple">
+                <div class="poster-number">04</div>
+                <div class="poster-content">
+                    <div style="flex: 1; display: flex; flex-direction: column; justify-content: center; align-items: center; width: 100%;">
+                        <div class="feature-icon">🚀</div>
+                        <div class="poster-title">매일 실행하다</div>
+                        <div style="margin: 30px 0; opacity: 0.9;">
+                            <div style="font-size: 16px; margin-bottom: 15px;">오늘의 선택이</div>
+                            <div style="font-size: 16px;">명확해집니다</div>
+                        </div>
+                        <div class="poster-description">
+                            매 순간의 선택을 가이드하고<br/>올바른 방향으로 나아갈 수 있도록<br/>Mandarat이 함께합니다
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 페이지 5: 기능 3 -->
+            <div class="poster poster-bg-purple">
+                <div class="poster-number">05</div>
+                <div class="poster-content">
+                    <div style="flex: 1; display: flex; flex-direction: column; justify-content: center; align-items: center; width: 100%;">
+                        <div class="feature-icon">📊</div>
+                        <div class="poster-title">진행을 확인하다</div>
+                        <div style="margin: 30px 0; opacity: 0.9;">
+                            <div style="font-size: 16px; margin-bottom: 15px;">당신의 성장이</div>
+                            <div style="font-size: 16px;">눈에 띕니다</div>
+                        </div>
+                        <div class="poster-description">
+                            목표 달성의 매 순간을 시각화하고<br/>계속되는 성취감으로<br/>동기를 유지하세요
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 페이지 6: 왜 Mandarat -->
+            <div class="poster info-bg">
+                <div class="poster-number">06</div>
+                <div class="poster-content">
+                    <div style="flex: 1; display: flex; flex-direction: column; justify-content: center; width: 100%;">
+                        <div style="margin-bottom: 30px;">
+                            <div class="poster-title" style="color: #1a1a1a; margin-bottom: 25px;">왜 Mandarat일까?</div>
+                        </div>
+                        <div style="display: grid; gap: 16px;">
+                            <div style="background: white; padding: 16px; border-radius: 12px; border-left: 4px solid #8B5CF6; text-align: left;">
+                                <div style="font-weight: 700; color: #8B5CF6; margin-bottom: 5px;">✓ 검증된 전략</div>
+                                <div style="font-size: 13px; color: #666;">메이저리그 MVP의 실제 전략</div>
+                            </div>
+                            <div style="background: white; padding: 16px; border-radius: 12px; border-left: 4px solid #8B5CF6; text-align: left;">
+                                <div style="font-weight: 700; color: #8B5CF6; margin-bottom: 5px;">✓ 과학적 효과</div>
+                                <div style="font-size: 13px; color: #666;">목표 기록 시 42% 달성확률 상승</div>
+                            </div>
+                            <div style="background: white; padding: 16px; border-radius: 12px; border-left: 4px solid #8B5CF6; text-align: left;">
+                                <div style="font-weight: 700; color: #8B5CF6; margin-bottom: 5px;">✓ 실행 중심</div>
+                                <div style="font-size: 13px; color: #666;">단순 기록이 아닌 매일의 가이드</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 페이지 7: CTA -->
+            <div class="poster poster-bg-purple">
+                <div class="poster-number">07</div>
+                <div class="poster-content">
+                    <div style="flex: 1; display: flex; flex-direction: column; justify-content: center; align-items: center; width: 100%;">
+                        <div style="margin-bottom: 20px; font-size: 60px;">⭐</div>
+                        <div class="poster-title" style="margin-bottom: 30px;">지금 시작하세요</div>
+                        <div class="poster-subtitle" style="margin-bottom: 30px;">목표가 흐려지는 경험을<br/>끝내세요</div>
+                        <div class="poster-description" style="margin-bottom: 40px;">
+                            Mandarat과 함께<br/>명확함을 얻고<br/>꿈을 현실로 만드세요
+                        </div>
+                    </div>
+                    <div class="poster-buttons">
+                        <button class="poster-button button-primary">지금 다운로드</button>
+                        <button class="poster-button button-secondary">자세히 보기</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 네비게이션 화살표 -->
+        <div class="nav-arrow prev-btn" onclick="prevSlide()">❮</div>
+        <div class="nav-arrow next-btn" onclick="nextSlide()">❯</div>
+
+        <!-- 네비게이션 도트 -->
+        <div class="nav-container" id="nav-dots">
+            <div class="nav-dot active" onclick="goToSlide(0)"></div>
+            <div class="nav-dot" onclick="goToSlide(1)"></div>
+            <div class="nav-dot" onclick="goToSlide(2)"></div>
+            <div class="nav-dot" onclick="goToSlide(3)"></div>
+            <div class="nav-dot" onclick="goToSlide(4)"></div>
+            <div class="nav-dot" onclick="goToSlide(5)"></div>
+            <div class="nav-dot" onclick="goToSlide(6)"></div>
+        </div>
+    </div>
+
+    <script>
+        let currentSlide = 0;
+        const totalSlides = 7;
+
+        function showSlide(n) {
+            const posters = document.querySelectorAll('.poster');
+            const dots = document.querySelectorAll('.nav-dot');
+
+            if (n >= totalSlides) currentSlide = totalSlides - 1;
+            if (n < 0) currentSlide = 0;
+
+            posters.forEach(poster => {
+                poster.classList.remove('active', 'prev');
+            });
+
+            if (currentSlide > 0) {
+                posters[currentSlide - 1].classList.add('prev');
+            }
+
+            posters[currentSlide].classList.add('active');
+
+            dots.forEach(dot => dot.classList.remove('active'));
+            dots[currentSlide].classList.add('active');
+
+            // 화살표 활성화/비활성화
+            document.querySelector('.prev-btn').classList.toggle('disabled', currentSlide === 0);
+            document.querySelector('.next-btn').classList.toggle('disabled', currentSlide === totalSlides - 1);
+        }
+
+        function nextSlide() {
+            if (currentSlide < totalSlides - 1) {
+                currentSlide++;
+                showSlide(currentSlide);
+            }
+        }
+
+        function prevSlide() {
+            if (currentSlide > 0) {
+                currentSlide--;
+                showSlide(currentSlide);
+            }
+        }
+
+        function goToSlide(n) {
+            currentSlide = n;
+            showSlide(currentSlide);
+        }
+
+        // 키보드 네비게이션
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'ArrowRight') nextSlide();
+            if (e.key === 'ArrowLeft') prevSlide();
+        });
+
+        // 터치 스와이프
+        let touchStartX = 0;
+        let touchEndX = 0;
+
+        document.querySelector('.posters-wrapper').addEventListener('touchstart', (e) => {
+            touchStartX = e.changedTouches[0].screenX;
+        });
+
+        document.querySelector('.posters-wrapper').addEventListener('touchend', (e) => {
+            touchEndX = e.changedTouches[0].screenX;
+            handleSwipe();
+        });
+
+        function handleSwipe() {
+            if (touchEndX < touchStartX - 50) {
+                nextSlide();
+            }
+            if (touchEndX > touchStartX + 50) {
+                prevSlide();
+            }
+        }
+
+        // 초기화
+        showSlide(currentSlide);
+    </script>
+</body>
+</html>

@@ -126,7 +126,7 @@ class _LandingScreenState extends ConsumerState<LandingScreen> {
               ),
               const SizedBox(height: 12),
               Text(
-                '메이저리그 MVP 오타니 쇼헤이가 선택한 만다라트 전략으로 목표를 설계해보세요.',
+                '오타니처럼 꿈꾸고, Mandarat으로 이루세요.',
                 style: TextStyle(
                   fontSize: 17,
                   fontWeight: FontWeight.w500,
@@ -137,22 +137,22 @@ class _LandingScreenState extends ConsumerState<LandingScreen> {
               const SizedBox(height: 32),
               _LandingHighlightCard(
                 icon: CupertinoIcons.sparkles,
-                title: '오타니 쇼헤이의 만다라트',
-                subtitle: '고교생 시절 단 한 장으로 메이저리그 루트를 완성한 전략을 담았어요.',
+                title: '꿈을 설계하다',
+                subtitle: '큰 꿈을 64개의 작은 목표로 분해합니다.',
                 accent: accent,
               ),
               const SizedBox(height: 12),
               _LandingHighlightCard(
                 icon: CupertinoIcons.square_grid_3x2_fill,
-                title: '64칸 액션 플래너',
-                subtitle: '목표-테마-실행을 계층적으로 정리하고 하루의 포커스를 명확히 합니다.',
+                title: '매일 실행하다',
+                subtitle: '매 순간의 선택을 명확하게 가이드합니다.',
                 accent: accent,
               ),
               const SizedBox(height: 12),
               _LandingHighlightCard(
                 icon: CupertinoIcons.scope,
-                title: '감각적인 몰입 경험',
-                subtitle: '퍼플 톤의 인터페이스와 인터랙션으로 진척도를 매 순간 확인하세요.',
+                title: '진행을 확인하다',
+                subtitle: '목표 달성의 모든 순간을 시각화합니다.',
                 accent: accent,
               ),
               const SizedBox(height: 36),
