@@ -70,49 +70,33 @@
 
         /* 공통 배경 */
         .poster-bg-purple {
-            background: linear-gradient(135deg, #8B5CF6 0%, #7C3AED 100%);
+            background: #8B5CF6;
         }
 
         .poster-bg-light {
-            background: linear-gradient(135deg, #f5f3ff 0%, #ffffff 100%);
+            background: #ffffff;
             color: #1a1a1a;
         }
 
         .poster-bg-feature {
-            background: linear-gradient(135deg, #8B5CF6 0%, #7C3AED 100%);
+            background: #8B5CF6;
         }
 
-        /* 배경 장식 */
+        /* 배경 장식 제거됨 */
         .poster::before {
-            content: '';
-            position: absolute;
-            top: -200px;
-            right: -100px;
-            width: 400px;
-            height: 400px;
-            background: rgba(255, 255, 255, 0.15);
-            border-radius: 50%;
-            z-index: 0;
+            display: none;
         }
 
         .poster::after {
-            content: '';
-            position: absolute;
-            bottom: -150px;
-            left: -100px;
-            width: 350px;
-            height: 350px;
-            background: rgba(255, 255, 255, 0.1);
-            border-radius: 50%;
-            z-index: 0;
+            display: none;
         }
 
         .poster-bg-light::before {
-            background: rgba(139, 92, 246, 0.08);
+            display: none;
         }
 
         .poster-bg-light::after {
-            background: rgba(139, 92, 246, 0.05);
+            display: none;
         }
 
         .poster-content {
@@ -130,13 +114,13 @@
         .poster-icon {
             width: 100px;
             height: 100px;
-            background: rgba(255, 255, 255, 0.95);
+            background: rgba(255, 255, 255, 1);
             border-radius: 30px;
             display: flex;
             align-items: center;
             justify-content: center;
             margin-bottom: 20px;
-            box-shadow: 0 15px 40px rgba(0, 0, 0, 0.2);
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15);
         }
 
         .poster-icon img {
@@ -238,13 +222,13 @@
         }
 
         .button-secondary {
-            background: rgba(255, 255, 255, 0.2);
+            background: transparent;
             color: white;
             border: 2px solid white;
         }
 
         .button-secondary:hover {
-            background: rgba(255, 255, 255, 0.3);
+            background: rgba(255, 255, 255, 0.1);
         }
 
         /* 네비게이션 */
@@ -371,7 +355,12 @@
 
         /* Story 배경 */
         .story-bg {
-            background: linear-gradient(135deg, #8B5CF6 0%, #7C3AED 100%);
+            background: #8B5CF6;
+        }
+        
+        /* Info 배경 */
+        .info-bg {
+            background: #ffffff;
         }
 
         /* 스토리 텍스트 */
