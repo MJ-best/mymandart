@@ -39,7 +39,7 @@ class MandarartRoot extends ConsumerWidget {
 
     return CupertinoApp.router(
       routerConfig: _router,
-      title: 'Mandalart Journey',
+      title: 'Mandarat',
       theme: _buildTheme(brightness),
       debugShowCheckedModeBanner: false,
     );
