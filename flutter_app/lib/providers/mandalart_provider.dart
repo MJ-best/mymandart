@@ -41,11 +41,23 @@ class MandalartNotifier extends StateNotifier<MandalartStateModel> {
     final actions = <ActionItemModel>[];
     if (actionsRaw != null) {
       for (final m in (jsonDecode(actionsRaw) as List<dynamic>)) {
+        // 하위 호환성: 'isCompleted'가 있으면 status로 변환
+        ActionStatus status;
+        if (m.containsKey('status')) {
+          status = ActionStatus.fromJson(m['status'] as String);
+        } else if (m.containsKey('isCompleted')) {
+          status = (m['isCompleted'] as bool)
+              ? ActionStatus.completed
+              : ActionStatus.notStarted;
+        } else {
+          status = ActionStatus.notStarted;
+        }
+
         actions.add(ActionItemModel(
           id: m['id'] as String,
           themeId: m['themeId'] as String,
           actionText: m['actionText'] as String,
-          isCompleted: m['isCompleted'] as bool,
+          status: status,
           order: m['order'] as int,
           createdAt: DateTime.tryParse(m['createdAt'] as String? ?? '') ?? DateTime.now(),
           updatedAt: DateTime.tryParse(m['updatedAt'] as String? ?? '') ?? DateTime.now(),
@@ -75,7 +87,7 @@ class MandalartNotifier extends StateNotifier<MandalartStateModel> {
                 'id': a.id,
                 'themeId': a.themeId,
                 'actionText': a.actionText,
-                'isCompleted': a.isCompleted,
+                'status': a.status.toJson(),
                 'order': a.order,
                 'createdAt': a.createdAt.toIso8601String(),
                 'updatedAt': a.updatedAt.toIso8601String(),
@@ -99,21 +111,21 @@ class MandalartNotifier extends StateNotifier<MandalartStateModel> {
     _persist();
   }
 
-  void updateActionItem({required int themeIndex, required int actionIndex, String? text, bool? completed}) {
+  void updateActionItem({required int themeIndex, required int actionIndex, String? text, ActionStatus? status}) {
     final themeId = 'theme-$themeIndex';
     final List<ActionItemModel> updated = List<ActionItemModel>.from(state.actionItems);
     final idx = updated.indexWhere((a) => a.themeId == themeId && a.order == actionIndex);
     if (idx >= 0) {
       updated[idx] = updated[idx].copyWith(
         actionText: text ?? updated[idx].actionText,
-        isCompleted: completed ?? updated[idx].isCompleted,
+        status: status ?? updated[idx].status,
       );
     } else {
       updated.add(ActionItemModel(
         id: const Uuid().v4(),
         themeId: themeId,
         actionText: text ?? '',
-        isCompleted: completed ?? false,
+        status: status ?? ActionStatus.notStarted,
         order: actionIndex,
         createdAt: DateTime.now(),
         updatedAt: DateTime.now(),
@@ -121,6 +133,34 @@ class MandalartNotifier extends StateNotifier<MandalartStateModel> {
     }
     state = state.copyWith(actionItems: updated);
     _persist();
+  }
+
+  // 액션 아이템 상태 토글 (notStarted -> inProgress -> completed -> notStarted)
+  void toggleActionStatus({required int themeIndex, required int actionIndex}) {
+    final themeId = 'theme-$themeIndex';
+    final List<ActionItemModel> updated = List<ActionItemModel>.from(state.actionItems);
+    final idx = updated.indexWhere((a) => a.themeId == themeId && a.order == actionIndex);
+
+    if (idx >= 0) {
+      final currentStatus = updated[idx].status;
+      ActionStatus newStatus;
+
+      switch (currentStatus) {
+        case ActionStatus.notStarted:
+          newStatus = ActionStatus.inProgress;
+          break;
+        case ActionStatus.inProgress:
+          newStatus = ActionStatus.completed;
+          break;
+        case ActionStatus.completed:
+          newStatus = ActionStatus.notStarted;
+          break;
+      }
+
+      updated[idx] = updated[idx].copyWith(status: newStatus);
+      state = state.copyWith(actionItems: updated);
+      _persist();
+    }
   }
 
   void setStep(int step) {
@@ -295,6 +335,31 @@ class MandalartNotifier extends StateNotifier<MandalartStateModel> {
     await prefs.remove(_keyCurrentMandalartId);
     await prefs.remove(_keyCurrentMandalartCreatedAt);
     await _persist();
+  }
+
+  /// JSON 데이터를 불러와서 현재 상태로 설정합니다
+  Future<bool> importFromState(MandalartStateModel importedState) async {
+    try {
+      final prefs = await SharedPreferences.getInstance();
+
+      // 상태 업데이트
+      state = importedState;
+
+      // 새로운 ID 생성 (불러온 데이터는 새 만다라트로 취급)
+      _currentMandalartId = null;
+      _currentMandalartCreatedAt = null;
+
+      // 저장소 초기화
+      await prefs.remove(_keyCurrentMandalartId);
+      await prefs.remove(_keyCurrentMandalartCreatedAt);
+
+      // 새로운 데이터 저장
+      await _persist();
+
+      return true;
+    } catch (e) {
+      return false;
+    }
   }
 }
 

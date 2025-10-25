@@ -98,11 +98,10 @@ class _MandalartAppScreenState extends ConsumerState<MandalartAppScreen> {
             }
           });
         },
-        onToggleAction: (themeIndex, actionIndex, completed) {
-          notifier.updateActionItem(
+        onToggleAction: (themeIndex, actionIndex) {
+          notifier.toggleActionStatus(
             themeIndex: themeIndex,
             actionIndex: actionIndex,
-            completed: completed,
           );
         },
       );

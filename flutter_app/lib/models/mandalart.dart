@@ -30,11 +30,26 @@ class ThemeModel {
   });
 }
 
+enum ActionStatus {
+  notStarted,
+  inProgress,
+  completed;
+
+  String toJson() => name;
+
+  static ActionStatus fromJson(String value) {
+    return ActionStatus.values.firstWhere(
+      (e) => e.name == value,
+      orElse: () => ActionStatus.notStarted,
+    );
+  }
+}
+
 class ActionItemModel {
   final String id;
   final String themeId;
   final String actionText;
-  final bool isCompleted;
+  final ActionStatus status;
   final int order;
   final DateTime createdAt;
   final DateTime updatedAt;
@@ -43,21 +58,26 @@ class ActionItemModel {
     required this.id,
     required this.themeId,
     required this.actionText,
-    required this.isCompleted,
+    required this.status,
     required this.order,
     required this.createdAt,
     required this.updatedAt,
   });
 
+  // 하위 호환성을 위한 getter
+  bool get isCompleted => status == ActionStatus.completed;
+  bool get isInProgress => status == ActionStatus.inProgress;
+  bool get isNotStarted => status == ActionStatus.notStarted;
+
   ActionItemModel copyWith({
     String? actionText,
-    bool? isCompleted,
+    ActionStatus? status,
   }) {
     return ActionItemModel(
       id: id,
       themeId: themeId,
       actionText: actionText ?? this.actionText,
-      isCompleted: isCompleted ?? this.isCompleted,
+      status: status ?? this.status,
       order: order,
       createdAt: createdAt,
       updatedAt: DateTime.now(),
@@ -69,7 +89,7 @@ class ActionItemModel {
       'id': id,
       'themeId': themeId,
       'actionText': actionText,
-      'isCompleted': isCompleted,
+      'status': status.toJson(),
       'order': order,
       'createdAt': createdAt.toIso8601String(),
       'updatedAt': updatedAt.toIso8601String(),
@@ -77,11 +97,23 @@ class ActionItemModel {
   }
 
   factory ActionItemModel.fromJson(Map<String, dynamic> json) {
+    // 하위 호환성: 'isCompleted'가 있으면 status로 변환
+    ActionStatus status;
+    if (json.containsKey('status')) {
+      status = ActionStatus.fromJson(json['status'] as String);
+    } else if (json.containsKey('isCompleted')) {
+      status = (json['isCompleted'] as bool)
+          ? ActionStatus.completed
+          : ActionStatus.notStarted;
+    } else {
+      status = ActionStatus.notStarted;
+    }
+
     return ActionItemModel(
       id: json['id'] as String,
       themeId: json['themeId'] as String,
       actionText: json['actionText'] as String,
-      isCompleted: json['isCompleted'] as bool,
+      status: status,
       order: json['order'] as int,
       createdAt: DateTime.parse(json['createdAt'] as String),
       updatedAt: DateTime.parse(json['updatedAt'] as String),

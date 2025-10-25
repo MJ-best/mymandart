@@ -48,7 +48,7 @@ class _ActionsStepState extends State<ActionsStep> {
             id: 'tmp',
             themeId: themeId,
             actionText: '',
-            isCompleted: false,
+            status: ActionStatus.notStarted,
             order: actionIndex,
             createdAt: DateTime.now(),
             updatedAt: DateTime.now(),
@@ -326,7 +326,7 @@ class _ActionsStepState extends State<ActionsStep> {
                           id: 'tmp',
                           themeId: themeId,
                           actionText: '',
-                          isCompleted: false,
+                          status: ActionStatus.notStarted,
                           order: actionIndex,
                           createdAt: DateTime.now(),
                           updatedAt: DateTime.now(),
@@ -337,21 +337,37 @@ class _ActionsStepState extends State<ActionsStep> {
                         children: [
                           Row(
                             children: [
-                              Semantics(
-                                label: existing.isCompleted
-                                    ? 'Mark as incomplete'
-                                    : 'Mark as complete',
-                                child: CupertinoCheckbox(
-                                  value: existing.isCompleted,
-                                  activeColor: CupertinoColors.systemPurple,
-                                  onChanged: (v) {
-                                    HapticFeedback.lightImpact();
-                                    widget.notifier.updateActionItem(
-                                      themeIndex: actualThemeIndex,
-                                      actionIndex: actionIndex,
-                                      completed: v ?? false,
-                                    );
-                                  },
+                              // 상태 표시 아이콘 (터치로 상태 변경)
+                              GestureDetector(
+                                onTap: () {
+                                  HapticFeedback.lightImpact();
+                                  widget.notifier.toggleActionStatus(
+                                    themeIndex: actualThemeIndex,
+                                    actionIndex: actionIndex,
+                                  );
+                                },
+                                child: Container(
+                                  width: 32,
+                                  height: 32,
+                                  decoration: BoxDecoration(
+                                    shape: BoxShape.circle,
+                                    color: existing.status == ActionStatus.completed
+                                        ? CupertinoColors.systemPurple
+                                        : existing.status == ActionStatus.inProgress
+                                            ? CupertinoColors.systemOrange
+                                            : CupertinoColors.systemGrey5,
+                                  ),
+                                  child: Icon(
+                                    existing.status == ActionStatus.completed
+                                        ? CupertinoIcons.checkmark_alt
+                                        : existing.status == ActionStatus.inProgress
+                                            ? CupertinoIcons.play_fill
+                                            : CupertinoIcons.circle,
+                                    color: existing.status == ActionStatus.notStarted
+                                        ? CupertinoColors.systemGrey
+                                        : CupertinoColors.white,
+                                    size: 16,
+                                  ),
                                 ),
                               ),
                               const SizedBox(width: 12),
@@ -383,7 +399,7 @@ class _ActionsStepState extends State<ActionsStep> {
                                           themeIndex: actualThemeIndex,
                                           actionIndex: actionIndex,
                                           text: '',
-                                          completed: false,
+                                          status: ActionStatus.notStarted,
                                         );
                                       },
                                       child: const Text('Delete'),

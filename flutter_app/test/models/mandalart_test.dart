@@ -9,7 +9,7 @@ void main() {
         id: 'test-id',
         themeId: 'theme-1',
         actionText: 'Test action',
-        isCompleted: false,
+        status: ActionStatus.notStarted,
         order: 0,
         createdAt: now,
         updatedAt: now,
@@ -30,7 +30,7 @@ void main() {
         id: 'test-id',
         themeId: 'theme-1',
         actionText: 'Original text',
-        isCompleted: false,
+        status: ActionStatus.notStarted,
         order: 0,
         createdAt: now,
         updatedAt: now,
@@ -53,13 +53,13 @@ void main() {
         id: 'test-id',
         themeId: 'theme-1',
         actionText: 'Test action',
-        isCompleted: false,
+        status: ActionStatus.notStarted,
         order: 0,
         createdAt: now,
         updatedAt: now,
       );
 
-      final updated = original.copyWith(isCompleted: true);
+      final updated = original.copyWith(status: ActionStatus.completed);
 
       expect(updated.isCompleted, true);
       expect(updated.actionText, original.actionText);
@@ -71,7 +71,7 @@ void main() {
         id: 'test-id',
         themeId: 'theme-1',
         actionText: 'Original text',
-        isCompleted: false,
+        status: ActionStatus.notStarted,
         order: 0,
         createdAt: now,
         updatedAt: now,
@@ -79,7 +79,7 @@ void main() {
 
       final updated = original.copyWith(
         actionText: 'Updated text',
-        isCompleted: true,
+        status: ActionStatus.completed,
       );
 
       expect(updated.actionText, 'Updated text');
@@ -135,7 +135,7 @@ void main() {
           id: '1',
           themeId: 'theme-0',
           actionText: 'Action 1',
-          isCompleted: false,
+          status: ActionStatus.notStarted,
           order: 0,
           createdAt: now,
           updatedAt: now,
@@ -170,7 +170,7 @@ void main() {
           id: '1',
           themeId: 'theme-0',
           actionText: 'Action 1',
-          isCompleted: false,
+          status: ActionStatus.notStarted,
           order: 0,
           createdAt: now,
           updatedAt: now,

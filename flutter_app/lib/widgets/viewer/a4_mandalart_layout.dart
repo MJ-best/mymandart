@@ -10,8 +10,7 @@ class A4MandalartLayout extends StatelessWidget {
   final MandalartStateModel state;
   final Object currentView;
   final void Function(int themeIndex) onThemeClick;
-  final void Function(int themeIndex, int actionIndex, bool completed)
-      onToggleAction;
+  final void Function(int themeIndex, int actionIndex) onToggleAction;
   final bool forScreenshot;
 
   const A4MandalartLayout({
@@ -157,7 +156,6 @@ class A4MandalartLayout extends StatelessWidget {
                                   onToggleAction(
                                     cell.themeIndex!,
                                     cell.actionIndex!,
-                                    !cell.isCompleted,
                                   );
                                 };
                               }

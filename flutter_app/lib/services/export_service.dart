@@ -16,13 +16,14 @@ class ExportService {
         if (themeText.trim().isNotEmpty) {
           grouped[themeText]!.add({
             'actionText': a.actionText,
-            'isCompleted': a.isCompleted,
+            'status': a.status.toJson(),
           });
         }
       }
     }
     final jsonData = {
       'goal': state.goalText,
+      'displayName': state.displayName,
       'themes': grouped.entries
           .map((e) => {
                 'themeText': e.key,
@@ -34,5 +35,82 @@ class ExportService {
 
     await Clipboard.setData(ClipboardData(
         text: const JsonEncoder.withIndent('  ').convert(jsonData)));
+  }
+
+  /// JSON 형식의 텍스트를 클립보드에서 가져와서 MandalartStateModel로 변환
+  static Future<MandalartStateModel?> importFromClipboard() async {
+    try {
+      final clipboardData = await Clipboard.getData('text/plain');
+      if (clipboardData == null || clipboardData.text == null) {
+        return null;
+      }
+
+      return importFromJson(clipboardData.text!);
+    } catch (e) {
+      return null;
+    }
+  }
+
+  /// JSON 문자열을 MandalartStateModel로 변환
+  static MandalartStateModel? importFromJson(String jsonString) {
+    try {
+      final data = jsonDecode(jsonString) as Map<String, dynamic>;
+
+      // 목표와 이름 추출
+      final goal = data['goal'] as String? ?? '';
+      final displayName = data['displayName'] as String? ?? '';
+
+      // 테마와 액션 아이템 추출
+      final themes = List<String>.filled(8, '');
+      final actionItems = <ActionItemModel>[];
+
+      final themesData = data['themes'] as List<dynamic>? ?? [];
+      for (var i = 0; i < themesData.length && i < 8; i++) {
+        final themeData = themesData[i] as Map<String, dynamic>;
+        final themeText = themeData['themeText'] as String? ?? '';
+        themes[i] = themeText;
+
+        final actionsData = themeData['actionItems'] as List<dynamic>? ?? [];
+        for (var j = 0; j < actionsData.length && j < 8; j++) {
+          final actionData = actionsData[j] as Map<String, dynamic>;
+          final actionText = actionData['actionText'] as String? ?? '';
+
+          // 상태 파싱 (하위 호환성)
+          ActionStatus status;
+          if (actionData.containsKey('status')) {
+            status = ActionStatus.fromJson(actionData['status'] as String);
+          } else if (actionData.containsKey('isCompleted')) {
+            status = (actionData['isCompleted'] as bool)
+                ? ActionStatus.completed
+                : ActionStatus.notStarted;
+          } else {
+            status = ActionStatus.notStarted;
+          }
+
+          if (actionText.trim().isNotEmpty) {
+            actionItems.add(ActionItemModel(
+              id: 'imported-$i-$j',
+              themeId: 'theme-$i',
+              actionText: actionText,
+              status: status,
+              order: j,
+              createdAt: DateTime.now(),
+              updatedAt: DateTime.now(),
+            ));
+          }
+        }
+      }
+
+      return MandalartStateModel(
+        displayName: displayName,
+        goalText: goal,
+        themes: themes,
+        actionItems: actionItems,
+        currentStep: 0,
+        showViewer: false,
+      );
+    } catch (e) {
+      return null;
+    }
   }
 }

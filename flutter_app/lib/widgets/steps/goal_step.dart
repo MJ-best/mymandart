@@ -4,6 +4,7 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/services.dart';
 import 'package:go_router/go_router.dart';
 import 'package:mandarart_journey/data/keywords.dart';
+import 'package:mandarart_journey/widgets/streak_widget.dart';
 
 class GoalStep extends StatefulWidget {
   final String value;
@@ -42,6 +43,9 @@ class _GoalStepState extends State<GoalStep> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
+        // 출석 체크 스트릭 위젯
+        const StreakWidget(),
+        const SizedBox(height: 32),
         Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [

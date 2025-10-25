@@ -1,4 +1,5 @@
 import 'package:flutter/cupertino.dart';
+import 'package:mandarart_journey/models/mandalart.dart';
 import 'package:mandarart_journey/utils/mandalart_grid.dart';
 
 class GridCellWidget extends StatelessWidget {
@@ -28,12 +29,20 @@ class GridCellWidget extends StatelessWidget {
         fontSize = 14;
         break;
       case 'action':
-        bg = cell.isCompleted
-            ? CupertinoColors.systemPurple.withOpacity(0.6)
-            : CupertinoColors.tertiarySystemFill.resolveFrom(context);
-        fg = cell.isCompleted
-            ? CupertinoColors.white
-            : CupertinoColors.label.resolveFrom(context);
+        switch (cell.status) {
+          case ActionStatus.completed:
+            bg = CupertinoColors.systemPurple.withOpacity(0.6);
+            fg = CupertinoColors.white;
+            break;
+          case ActionStatus.inProgress:
+            bg = CupertinoColors.systemOrange.withOpacity(0.6);
+            fg = CupertinoColors.white;
+            break;
+          case ActionStatus.notStarted:
+            bg = CupertinoColors.tertiarySystemFill.resolveFrom(context);
+            fg = CupertinoColors.label.resolveFrom(context);
+            break;
+        }
         fontSize = 13;
         break;
       default:

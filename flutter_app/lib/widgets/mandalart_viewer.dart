@@ -19,8 +19,7 @@ class MandalartViewer extends ConsumerStatefulWidget {
   final MandalartStateModel state;
   final VoidCallback onClose;
   final VoidCallback? onNavigateToActions;
-  final void Function(int themeIndex, int actionIndex, bool completed)
-      onToggleAction;
+  final void Function(int themeIndex, int actionIndex) onToggleAction;
   const MandalartViewer({
     super.key,
     required this.state,
@@ -36,7 +35,6 @@ class MandalartViewer extends ConsumerStatefulWidget {
 class _MandalartViewerState extends ConsumerState<MandalartViewer> {
   Object currentView = 'full'; // 'full' | int
   final ScreenshotController _screenshotController = ScreenshotController();
-  final ScreenshotController _a4ScreenshotController = ScreenshotController();
   late Map<String, String> _randomQuote;
   bool _isTodoExpanded = false;
 
@@ -120,7 +118,7 @@ class _MandalartViewerState extends ConsumerState<MandalartViewer> {
                     padding: EdgeInsets.zero,
                     onPressed: () {
                       HapticFeedback.lightImpact();
-                      _exportJson();
+                      _showJsonOptions();
                     },
                     child: const Icon(CupertinoIcons.doc_text),
                   ),
@@ -260,46 +258,39 @@ class _MandalartViewerState extends ConsumerState<MandalartViewer> {
   Widget _buildA4ViewerWithZoom() {
     return Container(
       color: CupertinoColors.systemGrey6.resolveFrom(context),
-      child: Stack(
-        children: [
-          // 화면에 표시되는 위젯 (다크모드 적용)
-          Center(
-            child: InteractiveViewer(
-              minScale: 0.5,
-              maxScale: 5.0,
-              panEnabled: true,
-              scaleEnabled: true,
-              boundaryMargin: const EdgeInsets.all(40),
-              child: A4MandalartLayout(
-                state: widget.state,
-                currentView: currentView,
-                onThemeClick: (themeIndex) {
-                  HapticFeedback.lightImpact();
-                  setState(() => currentView = themeIndex);
-                },
-                onToggleAction: (themeIndex, actionIndex, completed) {
-                  HapticFeedback.lightImpact();
-                  widget.onToggleAction(themeIndex, actionIndex, completed);
-                },
-                forScreenshot: false, // 화면에는 다크모드 적용
-              ),
-            ),
+      child: Center(
+        child: InteractiveViewer(
+          minScale: 0.5,
+          maxScale: 5.0,
+          panEnabled: true,
+          scaleEnabled: true,
+          boundaryMargin: const EdgeInsets.all(40),
+          child: A4MandalartLayout(
+            state: widget.state,
+            currentView: currentView,
+            onThemeClick: (themeIndex) {
+              HapticFeedback.lightImpact();
+              setState(() => currentView = themeIndex);
+            },
+            onToggleAction: (themeIndex, actionIndex) {
+              HapticFeedback.lightImpact();
+              widget.onToggleAction(themeIndex, actionIndex);
+            },
+            forScreenshot: false, // 화면에는 다크모드 적용
           ),
-          // 스크린샷용 위젯 (항상 밝은 배경, 화면에는 숨김)
-          Offstage(
-            child: Screenshot(
-              controller: _a4ScreenshotController,
-              child: A4MandalartLayout(
-                state: widget.state,
-                currentView: currentView,
-                onThemeClick: (themeIndex) {},
-                onToggleAction: (themeIndex, actionIndex, completed) {},
-                forScreenshot: true, // 스크린샷은 밝은 배경
-              ),
-            ),
-          ),
-        ],
+        ),
       ),
+    );
+  }
+
+  /// A4 레이아웃을 스크린샷용으로 생성
+  Widget _buildA4ForScreenshot() {
+    return A4MandalartLayout(
+      state: widget.state,
+      currentView: currentView,
+      onThemeClick: (themeIndex) {},
+      onToggleAction: (themeIndex, actionIndex) {},
+      forScreenshot: true, // 스크린샷은 밝은 배경
     );
   }
 
@@ -388,7 +379,7 @@ class _MandalartViewerState extends ConsumerState<MandalartViewer> {
               child: GestureDetector(
                 onTap: () {
                   HapticFeedback.lightImpact();
-                  widget.onToggleAction(themeIndex, actionIndex, true);
+                  widget.onToggleAction(themeIndex, actionIndex);
                 },
                 child: Container(
                   padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
@@ -551,7 +542,7 @@ class _MandalartViewerState extends ConsumerState<MandalartViewer> {
               child: GestureDetector(
                 onTap: () {
                   HapticFeedback.lightImpact();
-                  widget.onToggleAction(themeIndex, actionIndex, true);
+                  widget.onToggleAction(themeIndex, actionIndex);
                 },
                 child: Container(
                   padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
@@ -734,11 +725,44 @@ class _MandalartViewerState extends ConsumerState<MandalartViewer> {
     bool isA4Only,
   ) async {
     try {
-      // A4만 저장할지 전체 화면을 저장할지에 따라 다른 controller 사용
-      final controller = isA4Only ? _a4ScreenshotController : _screenshotController;
+      Uint8List? image;
       final contentType = isA4Only ? '만다라트' : '전체 화면';
 
-      final image = await ImageService.captureWithPreset(controller, preset);
+      if (isA4Only) {
+        // A4만 저장하는 경우 동적으로 위젯 생성하여 캡처
+        final tempController = ScreenshotController();
+        final a4Widget = RepaintBoundary(
+          child: _buildA4ForScreenshot(),
+        );
+
+        // 위젯을 오버레이에 추가하여 렌더링
+        final overlay = Overlay.of(context);
+        late OverlayEntry entry;
+        entry = OverlayEntry(
+          builder: (context) => Positioned(
+            left: -10000,
+            top: 0,
+            child: Screenshot(
+              controller: tempController,
+              child: a4Widget,
+            ),
+          ),
+        );
+
+        overlay.insert(entry);
+
+        // 렌더링이 완료될 때까지 대기
+        await Future.delayed(const Duration(milliseconds: 100));
+
+        image = await ImageService.captureWithPreset(tempController, preset);
+
+        // 오버레이 제거
+        entry.remove();
+      } else {
+        // 전체 화면 저장
+        image = await ImageService.captureWithPreset(_screenshotController, preset);
+      }
+
       if (image == null) {
         if (mounted) {
           _showCupertinoAlert('이미지 캡처에 실패했습니다. 다시 시도해주세요.');
@@ -768,11 +792,85 @@ class _MandalartViewerState extends ConsumerState<MandalartViewer> {
     }
   }
 
+  void _showJsonOptions() {
+    showCupertinoModalPopup(
+      context: context,
+      builder: (context) => CupertinoActionSheet(
+        title: const Text('JSON 데이터 관리'),
+        message: const Text('JSON 형식으로 내보내거나 가져올 수 있습니다'),
+        actions: [
+          CupertinoActionSheetAction(
+            onPressed: () {
+              Navigator.pop(context);
+              Future.microtask(() => _exportJson());
+            },
+            child: const Text('JSON 내보내기 (클립보드 복사)'),
+          ),
+          CupertinoActionSheetAction(
+            onPressed: () {
+              Navigator.pop(context);
+              Future.microtask(() => _importJson());
+            },
+            child: const Text('JSON 불러오기 (클립보드에서)'),
+          ),
+        ],
+        cancelButton: CupertinoActionSheetAction(
+          onPressed: () => Navigator.pop(context),
+          isDefaultAction: true,
+          child: const Text('취소'),
+        ),
+      ),
+    );
+  }
+
   Future<void> _exportJson() async {
     await ExportService.exportToJson(widget.state);
     if (mounted) {
       HapticFeedback.mediumImpact();
       _showCupertinoAlert('JSON이 클립보드에 복사되었습니다.');
+    }
+  }
+
+  Future<void> _importJson() async {
+    final importedState = await ExportService.importFromClipboard();
+    if (importedState == null) {
+      if (mounted) {
+        _showCupertinoAlert('클립보드에서 유효한 JSON 데이터를 찾을 수 없습니다.');
+      }
+      return;
+    }
+
+    if (mounted) {
+      // 확인 다이얼로그 표시
+      showCupertinoDialog(
+        context: context,
+        builder: (context) => CupertinoAlertDialog(
+          title: const Text('JSON 불러오기'),
+          content: const Text('현재 작업 중인 만다라트를 불러온 데이터로 교체하시겠습니까?\n현재 데이터는 저장되지 않습니다.'),
+          actions: [
+            CupertinoDialogAction(
+              child: const Text('취소'),
+              onPressed: () => Navigator.of(context).pop(),
+            ),
+            CupertinoDialogAction(
+              isDestructiveAction: true,
+              onPressed: () async {
+                Navigator.of(context).pop();
+                final success = await ref.read(mandalartProvider.notifier).importFromState(importedState);
+                if (mounted) {
+                  HapticFeedback.mediumImpact();
+                  if (success) {
+                    _showCupertinoAlert('JSON 데이터를 성공적으로 불러왔습니다.');
+                  } else {
+                    _showCupertinoAlert('JSON 데이터를 불러오는 중 오류가 발생했습니다.');
+                  }
+                }
+              },
+              child: const Text('불러오기'),
+            ),
+          ],
+        ),
+      );
     }
   }
 

@@ -2,6 +2,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:mandarart_journey/providers/mandalart_provider.dart';
+import 'package:mandarart_journey/models/mandalart.dart';
 
 void main() {
   TestWidgetsFlutterBinding.ensureInitialized();
@@ -129,7 +130,7 @@ void main() {
       notifier.updateActionItem(
         themeIndex: 0,
         actionIndex: 0,
-        completed: true,
+        status: ActionStatus.completed,
       );
       await Future.delayed(const Duration(milliseconds: 50));
 

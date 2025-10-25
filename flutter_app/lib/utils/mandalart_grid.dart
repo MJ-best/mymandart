@@ -3,16 +3,21 @@ import 'package:mandarart_journey/models/mandalart.dart';
 class GridCell {
   final String? text;
   final String type; // goal | theme | outer-theme | action | empty
-  final bool isCompleted;
+  final ActionStatus status;
   final int? themeIndex;
   final int? actionIndex;
   const GridCell({
     this.text,
     required this.type,
-    this.isCompleted = false,
+    this.status = ActionStatus.notStarted,
     this.themeIndex,
     this.actionIndex,
   });
+
+  // 하위 호환성을 위한 getter
+  bool get isCompleted => status == ActionStatus.completed;
+  bool get isInProgress => status == ActionStatus.inProgress;
+  bool get isNotStarted => status == ActionStatus.notStarted;
 }
 
 List<List<GridCell>> createMandalartGrid(MandalartStateModel state) {
@@ -90,7 +95,7 @@ List<List<GridCell>> createMandalartGrid(MandalartStateModel state) {
       grid[p[0]][p[1]] = GridCell(
         text: a.actionText,
         type: 'action',
-        isCompleted: a.isCompleted,
+        status: a.status,
         themeIndex: i,
         actionIndex: a.order,
       );
@@ -130,7 +135,7 @@ List<List<GridCell>> createThemeGrid(
     grid[p[0]][p[1]] = GridCell(
       text: a.actionText,
       type: 'action',
-      isCompleted: a.isCompleted,
+      status: a.status,
       themeIndex: themeIndex,
       actionIndex: a.order,
     );
