@@ -624,6 +624,368 @@ context.pop(); // 저장된 만다라트 화면 닫기 → 이전 화면으로
 
 ---
 
+## 2025-10-26 - 페이지 구조 재구성 및 꾸준점수 통합
+
+### 배경
+사용자가 만다라트를 작성하면서 꾸준히 접속하도록 동기부여하는 시스템이 필요했습니다. 또한 테마와 액션 아이템이 분리되어 있어 연결성이 약했고, 3번째 페이지는 뷰어만 보여주어 활용도가 낮았습니다.
+
+### 목표
+1. 페이지 구조를 3개로 재구성하여 각 페이지의 목적을 명확히 함
+2. 출석체크 시스템(꾸준점수)을 추가하여 사용자 참여 유도
+3. 테마와 액션 아이템을 통합하여 연결성 강화
+4. 만다라트 차트를 별도 페이지가 아닌 메인 흐름의 마지막 페이지로 통합
+
+### 구현 내용
+
+#### 1. 새로운 페이지 구조
+
+**변경 전 (4개 페이지)**:
+- Page 0: GoalStep (목표 입력)
+- Page 1: ThemesStep (테마 입력)
+- Page 2: ActionsStep (액션 아이템 입력)
+- 별도: MandalartViewer (뷰어 - showViewer 플래그로 전환)
+
+**변경 후 (3개 페이지)**:
+- Page 0: GoalStep (목표 입력)
+- Page 1: CombinedStep (테마 + 액션 통합 + 꾸준점수)
+- Page 2: MandalartViewer (만다라트 차트)
+
+#### 2. CombinedStep 위젯 생성 (`lib/widgets/steps/combined_step.dart`)
+
+테마 입력과 액션 아이템 입력을 하나의 위젯으로 통합:
+
+**주요 기능**:
+1. **꾸준점수 위젯** (최상단):
+   - 연속 출석 일수 표시
+   - 21일/66일 진행바
+   - 탭하여 출석체크
+   - 상태별 색상 변화 (재 → 연기 → 불 → 강한 불)
+
+2. **중심 목표 표시**:
+   - 보라색 그라데이션 배경
+   - 별 아이콘과 함께 표시
+   - 화살표로 확장 관계 시각화
+
+3. **8가지 핵심 영역 (테마)**:
+   - 각 테마별 입력 필드
+   - 펼치기/접기 가능한 UI
+   - 테마 예제 키워드 제공
+
+4. **액션 아이템 (테마별 8개)**:
+   - 테마를 펼치면 해당 액션 아이템 표시
+   - 상태 아이콘 (미시작/진행중/완료)
+   - 컨텍스트 메뉴 (Clear/Delete)
+   - 액션 아이디어 표시
+
+**코드 구조**:
+```dart
+class CombinedStep extends ConsumerStatefulWidget {
+  final MandalartStateModel state;
+  final MandalartNotifier notifier;
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      children: [
+        // 1. 출석체크 위젯
+        const StreakWidget(),
+
+        // 2. 중심 목표 표시
+        if (hasGoal) ...[
+          Container(/* 목표 카드 */),
+        ],
+
+        // 3. 테마 입력 + 액션 아이템
+        ...List.generate(8, (themeIndex) {
+          return Container(
+            child: Column(
+              children: [
+                // 테마 입력 필드
+                CupertinoTextField(/* ... */),
+
+                // 확장 시 액션 아이템 표시
+                if (isExpanded) ...[
+                  _buildActionItems(themeIndex, themeTitle),
+                ],
+              ],
+            ),
+          );
+        }),
+      ],
+    );
+  }
+}
+```
+
+#### 3. MandalartViewer PageView 통합 (`lib/widgets/mandalart_viewer.dart`)
+
+**문제**: MandalartViewer가 CupertinoPageScaffold를 사용하여 PageView 안에 넣으면 nested scaffold 문제 발생
+
+**해결**: `withScaffold` 파라미터 추가
+
+```dart
+class MandalartViewer extends ConsumerStatefulWidget {
+  final bool withScaffold; // 추가
+
+  const MandalartViewer({
+    super.key,
+    required this.state,
+    required this.onClose,
+    this.onNavigateToActions,
+    required this.onToggleAction,
+    this.withScaffold = true, // 기본값
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final body = SafeArea(
+      child: isLandscape ? _buildLandscapeLayout() : _buildPortraitLayout(),
+    );
+
+    if (!withScaffold) {
+      // PageView 안에서 사용: scaffold 없이 body만
+      return Screenshot(
+        controller: _screenshotController,
+        child: Container(
+          color: CupertinoColors.systemGroupedBackground.resolveFrom(context),
+          child: body,
+        ),
+      );
+    }
+
+    // 독립 페이지: scaffold 포함
+    return Screenshot(
+      controller: _screenshotController,
+      child: CupertinoPageScaffold(/* ... */),
+    );
+  }
+}
+```
+
+**사용 방법**:
+```dart
+// PageView 안에서
+MandalartViewer(
+  state: state,
+  withScaffold: false, // scaffold 제거
+  onClose: () => notifier.setStep(1),
+  onToggleAction: (themeIndex, actionIndex) => /* ... */,
+)
+```
+
+#### 4. StreakWidget 다크모드 적용 (`lib/widgets/streak_widget.dart`)
+
+**문제**: 다크모드 전환 시 꾸준점수판 색상이 변경되지 않음
+
+**원인**: `MediaQuery.of(context).platformBrightness` 사용
+- 시스템 다크모드 설정만 가져옴
+- 앱 내부 테마 토글과 동기화 안 됨
+
+**해결**: `CupertinoTheme.brightnessOf(context)` 사용
+
+```dart
+@override
+Widget build(BuildContext context, WidgetRef ref) {
+  final streak = ref.watch(streakProvider);
+  final brightness = CupertinoTheme.brightnessOf(context); // 수정
+  final isDark = brightness == Brightness.dark;
+
+  return GestureDetector(
+    child: Container(
+      decoration: BoxDecoration(
+        gradient: LinearGradient(
+          colors: _getGradientColors(streak.status, isDark), // isDark 전달
+        ),
+      ),
+    ),
+  );
+}
+
+List<Color> _getGradientColors(StreakStatus status, bool isDark) {
+  switch (status) {
+    case StreakStatus.ash:
+      return isDark
+          ? [Color(0xFF4B5563), Color(0xFF374151)] // 어두운 회색
+          : [Color(0xFF6B7280), Color(0xFF4B5563)]; // 밝은 회색
+    case StreakStatus.fire:
+      return isDark
+          ? [Color(0xFFEA580C), Color(0xFFC2410C)] // 어두운 오렌지
+          : [Color(0xFFF97316), Color(0xFFEA580C)]; // 밝은 오렌지
+    // ...
+  }
+}
+```
+
+**효과**: 테마 토글 버튼 클릭 시 즉시 꾸준점수판 색상 변경
+
+#### 5. 랜딩페이지 그라디언트 제거 (`lib/screens/landing_screen.dart`)
+
+**변경 전**:
+```dart
+return Container(
+  decoration: BoxDecoration(
+    gradient: LinearGradient(
+      colors: [backgroundTint, CupertinoColors.systemBackground],
+      begin: Alignment.topLeft,
+      end: Alignment.bottomRight,
+    ),
+    borderRadius: BorderRadius.circular(20),
+    border: Border.all(color: borderTint),
+  ),
+)
+```
+
+**변경 후**:
+```dart
+return Container(
+  decoration: BoxDecoration(
+    color: backgroundTint, // 단색 배경
+    borderRadius: BorderRadius.circular(20),
+    border: Border.all(color: borderTint),
+  ),
+)
+```
+
+**효과**: 더 깔끔하고 단순한 디자인
+
+#### 6. StreakWidget 위치 조정 (`lib/widgets/mandalart_viewer.dart`)
+
+**변경 내용**:
+- 세로 모드: TODO 리스트 위로 이동 (Line 215)
+- 가로 모드: TODO 리스트 위로 이동 (Line 272)
+
+**변경 전**:
+```
+[전체보기 버튼]
+[TODO 리스트]
+[꾸준점수]
+[명언]
+```
+
+**변경 후**:
+```
+[전체보기 버튼]
+[꾸준점수]
+[TODO 리스트]
+[명언]
+```
+
+#### 7. mandalart_app.dart 수정 (`lib/screens/mandalart_app.dart`)
+
+**showViewer 플래그 제거**:
+```dart
+// 변경 전
+if (state.showViewer) {
+  return MandalartViewer(/* ... */);
+}
+return CupertinoPageScaffold(/* ... */);
+
+// 변경 후 - PageView 안에 직접 포함
+return CupertinoPageScaffold(
+  child: PageView(
+    children: [
+      // Page 0: 목표
+      SingleChildScrollView(
+        child: GoalStep(/* ... */),
+      ),
+      // Page 1: 테마 + 액션 + 꾸준점수
+      SingleChildScrollView(
+        child: CombinedStep(state: state, notifier: notifier),
+      ),
+      // Page 2: 만다라트 차트
+      MandalartViewer(
+        state: state,
+        withScaffold: false,
+        onClose: () => notifier.setStep(1),
+        onToggleAction: (themeIndex, actionIndex) => /* ... */,
+      ),
+    ],
+  ),
+);
+```
+
+**네비게이션 바 수정**:
+```dart
+// 뷰어 아이콘 버튼 제거
+trailing: _buildThemeToggleButton(ref), // 테마 토글만 남김
+```
+
+### 파일 변경 요약
+
+1. **새로 생성**:
+   - `lib/widgets/steps/combined_step.dart` - 테마 + 액션 통합 위젯
+
+2. **주요 수정**:
+   - `lib/screens/mandalart_app.dart`
+     - showViewer 조건문 제거
+     - PageView를 3개 페이지로 재구성
+     - 네비게이션 바에서 뷰어 버튼 제거
+     - import 정리 (ThemesStep, ActionsStep 대신 CombinedStep)
+
+   - `lib/widgets/mandalart_viewer.dart`
+     - withScaffold 파라미터 추가
+     - PageView 모드와 독립 모드 분리
+     - StreakWidget import 추가
+     - StreakWidget 위치를 TODO 위로 이동
+
+   - `lib/widgets/streak_widget.dart`
+     - CupertinoTheme.brightnessOf(context) 사용
+     - _getGradientColors에 isDark 파라미터 추가
+     - _getPrimaryColor에 isDark 파라미터 추가
+     - 다크모드별 색상 정의
+
+   - `lib/screens/landing_screen.dart`
+     - _LandingHighlightCard에서 gradient 제거
+     - 단색 배경으로 변경
+
+### 사용자 경험 개선
+
+1. **명확한 페이지 흐름**:
+   - Page 0: 목표 설정
+   - Page 1: 구체적 계획 (테마 + 액션 + 출석)
+   - Page 2: 전체 시각화
+   - 각 페이지의 목적이 명확함
+
+2. **테마-액션 연결성 강화**:
+   - 테마를 펼치면 바로 액션 아이템 보임
+   - 각 테마가 어떤 행동으로 구체화되는지 직관적
+   - 한 화면에서 목표 → 테마 → 액션의 흐름 확인
+
+3. **꾸준한 참여 유도**:
+   - 만다라트 페이지에 꾸준점수 표시
+   - 연속 출석 일수 추적
+   - 21일/66일 습관화 목표 제시
+   - 상태별 시각적 피드백 (불 → 강한 불)
+
+4. **다크모드 완벽 지원**:
+   - 모든 위젯이 테마에 반응
+   - 꾸준점수판도 즉시 색상 변경
+   - 일관된 사용자 경험
+
+5. **깔끔한 디자인**:
+   - 불필요한 그라디언트 제거
+   - 단순하고 명확한 UI
+   - 정보 계층 구조 개선
+
+### 테스트 결과
+
+- **Flutter analyze**: No issues found!
+- **페이지 전환**: 부드러운 애니메이션
+- **꾸준점수**: 출석체크 정상 작동
+- **테마-액션 펼치기**: 정상 작동
+- **다크모드**: 모든 화면에서 완벽 작동
+- **만다라트 차트**: PageView 안에서 정상 렌더링
+- **네비게이션**: 뒤로가기/앞으로가기 정상 작동
+
+### 핵심 개념
+
+1. **위젯 재사용성**: MandalartViewer를 독립 페이지와 PageView 모두에서 사용 가능하게 설계
+2. **테마 관리**: CupertinoTheme.brightnessOf를 사용하여 앱 테마와 완벽 동기화
+3. **정보 계층**: 목표 → 테마 → 액션의 확장 구조를 UI로 시각화
+4. **사용자 동기부여**: 꾸준점수로 지속적인 참여 유도
+
+---
+
 ## 2025-10-17 - 사용자 경험 개선 및 흐름 재구성
 
 ### 문제 상황

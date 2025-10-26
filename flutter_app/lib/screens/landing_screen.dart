@@ -283,11 +283,7 @@ class _LandingHighlightCard extends StatelessWidget {
 
     return Container(
       decoration: BoxDecoration(
-        gradient: LinearGradient(
-          colors: [backgroundTint, CupertinoColors.systemBackground],
-          begin: Alignment.topLeft,
-          end: Alignment.bottomRight,
-        ),
+        color: backgroundTint,
         borderRadius: BorderRadius.circular(20),
         border: Border.all(color: borderTint),
       ),

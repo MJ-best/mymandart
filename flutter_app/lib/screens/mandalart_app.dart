@@ -8,8 +8,7 @@ import 'package:mandarart_journey/widgets/mandalart_viewer.dart';
 import 'package:mandarart_journey/widgets/step_progress_indicator.dart';
 import 'package:mandarart_journey/widgets/step_arrow_button.dart';
 import 'package:mandarart_journey/widgets/steps/goal_step.dart';
-import 'package:mandarart_journey/widgets/steps/themes_step.dart';
-import 'package:mandarart_journey/widgets/steps/actions_step.dart';
+import 'package:mandarart_journey/widgets/steps/combined_step.dart';
 import 'package:mandarart_journey/screens/landing_screen.dart';
 import 'package:responsive_builder/responsive_builder.dart';
 
@@ -70,42 +69,6 @@ class _MandalartAppScreenState extends ConsumerState<MandalartAppScreen> {
       },
     );
 
-    // Listen to viewer state changes to update page controller
-    ref.listen<bool>(
-      mandalartProvider.select((value) => value.showViewer),
-      (previous, next) {
-        // Viewer가 닫힐 때 (true -> false) PageController를 현재 step으로 업데이트
-        if (previous == true && next == false) {
-          WidgetsBinding.instance.addPostFrameCallback((_) {
-            if (mounted && _pageController.hasClients) {
-              _pageController.jumpToPage(state.currentStep);
-            }
-          });
-        }
-      },
-    );
-
-    if (state.showViewer) {
-      return MandalartViewer(
-        state: state,
-        onClose: notifier.closeViewer,
-        onNavigateToActions: () {
-          // 뷰어 닫고 Page 2 (액션 아이템 페이지)로 이동
-          notifier.closeViewer();
-          Future.delayed(const Duration(milliseconds: 100), () {
-            if (mounted && _pageController.hasClients) {
-              notifier.setStep(2);
-            }
-          });
-        },
-        onToggleAction: (themeIndex, actionIndex) {
-          notifier.toggleActionStatus(
-            themeIndex: themeIndex,
-            actionIndex: actionIndex,
-          );
-        },
-      );
-    }
 
     return CupertinoPageScaffold(
       navigationBar: CupertinoNavigationBar(
@@ -129,25 +92,7 @@ class _MandalartAppScreenState extends ConsumerState<MandalartAppScreen> {
         ),
         backgroundColor: CupertinoColors.systemBackground,
         border: null,
-        trailing: Row(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            _buildThemeToggleButton(ref),
-            const SizedBox(width: 8),
-            Semantics(
-              label: 'View Mandalart grid',
-              button: true,
-              child: CupertinoButton(
-                padding: EdgeInsets.zero,
-                onPressed: () {
-                  HapticFeedback.lightImpact();
-                  notifier.openViewer();
-                },
-                child: const Icon(CupertinoIcons.square_grid_2x2),
-              ),
-            ),
-          ],
-        ),
+        trailing: _buildThemeToggleButton(ref),
       ),
       child: SafeArea(
         child: Column(
@@ -177,17 +122,13 @@ class _MandalartAppScreenState extends ConsumerState<MandalartAppScreen> {
                   const SizedBox(width: 12),
                   StepArrowButton(
                     icon: CupertinoIcons.chevron_forward,
-                    semanticLabel: state.currentStep < 2
-                        ? '다음 단계로 이동'
-                        : '만다라트 보기 열기',
-                    onPressed: () {
-                      HapticFeedback.mediumImpact();
-                      if (state.currentStep < 2) {
-                        notifier.nextStep();
-                      } else {
-                        notifier.openViewer();
-                      }
-                    },
+                    semanticLabel: '다음 단계로 이동',
+                    onPressed: state.currentStep < 2
+                        ? () {
+                            HapticFeedback.mediumImpact();
+                            notifier.nextStep();
+                          }
+                        : null,
                   ),
                 ],
               ),
@@ -229,31 +170,58 @@ class _MandalartAppScreenState extends ConsumerState<MandalartAppScreen> {
           notifier.setStep(page);
         }
       },
-      children: List.generate(3, (index) {
-        return SingleChildScrollView(
+      children: [
+        // Page 0: 목표 입력
+        SingleChildScrollView(
           physics: const BouncingScrollPhysics(),
           padding: padding,
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              if (index == 0)
-                GoalStep(
-                  value: state.goalText,
-                  onChange: notifier.updateGoal,
-                )
-              else if (index == 1)
-                ThemesStep(
-                  goalText: state.goalText,
-                  themes: state.themes,
-                  onChange: notifier.updateThemes,
-                )
-              else
-                ActionsStep(state: state, notifier: notifier),
+              GoalStep(
+                value: state.goalText,
+                onChange: notifier.updateGoal,
+              ),
               const SizedBox(height: 32),
             ],
           ),
-        );
-      }),
+        ),
+        // Page 1: 테마 + 액션 아이템 (통합)
+        SingleChildScrollView(
+          physics: const BouncingScrollPhysics(),
+          padding: padding,
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              CombinedStep(state: state, notifier: notifier),
+              const SizedBox(height: 32),
+            ],
+          ),
+        ),
+        // Page 2: 만다라트 뷰어
+        MandalartViewer(
+          state: state,
+          withScaffold: false,
+          onClose: () {
+            // 이전 페이지로 돌아가기
+            if (mounted && _pageController.hasClients) {
+              notifier.setStep(1);
+            }
+          },
+          onNavigateToActions: () {
+            // Page 1로 이동
+            if (mounted && _pageController.hasClients) {
+              notifier.setStep(1);
+            }
+          },
+          onToggleAction: (themeIndex, actionIndex) {
+            notifier.toggleActionStatus(
+              themeIndex: themeIndex,
+              actionIndex: actionIndex,
+            );
+          },
+        ),
+      ],
     );
   }
 

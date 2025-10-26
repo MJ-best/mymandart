@@ -14,18 +14,21 @@ import 'package:mandarart_journey/services/image_service.dart';
 import 'package:mandarart_journey/providers/theme_provider.dart';
 import 'package:mandarart_journey/providers/mandalart_provider.dart';
 import 'package:mandarart_journey/widgets/viewer/a4_mandalart_layout.dart';
+import 'package:mandarart_journey/widgets/streak_widget.dart';
 
 class MandalartViewer extends ConsumerStatefulWidget {
   final MandalartStateModel state;
   final VoidCallback onClose;
   final VoidCallback? onNavigateToActions;
   final void Function(int themeIndex, int actionIndex) onToggleAction;
+  final bool withScaffold;
   const MandalartViewer({
     super.key,
     required this.state,
     required this.onClose,
     this.onNavigateToActions,
     required this.onToggleAction,
+    this.withScaffold = true,
   });
 
   @override
@@ -52,6 +55,30 @@ class _MandalartViewerState extends ConsumerState<MandalartViewer> {
     final mediaQuery = MediaQuery.of(context);
     final isLandscape = mediaQuery.orientation == Orientation.landscape;
 
+    final body = SafeArea(
+      child: isLandscape
+          ? _buildLandscapeLayout()
+          : _buildPortraitLayout(),
+    );
+
+    if (!widget.withScaffold) {
+      // PageView 안에서 사용할 때: scaffold 없이 body만 렌더링
+      return Screenshot(
+        controller: _screenshotController,
+        child: AnimatedSwitcher(
+          duration: const Duration(milliseconds: 300),
+          switchInCurve: Curves.easeOut,
+          switchOutCurve: Curves.easeIn,
+          child: Container(
+            key: ValueKey(currentView),
+            color: CupertinoColors.systemGroupedBackground.resolveFrom(context),
+            child: body,
+          ),
+        ),
+      );
+    }
+
+    // 독립 페이지로 사용할 때: scaffold 포함
     return Screenshot(
       controller: _screenshotController,
       child: AnimatedSwitcher(
@@ -138,11 +165,7 @@ class _MandalartViewerState extends ConsumerState<MandalartViewer> {
               ],
             ),
           ),
-          child: SafeArea(
-            child: isLandscape
-                ? _buildLandscapeLayout()
-                : _buildPortraitLayout(),
-          ),
+          child: body,
         ),
       ),
     );
@@ -188,6 +211,9 @@ class _MandalartViewerState extends ConsumerState<MandalartViewer> {
                       ),
                     ),
                   if (!isFull) const SizedBox(height: 12),
+                  // 꾸준점수 (출석체크)
+                  const StreakWidget(),
+                  const SizedBox(height: 12),
                   // TODO 리스트 미리보기 (확장 시 명언이 아래로 밀림)
                   _buildTodoListPreview(),
                   const SizedBox(height: 12),
@@ -241,6 +267,9 @@ class _MandalartViewerState extends ConsumerState<MandalartViewer> {
                       ),
                     ),
                   ),
+                const SizedBox(height: 20),
+                // 꾸준점수 (출석체크)
+                const StreakWidget(),
                 const SizedBox(height: 20),
                 // TODO 리스트 추가
                 _buildTodoList(),

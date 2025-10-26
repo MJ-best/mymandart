@@ -10,6 +10,8 @@ class StreakWidget extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final streak = ref.watch(streakProvider);
+    final brightness = CupertinoTheme.brightnessOf(context);
+    final isDark = brightness == Brightness.dark;
 
     return GestureDetector(
       onTap: () async {
@@ -26,14 +28,14 @@ class StreakWidget extends ConsumerWidget {
         padding: const EdgeInsets.all(16),
         decoration: BoxDecoration(
           gradient: LinearGradient(
-            colors: _getGradientColors(streak.status),
+            colors: _getGradientColors(streak.status, isDark),
             begin: Alignment.topLeft,
             end: Alignment.bottomRight,
           ),
           borderRadius: BorderRadius.circular(16),
           boxShadow: [
             BoxShadow(
-              color: _getPrimaryColor(streak.status).withOpacity(0.3),
+              color: _getPrimaryColor(streak.status, isDark).withOpacity(0.3),
               blurRadius: 8,
               offset: const Offset(0, 4),
             ),
@@ -213,41 +215,61 @@ class StreakWidget extends ConsumerWidget {
     );
   }
 
-  List<Color> _getGradientColors(StreakStatus status) {
+  List<Color> _getGradientColors(StreakStatus status, bool isDark) {
     switch (status) {
       case StreakStatus.ash:
-        return [
-          const Color(0xFF6B7280),
-          const Color(0xFF4B5563),
-        ];
+        return isDark
+            ? [
+                const Color(0xFF2D3139),
+                const Color(0xFF23272F),
+              ]
+            : [
+                const Color(0xFF6B7280),
+                const Color(0xFF4B5563),
+              ];
       case StreakStatus.smoke:
-        return [
-          const Color(0xFF9CA3AF),
-          const Color(0xFF6B7280),
-        ];
+        return isDark
+            ? [
+                const Color(0xFF3F4451),
+                const Color(0xFF2D3139),
+              ]
+            : [
+                const Color(0xFF9CA3AF),
+                const Color(0xFF6B7280),
+              ];
       case StreakStatus.fire:
-        return [
-          const Color(0xFFF97316),
-          const Color(0xFFEA580C),
-        ];
+        return isDark
+            ? [
+                const Color(0xFF5A5E6B),
+                const Color(0xFF4B5563),
+              ]
+            : [
+                const Color(0xFFF97316),
+                const Color(0xFFEA580C),
+              ];
       case StreakStatus.strongFire:
-        return [
-          const Color(0xFFDC2626),
-          const Color(0xFFB91C1C),
-        ];
+        return isDark
+            ? [
+                const Color(0xFF6B7280),
+                const Color(0xFF5A5E6B),
+              ]
+            : [
+                const Color(0xFFDC2626),
+                const Color(0xFFB91C1C),
+              ];
     }
   }
 
-  Color _getPrimaryColor(StreakStatus status) {
+  Color _getPrimaryColor(StreakStatus status, bool isDark) {
     switch (status) {
       case StreakStatus.ash:
-        return const Color(0xFF6B7280);
+        return isDark ? const Color(0xFF2D3139) : const Color(0xFF6B7280);
       case StreakStatus.smoke:
-        return const Color(0xFF9CA3AF);
+        return isDark ? const Color(0xFF3F4451) : const Color(0xFF9CA3AF);
       case StreakStatus.fire:
-        return const Color(0xFFF97316);
+        return isDark ? const Color(0xFF5A5E6B) : const Color(0xFFF97316);
       case StreakStatus.strongFire:
-        return const Color(0xFFDC2626);
+        return isDark ? const Color(0xFF6B7280) : const Color(0xFFDC2626);
     }
   }
 
