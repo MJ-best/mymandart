@@ -177,6 +177,9 @@ class _MandalartViewerState extends ConsumerState<MandalartViewer> {
 
     return Column(
       children: [
+        // withScaffold가 false일 때 상단에 버튼 행 추가
+        if (!widget.withScaffold) _buildActionButtons(),
+
         // 2/3: A4 만다라트 뷰어 (확대/축소 가능)
         Expanded(
           flex: 2,
@@ -232,51 +235,60 @@ class _MandalartViewerState extends ConsumerState<MandalartViewer> {
   Widget _buildLandscapeLayout() {
     final isFull = currentView == 'full';
 
-    return Row(
+    return Column(
       children: [
-        // 왼쪽: A4 만다라트 뷰어
-        Expanded(
-          flex: 3,
-          child: _buildA4ViewerWithZoom(),
-        ),
+        // withScaffold가 false일 때 상단에 버튼 행 추가
+        if (!widget.withScaffold) _buildActionButtons(),
 
-        // 오른쪽: TODO 리스트, 정보와 버튼
         Expanded(
-          flex: 2,
-          child: SingleChildScrollView(
-            padding: const EdgeInsets.all(16),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.stretch,
-              children: [
-                if (!isFull)
-                  Semantics(
-                    label: 'Return to full view',
-                    button: true,
-                    child: CupertinoButton.filled(
-                      onPressed: () {
-                        HapticFeedback.lightImpact();
-                        setState(() => currentView = 'full');
-                      },
-                      child: const Row(
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          Icon(CupertinoIcons.arrow_left, size: 20),
-                          SizedBox(width: 8),
-                          Text('전체보기'),
-                        ],
-                      ),
-                    ),
+          child: Row(
+            children: [
+              // 왼쪽: A4 만다라트 뷰어
+              Expanded(
+                flex: 3,
+                child: _buildA4ViewerWithZoom(),
+              ),
+
+              // 오른쪽: TODO 리스트, 정보와 버튼
+              Expanded(
+                flex: 2,
+                child: SingleChildScrollView(
+                  padding: const EdgeInsets.all(16),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.stretch,
+                    children: [
+                      if (!isFull)
+                        Semantics(
+                          label: 'Return to full view',
+                          button: true,
+                          child: CupertinoButton.filled(
+                            onPressed: () {
+                              HapticFeedback.lightImpact();
+                              setState(() => currentView = 'full');
+                            },
+                            child: const Row(
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                Icon(CupertinoIcons.arrow_left, size: 20),
+                                SizedBox(width: 8),
+                                Text('전체보기'),
+                              ],
+                            ),
+                          ),
+                        ),
+                      const SizedBox(height: 20),
+                      // 꾸준점수 (출석체크)
+                      const StreakWidget(),
+                      const SizedBox(height: 20),
+                      // TODO 리스트 추가
+                      _buildTodoList(),
+                      const SizedBox(height: 20),
+                      _buildMotivationalQuote(),
+                    ],
                   ),
-                const SizedBox(height: 20),
-                // 꾸준점수 (출석체크)
-                const StreakWidget(),
-                const SizedBox(height: 20),
-                // TODO 리스트 추가
-                _buildTodoList(),
-                const SizedBox(height: 20),
-                _buildMotivationalQuote(),
-              ],
-            ),
+                ),
+              ),
+            ],
           ),
         ),
       ],
@@ -672,6 +684,97 @@ class _MandalartViewerState extends ConsumerState<MandalartViewer> {
               fontSize: 13,
               fontWeight: FontWeight.w600,
               color: CupertinoColors.systemPurple,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  /// withScaffold가 false일 때 표시할 액션 버튼들
+  Widget _buildActionButtons() {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+      decoration: BoxDecoration(
+        color: CupertinoColors.systemBackground.resolveFrom(context),
+        border: Border(
+          bottom: BorderSide(
+            color: CupertinoColors.separator.resolveFrom(context),
+            width: 0.5,
+          ),
+        ),
+      ),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.end,
+        children: [
+          // 저장 버튼
+          Semantics(
+            label: 'Save mandalart',
+            button: true,
+            child: CupertinoButton(
+              padding: EdgeInsets.zero,
+              onPressed: () {
+                HapticFeedback.lightImpact();
+                _saveMandalart();
+              },
+              child: const Icon(
+                CupertinoIcons.floppy_disk,
+                size: 24,
+              ),
+            ),
+          ),
+          const SizedBox(width: 8),
+          // 다크모드 토글
+          _buildThemeToggleButton(),
+          const SizedBox(width: 8),
+          // 이미지 저장/다운로드 버튼
+          if (!kIsWeb)
+            Semantics(
+              label: 'Save image to gallery',
+              button: true,
+              child: CupertinoButton(
+                padding: EdgeInsets.zero,
+                onPressed: () {
+                  HapticFeedback.lightImpact();
+                  _showWallpaperOptions(isDownload: false);
+                },
+                child: const Icon(
+                  CupertinoIcons.photo_on_rectangle,
+                  size: 24,
+                ),
+              ),
+            ),
+          if (kIsWeb)
+            Semantics(
+              label: 'Download image',
+              button: true,
+              child: CupertinoButton(
+                padding: EdgeInsets.zero,
+                onPressed: () {
+                  HapticFeedback.lightImpact();
+                  _showWallpaperOptions(isDownload: true);
+                },
+                child: const Icon(
+                  CupertinoIcons.share,
+                  size: 24,
+                ),
+              ),
+            ),
+          if (!kIsWeb) const SizedBox(width: 8),
+          // JSON 내보내기/불러오기 버튼
+          Semantics(
+            label: 'Export or import JSON',
+            button: true,
+            child: CupertinoButton(
+              padding: EdgeInsets.zero,
+              onPressed: () {
+                HapticFeedback.lightImpact();
+                _showJsonOptions();
+              },
+              child: const Icon(
+                CupertinoIcons.doc_text,
+                size: 24,
+              ),
             ),
           ),
         ],
