@@ -15,9 +15,9 @@ class StepProgressIndicator extends StatelessWidget {
           final isActive = index <= currentStep;
           return AnimatedContainer(
             duration: const Duration(milliseconds: 200),
-            margin: const EdgeInsets.symmetric(horizontal: 6),
-            width: isActive ? 14 : 10,
-            height: isActive ? 14 : 10,
+            margin: const EdgeInsets.symmetric(horizontal: 4),
+            width: isActive ? 6 : 5,
+            height: isActive ? 6 : 5,
             decoration: BoxDecoration(
               shape: BoxShape.circle,
               color: isActive

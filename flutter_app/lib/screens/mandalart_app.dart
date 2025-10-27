@@ -1,6 +1,7 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:mandarart_journey/models/mandalart.dart';
 import 'package:mandarart_journey/providers/mandalart_provider.dart';
 import 'package:mandarart_journey/providers/theme_provider.dart';
@@ -28,6 +29,21 @@ class _MandalartAppScreenState extends ConsumerState<MandalartAppScreen> {
   void initState() {
     super.initState();
     _pageController = PageController(initialPage: 0);
+    _checkAndNavigateToViewer();
+  }
+
+  Future<void> _checkAndNavigateToViewer() async {
+    final prefs = await SharedPreferences.getInstance();
+    final hasStarted = prefs.getBool('has_started') ?? false;
+
+    if (hasStarted && mounted) {
+      // 사용자가 이미 시작했다면 3페이지(뷰어)로 이동
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (mounted) {
+          ref.read(mandalartProvider.notifier).setStep(2);
+        }
+      });
+    }
   }
 
   @override
@@ -71,29 +87,6 @@ class _MandalartAppScreenState extends ConsumerState<MandalartAppScreen> {
 
 
     return CupertinoPageScaffold(
-      navigationBar: CupertinoNavigationBar(
-        leading: state.currentStep > 0
-            ? CupertinoNavigationBarBackButton(
-                onPressed: () {
-                  HapticFeedback.lightImpact();
-                  notifier.previousStep();
-                },
-              )
-            : CupertinoButton(
-                padding: EdgeInsets.zero,
-                onPressed: () {
-                  HapticFeedback.lightImpact();
-                  _showHelpModal(context);
-                },
-                child: const Icon(CupertinoIcons.question_circle),
-              ),
-        middle: Text(
-          state.displayName.isNotEmpty ? state.displayName : '나만의 만다라트',
-        ),
-        backgroundColor: CupertinoColors.systemBackground,
-        border: null,
-        trailing: _buildThemeToggleButton(ref),
-      ),
       child: SafeArea(
         child: Column(
           children: [
@@ -214,6 +207,13 @@ class _MandalartAppScreenState extends ConsumerState<MandalartAppScreen> {
               notifier.setStep(1);
             }
           },
+          onShowHelp: () {
+            // 도움말 모달 표시
+            showCupertinoModalPopup(
+              context: context,
+              builder: (context) => const LandingScreen(isModal: true),
+            );
+          },
           onToggleAction: (themeIndex, actionIndex) {
             notifier.toggleActionStatus(
               themeIndex: themeIndex,
@@ -225,34 +225,4 @@ class _MandalartAppScreenState extends ConsumerState<MandalartAppScreen> {
     );
   }
 
-  void _showHelpModal(BuildContext context) {
-    showCupertinoModalPopup(
-      context: context,
-      builder: (context) => const LandingScreen(isModal: true),
-    );
-  }
-
-  Widget _buildThemeToggleButton(WidgetRef ref) {
-    final themeState = ref.watch(themeProvider);
-    final bool isLight = themeState.mode == ThemeMode.light;
-    final IconData icon = isLight ? CupertinoIcons.sun_max_fill : CupertinoIcons.moon_fill;
-    final String label = isLight ? 'Light mode' : 'Dark mode';
-
-    return Semantics(
-      label: 'Toggle theme: $label',
-      button: true,
-      child: CupertinoButton(
-        padding: EdgeInsets.zero,
-        onPressed: () {
-          HapticFeedback.lightImpact();
-          ref.read(themeProvider.notifier).toggleTheme();
-        },
-        child: Icon(
-          icon,
-          color: CupertinoColors.systemPurple,
-          size: 24,
-        ),
-      ),
-    );
-  }
 }

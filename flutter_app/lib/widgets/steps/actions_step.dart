@@ -167,7 +167,7 @@ class _ActionsStepState extends State<ActionsStep> {
                 ),
                 const SizedBox(height: 10),
                 Text(
-                  '${filledThemes.length}개의 핵심 영역이 각각 8가지 구체적 행동으로 확장됩니다',
+                  '${filledThemes.length}개의 핵심영역이 각각 8가지 측정가능한 구체적 행동으로 확장됩니다',
                   textAlign: TextAlign.center,
                   style: TextStyle(
                     fontSize: 13,
@@ -298,7 +298,7 @@ class _ActionsStepState extends State<ActionsStep> {
                       ),
                       const SizedBox(width: 8),
                       Text(
-                        '이 영역을 달성하기 위한 8가지 구체적 행동',
+                        '8가지 측정가능한 구체적 행동',
                         style: TextStyle(
                           fontSize: 13,
                           fontWeight: FontWeight.w500,

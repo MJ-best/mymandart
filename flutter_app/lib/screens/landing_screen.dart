@@ -3,8 +3,10 @@ import 'package:flutter/material.dart' show Material;
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
-import 'package:mandarart_journey/providers/mandalart_provider.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+import 'package:mandarart_journey/providers/mandarart_provider.dart';
 import 'package:mandarart_journey/providers/theme_provider.dart';
+import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 
 class LandingScreen extends ConsumerStatefulWidget {
   final bool isModal;
@@ -108,13 +110,13 @@ class _LandingScreenState extends ConsumerState<LandingScreen> {
                 ],
               ),
               const SizedBox(height: 20),
-              const Hero(
+              Hero(
                 tag: 'app-title',
                 child: Material(
                   color: CupertinoColors.transparent,
                   child: Text(
-                    '만다라트로 여정을 디자인하세요',
-                    style: TextStyle(
+                    AppLocalizations.of(context)!.landingTitle,
+                    style: const TextStyle(
                       fontSize: 32,
                       fontWeight: FontWeight.bold,
                       letterSpacing: -1.2,
@@ -126,7 +128,7 @@ class _LandingScreenState extends ConsumerState<LandingScreen> {
               ),
               const SizedBox(height: 12),
               Text(
-                '오타니처럼 꿈꾸고, Mandarat으로 이루세요.',
+                AppLocalizations.of(context)!.landingSubtitle,
                 style: TextStyle(
                   fontSize: 17,
                   fontWeight: FontWeight.w500,
@@ -207,7 +209,7 @@ class _LandingScreenState extends ConsumerState<LandingScreen> {
                 child: CupertinoButton.filled(
                   padding:
                       const EdgeInsets.symmetric(vertical: 16, horizontal: 32),
-                  onPressed: () {
+                  onPressed: () async {
                     HapticFeedback.mediumImpact();
                     final name =
                         inferredName.isEmpty ? '나만의 만다라트' : inferredName;
@@ -215,6 +217,12 @@ class _LandingScreenState extends ConsumerState<LandingScreen> {
                         .read(mandalartProvider.notifier)
                         .updateDisplayName(name);
                     FocusScope.of(context).unfocus();
+
+                    // 사용자가 시작했음을 기록
+                    final prefs = await SharedPreferences.getInstance();
+                    await prefs.setBool('has_started', true);
+
+                    if (!mounted) return;
                     if (widget.isModal) {
                       Navigator.of(context).pop();
                       if (widget.onComplete != null) {
@@ -227,6 +235,50 @@ class _LandingScreenState extends ConsumerState<LandingScreen> {
                   child: Text(
                     widget.isModal ? '확인' : '나의 만다라트 만들기',
                     style: const TextStyle(fontSize: 17, fontWeight: FontWeight.w600),
+                  ),
+                ),
+              ),
+              const SizedBox(height: 12),
+              Semantics(
+                label: 'View saved Mandalarts',
+                button: true,
+                child: Container(
+                  decoration: BoxDecoration(
+                    border: Border.all(
+                      color: CupertinoColors.systemPurple.resolveFrom(context),
+                      width: 2,
+                    ),
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                  child: CupertinoButton(
+                    padding: const EdgeInsets.symmetric(vertical: 14, horizontal: 32),
+                    onPressed: () {
+                      HapticFeedback.lightImpact();
+                      FocusScope.of(context).unfocus();
+                      if (widget.isModal) {
+                        Navigator.of(context).pop();
+                      }
+                      GoRouter.of(context).push('/saved-mandalarts');
+                    },
+                    child: Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        const Icon(
+                          CupertinoIcons.folder,
+                          size: 20,
+                          color: CupertinoColors.systemPurple,
+                        ),
+                        const SizedBox(width: 8),
+                        Text(
+                          '이전 만다라트 보기',
+                          style: TextStyle(
+                            fontSize: 17,
+                            fontWeight: FontWeight.w600,
+                            color: CupertinoColors.label.resolveFrom(context),
+                          ),
+                        ),
+                      ],
+                    ),
                   ),
                 ),
               ),

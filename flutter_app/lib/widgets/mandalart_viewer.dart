@@ -20,6 +20,7 @@ class MandalartViewer extends ConsumerStatefulWidget {
   final MandalartStateModel state;
   final VoidCallback onClose;
   final VoidCallback? onNavigateToActions;
+  final VoidCallback? onShowHelp;
   final void Function(int themeIndex, int actionIndex) onToggleAction;
   final bool withScaffold;
   const MandalartViewer({
@@ -27,6 +28,7 @@ class MandalartViewer extends ConsumerStatefulWidget {
     required this.state,
     required this.onClose,
     this.onNavigateToActions,
+    this.onShowHelp,
     required this.onToggleAction,
     this.withScaffold = true,
   });
@@ -222,6 +224,32 @@ class _MandalartViewerState extends ConsumerState<MandalartViewer> {
                   const SizedBox(height: 12),
                   // 명언 (더보기 확장 시 스크롤로 가려짐)
                   _buildMotivationalQuote(),
+                  // withScaffold가 false일 때만 도움말 버튼 표시
+                  if (!widget.withScaffold && widget.onShowHelp != null) ...[
+                    const SizedBox(height: 12),
+                    CupertinoButton(
+                      padding: const EdgeInsets.symmetric(vertical: 12),
+                      onPressed: widget.onShowHelp,
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          const Icon(
+                            CupertinoIcons.question_circle,
+                            color: CupertinoColors.systemPurple,
+                            size: 20,
+                          ),
+                          const SizedBox(width: 8),
+                          Text(
+                            '도움말',
+                            style: TextStyle(
+                              fontSize: 14,
+                              color: CupertinoColors.label.resolveFrom(context),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ],
                 ],
               ),
             ),
@@ -284,6 +312,32 @@ class _MandalartViewerState extends ConsumerState<MandalartViewer> {
                       _buildTodoList(),
                       const SizedBox(height: 20),
                       _buildMotivationalQuote(),
+                      // withScaffold가 false일 때만 도움말 버튼 표시
+                      if (!widget.withScaffold && widget.onShowHelp != null) ...[
+                        const SizedBox(height: 20),
+                        CupertinoButton(
+                          padding: const EdgeInsets.symmetric(vertical: 12),
+                          onPressed: widget.onShowHelp,
+                          child: Row(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              const Icon(
+                                CupertinoIcons.question_circle,
+                                color: CupertinoColors.systemPurple,
+                                size: 20,
+                              ),
+                              const SizedBox(width: 8),
+                              Text(
+                                '도움말',
+                                style: TextStyle(
+                                  fontSize: 14,
+                                  color: CupertinoColors.label.resolveFrom(context),
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                      ],
                     ],
                   ),
                 ),
@@ -693,8 +747,13 @@ class _MandalartViewerState extends ConsumerState<MandalartViewer> {
 
   /// withScaffold가 false일 때 표시할 액션 버튼들
   Widget _buildActionButtons() {
+    final mediaQuery = MediaQuery.of(context);
+    final isPhone = mediaQuery.size.width < 600;
+    final iconSize = isPhone ? 20.0 : 24.0;
+    final spacing = isPhone ? 4.0 : 8.0;
+
     return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+      padding: EdgeInsets.symmetric(horizontal: isPhone ? 8 : 16, vertical: 6),
       decoration: BoxDecoration(
         color: CupertinoColors.systemBackground.resolveFrom(context),
         border: Border(
@@ -717,16 +776,16 @@ class _MandalartViewerState extends ConsumerState<MandalartViewer> {
                 HapticFeedback.lightImpact();
                 _saveMandalart();
               },
-              child: const Icon(
+              child: Icon(
                 CupertinoIcons.floppy_disk,
-                size: 24,
+                size: iconSize,
               ),
             ),
           ),
-          const SizedBox(width: 8),
+          SizedBox(width: spacing),
           // 다크모드 토글
           _buildThemeToggleButton(),
-          const SizedBox(width: 8),
+          SizedBox(width: spacing),
           // 이미지 저장/다운로드 버튼
           if (!kIsWeb)
             Semantics(
@@ -738,9 +797,9 @@ class _MandalartViewerState extends ConsumerState<MandalartViewer> {
                   HapticFeedback.lightImpact();
                   _showWallpaperOptions(isDownload: false);
                 },
-                child: const Icon(
+                child: Icon(
                   CupertinoIcons.photo_on_rectangle,
-                  size: 24,
+                  size: iconSize,
                 ),
               ),
             ),
@@ -754,13 +813,13 @@ class _MandalartViewerState extends ConsumerState<MandalartViewer> {
                   HapticFeedback.lightImpact();
                   _showWallpaperOptions(isDownload: true);
                 },
-                child: const Icon(
+                child: Icon(
                   CupertinoIcons.share,
-                  size: 24,
+                  size: iconSize,
                 ),
               ),
             ),
-          if (!kIsWeb) const SizedBox(width: 8),
+          if (!kIsWeb) SizedBox(width: spacing),
           // JSON 내보내기/불러오기 버튼
           Semantics(
             label: 'Export or import JSON',
@@ -771,9 +830,9 @@ class _MandalartViewerState extends ConsumerState<MandalartViewer> {
                 HapticFeedback.lightImpact();
                 _showJsonOptions();
               },
-              child: const Icon(
+              child: Icon(
                 CupertinoIcons.doc_text,
-                size: 24,
+                size: iconSize,
               ),
             ),
           ),

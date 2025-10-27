@@ -25,19 +25,19 @@ class StreakWidget extends ConsumerWidget {
         }
       },
       child: Container(
-        padding: const EdgeInsets.all(16),
+        padding: const EdgeInsets.all(10),
         decoration: BoxDecoration(
           gradient: LinearGradient(
             colors: _getGradientColors(streak.status, isDark),
             begin: Alignment.topLeft,
             end: Alignment.bottomRight,
           ),
-          borderRadius: BorderRadius.circular(16),
+          borderRadius: BorderRadius.circular(12),
           boxShadow: [
             BoxShadow(
               color: _getPrimaryColor(streak.status, isDark).withOpacity(0.3),
-              blurRadius: 8,
-              offset: const Offset(0, 4),
+              blurRadius: 6,
+              offset: const Offset(0, 3),
             ),
           ],
         ),
@@ -50,14 +50,14 @@ class StreakWidget extends ConsumerWidget {
                 Row(
                   children: [
                     _buildStreakIcon(streak.status),
-                    const SizedBox(width: 12),
+                    const SizedBox(width: 8),
                     Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Text(
                           '${streak.currentStreak}일 연속',
                           style: const TextStyle(
-                            fontSize: 24,
+                            fontSize: 18,
                             fontWeight: FontWeight.w700,
                             color: CupertinoColors.white,
                           ),
@@ -65,7 +65,7 @@ class StreakWidget extends ConsumerWidget {
                         Text(
                           _getStatusText(streak.status),
                           style: TextStyle(
-                            fontSize: 13,
+                            fontSize: 11,
                             color: CupertinoColors.white.withOpacity(0.9),
                             fontWeight: FontWeight.w500,
                           ),
@@ -77,11 +77,11 @@ class StreakWidget extends ConsumerWidget {
                 Icon(
                   CupertinoIcons.hand_raised_fill,
                   color: CupertinoColors.white.withOpacity(0.7),
-                  size: 24,
+                  size: 20,
                 ),
               ],
             ),
-            const SizedBox(height: 16),
+            const SizedBox(height: 8),
             // 진행 바
             Column(
               crossAxisAlignment: CrossAxisAlignment.start,
@@ -92,7 +92,7 @@ class StreakWidget extends ConsumerWidget {
                     Text(
                       streak.phaseDescription,
                       style: TextStyle(
-                        fontSize: 12,
+                        fontSize: 10,
                         color: CupertinoColors.white.withOpacity(0.9),
                         fontWeight: FontWeight.w600,
                       ),
@@ -100,13 +100,13 @@ class StreakWidget extends ConsumerWidget {
                     Text(
                       '최고 ${streak.longestStreak}일',
                       style: TextStyle(
-                        fontSize: 11,
+                        fontSize: 9,
                         color: CupertinoColors.white.withOpacity(0.7),
                       ),
                     ),
                   ],
                 ),
-                const SizedBox(height: 8),
+                const SizedBox(height: 4),
                 // 21일 진행바
                 _buildProgressBar(
                   current: streak.currentStreak.clamp(0, 21),
@@ -114,7 +114,7 @@ class StreakWidget extends ConsumerWidget {
                   label: '21일',
                   isComplete: streak.hasReachedConscious,
                 ),
-                const SizedBox(height: 6),
+                const SizedBox(height: 3),
                 // 66일 진행바
                 _buildProgressBar(
                   current: streak.currentStreak.clamp(0, 66),
@@ -142,10 +142,10 @@ class StreakWidget extends ConsumerWidget {
       children: [
         Expanded(
           child: Container(
-            height: 8,
+            height: 6,
             decoration: BoxDecoration(
               color: CupertinoColors.white.withOpacity(0.3),
-              borderRadius: BorderRadius.circular(4),
+              borderRadius: BorderRadius.circular(3),
             ),
             child: FractionallySizedBox(
               alignment: Alignment.centerLeft,
@@ -155,19 +155,19 @@ class StreakWidget extends ConsumerWidget {
                   color: isComplete
                       ? CupertinoColors.systemGreen
                       : CupertinoColors.white,
-                  borderRadius: BorderRadius.circular(4),
+                  borderRadius: BorderRadius.circular(3),
                 ),
               ),
             ),
           ),
         ),
-        const SizedBox(width: 8),
+        const SizedBox(width: 6),
         SizedBox(
-          width: 30,
+          width: 28,
           child: Text(
             label,
             style: TextStyle(
-              fontSize: 10,
+              fontSize: 9,
               color: CupertinoColors.white.withOpacity(0.8),
               fontWeight: FontWeight.w600,
             ),
@@ -201,8 +201,8 @@ class StreakWidget extends ConsumerWidget {
     }
 
     return Container(
-      width: 48,
-      height: 48,
+      width: 32,
+      height: 32,
       decoration: BoxDecoration(
         shape: BoxShape.circle,
         color: CupertinoColors.white.withOpacity(0.2),
@@ -210,7 +210,7 @@ class StreakWidget extends ConsumerWidget {
       child: Icon(
         icon,
         color: CupertinoColors.white,
-        size: 28,
+        size: 20,
       ),
     );
   }

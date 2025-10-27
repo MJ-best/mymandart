@@ -1,10 +1,13 @@
 import 'package:flutter/cupertino.dart';
+import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:mandarart_journey/screens/mandalart_app.dart';
 import 'package:mandarart_journey/screens/landing_screen.dart';
 import 'package:mandarart_journey/screens/saved_mandalarts_screen.dart';
 import 'package:mandarart_journey/providers/theme_provider.dart';
+import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 
 void main() {
   runApp(const ProviderScope(child: MandarartRoot()));
@@ -12,6 +15,19 @@ void main() {
 
 final _router = GoRouter(
   initialLocation: '/',
+  redirect: (context, state) async {
+    // 앱 시작 시에만 체크 (루트 경로에서만)
+    if (state.matchedLocation == '/') {
+      final prefs = await SharedPreferences.getInstance();
+      final hasStarted = prefs.getBool('has_started') ?? false;
+
+      // 사용자가 이미 시작했다면 /create로 리다이렉트
+      if (hasStarted) {
+        return '/create';
+      }
+    }
+    return null; // 리다이렉트 없음
+  },
   routes: [
     GoRoute(
       path: '/',
@@ -42,6 +58,8 @@ class MandarartRoot extends ConsumerWidget {
       title: 'Mandarat',
       theme: _buildTheme(brightness),
       debugShowCheckedModeBanner: false,
+      localizationsDelegates: AppLocalizations.localizationsDelegates,
+      supportedLocales: AppLocalizations.supportedLocales,
     );
   }
 

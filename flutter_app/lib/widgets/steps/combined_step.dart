@@ -206,7 +206,7 @@ class _CombinedStepState extends ConsumerState<CombinedStep> {
                     ),
                     const SizedBox(width: 8),
                     Text(
-                      '이 목표를 실현하기 위한 8가지 핵심 영역',
+                      '8가지 핵심영역',
                       style: TextStyle(
                         fontSize: 14,
                         fontWeight: FontWeight.w500,
@@ -416,7 +416,7 @@ class _CombinedStepState extends ConsumerState<CombinedStep> {
                             ),
                             const SizedBox(width: 8),
                             Text(
-                              '이 영역을 달성하기 위한 8가지 구체적 행동',
+                              '8가지 측정가능한 구체적 행동',
                               style: TextStyle(
                                 fontSize: 13,
                                 fontWeight: FontWeight.w500,
