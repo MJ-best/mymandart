@@ -350,6 +350,9 @@ class _MandalartViewerState extends ConsumerState<MandalartViewer> {
 
   /// A4 크기 레이아웃을 화면에 맞게 축소하여 표시
   Widget _buildA4ViewerWithZoom() {
+    final mediaQuery = MediaQuery.of(context);
+    final isPortrait = mediaQuery.orientation == Orientation.portrait;
+
     return Container(
       color: CupertinoColors.systemGrey6.resolveFrom(context),
       child: Center(
@@ -358,7 +361,8 @@ class _MandalartViewerState extends ConsumerState<MandalartViewer> {
           maxScale: 5.0,
           panEnabled: true,
           scaleEnabled: true,
-          boundaryMargin: const EdgeInsets.all(40),
+          // 세로 모드에서는 작은 여백만, 가로 모드에서는 큰 여백
+          boundaryMargin: EdgeInsets.all(isPortrait ? 10 : 40),
           child: A4MandalartLayout(
             state: widget.state,
             currentView: currentView,

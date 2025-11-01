@@ -42,6 +42,26 @@ class A4MandalartLayout extends StatelessWidget {
     final total =
         state.actionItems.where((a) => a.actionText.trim().isNotEmpty).length;
 
+    // 화면 크기를 고려한 동적 크기 계산
+    final mediaQuery = MediaQuery.of(context);
+    final screenWidth = mediaQuery.size.width;
+    final screenHeight = mediaQuery.size.height;
+    final isPortrait = mediaQuery.orientation == Orientation.portrait;
+
+    // 세로 모드에서는 화면 너비에 맞춰서, 가로 모드에서는 고정 크기 사용
+    double effectiveWidth;
+    double effectiveHeight;
+
+    if (isPortrait && !forScreenshot) {
+      // 세로 모드: 화면 너비의 95%를 사용 (여백 고려)
+      effectiveWidth = screenWidth * 0.95;
+      effectiveHeight = effectiveWidth / a4Ratio;
+    } else {
+      // 가로 모드 또는 스크린샷용: 고정 A4 크기 사용
+      effectiveWidth = a4Width;
+      effectiveHeight = a4Height;
+    }
+
     // 스크린샷/인쇄용일 때만 밝은 테마 강제 적용
     final shouldForceLightTheme = forScreenshot;
     final effectiveContext = shouldForceLightTheme
@@ -50,10 +70,26 @@ class A4MandalartLayout extends StatelessWidget {
               platformBrightness: Brightness.light,
             ),
             child: Builder(
-              builder: (context) => _buildContent(context, isFull, grid, completed, total),
+              builder: (context) => _buildContent(
+                context,
+                isFull,
+                grid,
+                completed,
+                total,
+                effectiveWidth,
+                effectiveHeight,
+              ),
             ),
           )
-        : _buildContent(context, isFull, grid, completed, total);
+        : _buildContent(
+            context,
+            isFull,
+            grid,
+            completed,
+            total,
+            effectiveWidth,
+            effectiveHeight,
+          );
 
     return effectiveContext;
   }
@@ -64,18 +100,31 @@ class A4MandalartLayout extends StatelessWidget {
     List<List<dynamic>> grid,
     int completed,
     int total,
+    double width,
+    double height,
   ) {
     // 현재 테마에 따른 동적 색상
     final backgroundColor = CupertinoColors.systemBackground.resolveFrom(context);
     final textColor = CupertinoColors.label.resolveFrom(context);
     final secondaryTextColor = CupertinoColors.secondaryLabel.resolveFrom(context);
 
+    // 화면 크기에 따라 폰트 크기와 패딩을 조정
+    final scaleFactor = width / a4Width;
+    final titleFontSize = (28 * scaleFactor).clamp(20.0, 28.0);
+    final goalFontSize = (22 * scaleFactor).clamp(16.0, 22.0);
+    final statusFontSize = (18 * scaleFactor).clamp(14.0, 18.0);
+    final quoteFontSize = (13 * scaleFactor).clamp(11.0, 13.0);
+    final authorFontSize = (11 * scaleFactor).clamp(9.0, 11.0);
+    final footerFontSize = (12 * scaleFactor).clamp(10.0, 12.0);
+    final padding = (24.0 * scaleFactor).clamp(12.0, 24.0);
+    final spacing = (8.0 * scaleFactor).clamp(4.0, 8.0);
+
     return Container(
-      width: a4Width,
-      height: a4Height,
+      width: width,
+      height: height,
       color: backgroundColor,
       child: Padding(
-        padding: const EdgeInsets.all(24.0),
+        padding: EdgeInsets.all(padding),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.center,
           children: [
@@ -86,36 +135,36 @@ class A4MandalartLayout extends StatelessWidget {
                   : '나만의 만다라트',
               textAlign: TextAlign.center,
               style: TextStyle(
-                fontSize: 28,
+                fontSize: titleFontSize,
                 fontWeight: FontWeight.w700,
                 color: textColor,
                 height: 1.2,
               ),
             ),
-            const SizedBox(height: 8),
+            SizedBox(height: spacing),
             if (state.goalText.trim().isNotEmpty) ...[
               Text(
                 state.goalText.trim(),
                 textAlign: TextAlign.center,
                 style: TextStyle(
-                  fontSize: 22,
+                  fontSize: goalFontSize,
                   fontWeight: FontWeight.w600,
                   color: textColor,
                   height: 1.3,
                 ),
               ),
-              const SizedBox(height: 8),
+              SizedBox(height: spacing),
             ],
             Text(
               '$completed/$total 액션아이템 완료',
               textAlign: TextAlign.center,
               style: TextStyle(
-                fontSize: 18,
+                fontSize: statusFontSize,
                 fontWeight: FontWeight.w600,
                 color: CupertinoTheme.of(context).primaryColor,
               ),
             ),
-            const SizedBox(height: 16),
+            SizedBox(height: spacing * 2),
 
             // 만다라트 그리드 (메인 컨텐츠)
             Expanded(
@@ -174,29 +223,29 @@ class A4MandalartLayout extends StatelessWidget {
               ),
             ),
 
-            const SizedBox(height: 12),
+            SizedBox(height: spacing * 1.5),
 
             // 명언 (날짜 위에 표시)
             if (randomQuote != null) ...[
               Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                padding: EdgeInsets.symmetric(horizontal: padding * 0.67, vertical: spacing),
                 child: Column(
                   children: [
                     Text(
                       '"${randomQuote!['quote']!}"',
                       textAlign: TextAlign.center,
                       style: TextStyle(
-                        fontSize: 13,
+                        fontSize: quoteFontSize,
                         fontStyle: FontStyle.italic,
                         color: textColor,
                         height: 1.4,
                       ),
                     ),
-                    const SizedBox(height: 4),
+                    SizedBox(height: spacing * 0.5),
                     Text(
                       '- ${randomQuote!['author']} -',
                       style: TextStyle(
-                        fontSize: 11,
+                        fontSize: authorFontSize,
                         fontWeight: FontWeight.w600,
                         color: secondaryTextColor,
                       ),
@@ -204,7 +253,7 @@ class A4MandalartLayout extends StatelessWidget {
                   ],
                 ),
               ),
-              const SizedBox(height: 8),
+              SizedBox(height: spacing),
             ],
 
             // 푸터 - 현재 날짜
@@ -212,7 +261,7 @@ class A4MandalartLayout extends StatelessWidget {
               '생성일: ${DateTime.now().year}.${DateTime.now().month.toString().padLeft(2, '0')}.${DateTime.now().day.toString().padLeft(2, '0')}',
               textAlign: TextAlign.center,
               style: TextStyle(
-                fontSize: 12,
+                fontSize: footerFontSize,
                 color: secondaryTextColor,
               ),
             ),
