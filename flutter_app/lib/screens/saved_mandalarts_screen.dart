@@ -5,6 +5,7 @@ import 'package:go_router/go_router.dart';
 
 import 'package:mandarart_journey/models/mandalart.dart';
 import 'package:mandarart_journey/providers/mandalart_provider.dart';
+import 'package:mandarart_journey/providers/theme_provider.dart';
 import 'package:mandarart_journey/screens/landing_screen.dart';
 
 class SavedMandalartsScreen extends ConsumerStatefulWidget {
@@ -113,6 +114,7 @@ class _SavedMandalartsScreenState extends ConsumerState<SavedMandalartsScreen> {
   }
 
   Widget _buildMandalartList() {
+    final primaryColor = ref.watch(themeProvider).primaryColor;
     return CustomScrollView(
       slivers: [
         const SliverPadding(padding: EdgeInsets.only(top: 16)),
@@ -141,15 +143,15 @@ class _SavedMandalartsScreenState extends ConsumerState<SavedMandalartsScreen> {
                 decoration: BoxDecoration(
                   gradient: LinearGradient(
                     colors: [
-                      CupertinoColors.systemGreen.withOpacity(0.15),
-                      CupertinoColors.systemIndigo.withOpacity(0.1),
+                      primaryColor.withValues(alpha: 0.15),
+                      CupertinoColors.systemIndigo.withValues(alpha: 0.1),
                     ],
                     begin: Alignment.topLeft,
                     end: Alignment.bottomRight,
                   ),
                   borderRadius: BorderRadius.circular(12),
                   border: Border.all(
-                    color: CupertinoColors.systemGreen.withOpacity(0.3),
+                    color: primaryColor.withValues(alpha: 0.3),
                     width: 2,
                   ),
                 ),
@@ -158,8 +160,8 @@ class _SavedMandalartsScreenState extends ConsumerState<SavedMandalartsScreen> {
                   children: [
                     Container(
                       padding: const EdgeInsets.all(8),
-                      decoration: const BoxDecoration(
-                        color: CupertinoColors.systemGreen,
+                      decoration: BoxDecoration(
+                        color: primaryColor,
                         shape: BoxShape.circle,
                       ),
                       child: const Icon(
@@ -169,12 +171,12 @@ class _SavedMandalartsScreenState extends ConsumerState<SavedMandalartsScreen> {
                       ),
                     ),
                     const SizedBox(width: 12),
-                    const Text(
+                    Text(
                       '새 만다라트 시작',
                       style: TextStyle(
                         fontSize: 18,
                         fontWeight: FontWeight.w600,
-                        color: CupertinoColors.systemGreen,
+                        color: primaryColor,
                       ),
                     ),
                   ],
@@ -201,6 +203,7 @@ class _SavedMandalartsScreenState extends ConsumerState<SavedMandalartsScreen> {
   }
 
   Widget _buildMandalartCard(SavedMandalartMeta meta) {
+    final primaryColor = ref.watch(themeProvider).primaryColor;
     final progressPercent = meta.totalCount > 0
         ? (meta.completedCount / meta.totalCount * 100).toInt()
         : 0;
@@ -217,7 +220,7 @@ class _SavedMandalartsScreenState extends ConsumerState<SavedMandalartsScreen> {
           borderRadius: BorderRadius.circular(12),
           boxShadow: [
             BoxShadow(
-              color: CupertinoColors.systemGrey.resolveFrom(context).withOpacity(0.1),
+              color: CupertinoColors.systemGrey.resolveFrom(context).withValues(alpha: 0.1),
               blurRadius: 8,
               offset: const Offset(0, 2),
             ),
@@ -296,7 +299,7 @@ class _SavedMandalartsScreenState extends ConsumerState<SavedMandalartsScreen> {
                           : 0,
                       child: Container(
                         decoration: BoxDecoration(
-                          color: CupertinoColors.systemGreen,
+                          color: primaryColor,
                           borderRadius: BorderRadius.circular(3),
                         ),
                       ),
@@ -309,7 +312,7 @@ class _SavedMandalartsScreenState extends ConsumerState<SavedMandalartsScreen> {
                   style: TextStyle(
                     fontSize: 14,
                     fontWeight: FontWeight.w600,
-                    color: CupertinoColors.systemGreen.resolveFrom(context),
+                    color: primaryColor,
                   ),
                 ),
               ],

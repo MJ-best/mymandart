@@ -7,6 +7,8 @@ class StepProgressIndicator extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final primaryColor = CupertinoTheme.of(context).primaryColor;
+
     return Semantics(
       label: '현재 진행 단계 ${currentStep + 1} / 3',
       child: Row(
@@ -21,7 +23,7 @@ class StepProgressIndicator extends StatelessWidget {
             decoration: BoxDecoration(
               shape: BoxShape.circle,
               color: isActive
-                  ? CupertinoColors.systemGreen
+                  ? primaryColor
                   : CupertinoColors.systemGrey3,
             ),
           );

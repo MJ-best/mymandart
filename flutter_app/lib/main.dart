@@ -56,11 +56,12 @@ class MandarartRoot extends ConsumerWidget {
     // 현재 테마 상태 가져오기
     final themeState = ref.watch(themeProvider);
     final brightness = themeState.effectiveBrightness;
+    final primaryColor = themeState.primaryColor;
 
     return CupertinoApp.router(
       routerConfig: _router,
       title: 'Mandarat',
-      theme: _buildTheme(brightness),
+      theme: _buildTheme(brightness, primaryColor),
       debugShowCheckedModeBanner: false,
       localizationsDelegates: AppLocalizations.localizationsDelegates,
       supportedLocales: AppLocalizations.supportedLocales,
@@ -68,12 +69,12 @@ class MandarartRoot extends ConsumerWidget {
   }
 
   /// Brightness에 따라 적절한 테마 데이터 생성
-  CupertinoThemeData _buildTheme(Brightness brightness) {
+  CupertinoThemeData _buildTheme(Brightness brightness, Color primaryColor) {
     final isDark = brightness == Brightness.dark;
 
     return CupertinoThemeData(
       brightness: brightness,
-      primaryColor: CupertinoColors.systemGreen,
+      primaryColor: primaryColor,
       scaffoldBackgroundColor: isDark
           ? CupertinoColors.black
           : CupertinoColors.systemGroupedBackground,
@@ -84,7 +85,7 @@ class MandarartRoot extends ConsumerWidget {
             )
           : CupertinoColors.systemBackground,
       textTheme: CupertinoTextThemeData(
-        primaryColor: CupertinoColors.systemGreen,
+        primaryColor: primaryColor,
         navLargeTitleTextStyle: TextStyle(
           fontSize: 34,
           fontWeight: FontWeight.bold,

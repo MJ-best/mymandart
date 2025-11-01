@@ -3,6 +3,7 @@ import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:mandarart_journey/models/mandalart.dart';
 import 'package:mandarart_journey/providers/mandalart_provider.dart';
+import 'package:mandarart_journey/providers/theme_provider.dart';
 import 'package:mandarart_journey/data/keywords.dart';
 import 'package:mandarart_journey/widgets/streak_widget.dart';
 
@@ -123,6 +124,7 @@ class _CombinedStepState extends ConsumerState<CombinedStep> {
 
   @override
   Widget build(BuildContext context) {
+    final primaryColor = ref.watch(themeProvider).primaryColor;
     final hasGoal = widget.state.goalText.trim().isNotEmpty;
 
     return Column(
@@ -139,15 +141,15 @@ class _CombinedStepState extends ConsumerState<CombinedStep> {
             decoration: BoxDecoration(
               gradient: LinearGradient(
                 colors: [
-                  CupertinoColors.systemGreen.withOpacity(0.15),
-                  CupertinoColors.systemIndigo.withOpacity(0.1),
+                  primaryColor.withValues(alpha: 0.15),
+                  CupertinoColors.systemIndigo.withValues(alpha: 0.1),
                 ],
                 begin: Alignment.topLeft,
                 end: Alignment.bottomRight,
               ),
               borderRadius: BorderRadius.circular(16),
               border: Border.all(
-                color: CupertinoColors.systemGreen.withOpacity(0.3),
+                color: primaryColor.withValues(alpha: 0.3),
                 width: 2,
               ),
             ),
@@ -159,7 +161,7 @@ class _CombinedStepState extends ConsumerState<CombinedStep> {
                     Container(
                       padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
                       decoration: BoxDecoration(
-                        color: CupertinoColors.systemGreen,
+                        color: primaryColor,
                         borderRadius: BorderRadius.circular(20),
                       ),
                       child: const Row(
@@ -201,7 +203,7 @@ class _CombinedStepState extends ConsumerState<CombinedStep> {
                   children: [
                     Icon(
                       CupertinoIcons.arrow_down,
-                      color: CupertinoColors.systemGreen.withOpacity(0.6),
+                      color: primaryColor.withValues(alpha: 0.6),
                       size: 20,
                     ),
                     const SizedBox(width: 8),
@@ -216,7 +218,7 @@ class _CombinedStepState extends ConsumerState<CombinedStep> {
                     const SizedBox(width: 8),
                     Icon(
                       CupertinoIcons.arrow_down,
-                      color: CupertinoColors.systemGreen.withOpacity(0.6),
+                      color: primaryColor.withValues(alpha: 0.6),
                       size: 20,
                     ),
                   ],
@@ -249,13 +251,13 @@ class _CombinedStepState extends ConsumerState<CombinedStep> {
               Container(
                 decoration: BoxDecoration(
                   color: isExpanded
-                      ? CupertinoColors.systemGreen.withOpacity(0.05)
+                      ? primaryColor.withValues(alpha: 0.05)
                       : CupertinoColors.secondarySystemGroupedBackground.resolveFrom(context),
                   borderRadius: BorderRadius.circular(12),
                   border: Border.all(
                     color: isExpanded
-                        ? CupertinoColors.systemGreen.withOpacity(0.3)
-                        : CupertinoColors.separator.resolveFrom(context).withOpacity(0.3),
+                        ? primaryColor.withValues(alpha: 0.3)
+                        : CupertinoColors.separator.resolveFrom(context).withValues(alpha: 0.3),
                     width: isExpanded ? 2 : 1,
                   ),
                 ),
@@ -341,7 +343,7 @@ class _CombinedStepState extends ConsumerState<CombinedStep> {
                                         isExpanded
                                             ? CupertinoIcons.chevron_up
                                             : CupertinoIcons.chevron_down,
-                                        color: CupertinoColors.systemGreen,
+                                        color: primaryColor,
                                         size: 20,
                                       ),
                                     ),
@@ -401,7 +403,7 @@ class _CombinedStepState extends ConsumerState<CombinedStep> {
                         padding: const EdgeInsets.symmetric(horizontal: 16),
                         child: Container(
                           height: 1,
-                          color: CupertinoColors.separator.resolveFrom(context).withOpacity(0.3),
+                          color: CupertinoColors.separator.resolveFrom(context).withValues(alpha: 0.3),
                         ),
                       ),
                       Padding(
@@ -411,7 +413,7 @@ class _CombinedStepState extends ConsumerState<CombinedStep> {
                           children: [
                             Icon(
                               CupertinoIcons.arrow_down_circle_fill,
-                              color: CupertinoColors.systemGreen.withOpacity(0.6),
+                              color: primaryColor.withValues(alpha: 0.6),
                               size: 16,
                             ),
                             const SizedBox(width: 8),
@@ -426,7 +428,7 @@ class _CombinedStepState extends ConsumerState<CombinedStep> {
                             const SizedBox(width: 8),
                             Icon(
                               CupertinoIcons.arrow_down_circle_fill,
-                              color: CupertinoColors.systemGreen.withOpacity(0.6),
+                              color: primaryColor.withValues(alpha: 0.6),
                               size: 16,
                             ),
                           ],
@@ -448,10 +450,10 @@ class _CombinedStepState extends ConsumerState<CombinedStep> {
         const SizedBox(height: 8),
         Text(
           '진행률: ${widget.state.themes.where((t) => t.trim().isNotEmpty).length}/8',
-          style: const TextStyle(
+          style: TextStyle(
             fontSize: 15,
             fontWeight: FontWeight.w600,
-            color: CupertinoColors.systemGreen,
+            color: primaryColor,
           ),
         ),
       ],
@@ -492,28 +494,33 @@ class _CombinedStepState extends ConsumerState<CombinedStep> {
                         actionIndex: actionIndex,
                       );
                     },
-                    child: Container(
-                      width: 32,
-                      height: 32,
-                      decoration: BoxDecoration(
-                        shape: BoxShape.circle,
-                        color: existing.status == ActionStatus.completed
-                            ? CupertinoColors.systemGreen
-                            : existing.status == ActionStatus.inProgress
-                                ? CupertinoColors.systemOrange
-                                : CupertinoColors.systemGrey5,
-                      ),
-                      child: Icon(
-                        existing.status == ActionStatus.completed
-                            ? CupertinoIcons.checkmark_alt
-                            : existing.status == ActionStatus.inProgress
-                                ? CupertinoIcons.play_fill
-                                : CupertinoIcons.circle,
-                        color: existing.status == ActionStatus.notStarted
-                            ? CupertinoColors.systemGrey
-                            : CupertinoColors.white,
-                        size: 16,
-                      ),
+                    child: Builder(
+                      builder: (context) {
+                        final primaryColor = ref.watch(themeProvider).primaryColor;
+                        return Container(
+                          width: 32,
+                          height: 32,
+                          decoration: BoxDecoration(
+                            shape: BoxShape.circle,
+                            color: existing.status == ActionStatus.completed
+                                ? primaryColor
+                                : existing.status == ActionStatus.inProgress
+                                    ? CupertinoColors.systemOrange
+                                    : CupertinoColors.systemGrey5,
+                          ),
+                          child: Icon(
+                            existing.status == ActionStatus.completed
+                                ? CupertinoIcons.checkmark_alt
+                                : existing.status == ActionStatus.inProgress
+                                    ? CupertinoIcons.play_fill
+                                    : CupertinoIcons.circle,
+                            color: existing.status == ActionStatus.notStarted
+                                ? CupertinoColors.systemGrey
+                                : CupertinoColors.white,
+                            size: 16,
+                          ),
+                        );
+                      },
                     ),
                   ),
                   const SizedBox(width: 12),

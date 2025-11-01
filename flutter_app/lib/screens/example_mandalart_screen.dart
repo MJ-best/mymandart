@@ -4,6 +4,7 @@ import 'package:go_router/go_router.dart';
 import 'package:mandarart_journey/data/ohtani_example.dart';
 import 'package:mandarart_journey/models/mandalart.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:mandarart_journey/providers/theme_provider.dart';
 
 /// 오타니 쇼헤이의 만다라트 예시를 보여주는 화면
 class ExampleMandalartScreen extends ConsumerWidget {
@@ -11,6 +12,7 @@ class ExampleMandalartScreen extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final primaryColor = ref.watch(themeProvider).primaryColor;
     final exampleData = OhtaniMandalartExample.data;
 
     return CupertinoPageScaffold(
@@ -22,10 +24,10 @@ class ExampleMandalartScreen extends ConsumerWidget {
             Container(
               padding: const EdgeInsets.all(16),
               decoration: BoxDecoration(
-                color: CupertinoColors.systemGreen.withOpacity(0.1),
+                color: primaryColor.withValues(alpha: 0.1),
                 border: Border(
                   bottom: BorderSide(
-                    color: CupertinoColors.systemGreen.withOpacity(0.3),
+                    color: primaryColor.withValues(alpha: 0.3),
                     width: 1,
                   ),
                 ),
@@ -151,7 +153,8 @@ class _ExampleMandalartViewerState extends State<_ExampleMandalartViewer> {
 
     if (_selectedThemeIndex != null) {
       // 특정 테마의 액션 보기
-      return _buildActionView(context, _selectedThemeIndex!);
+      final primaryColor = CupertinoTheme.of(context).primaryColor;
+      return _buildActionView(context, _selectedThemeIndex!, primaryColor);
     } else {
       // 전체 만다라트 보기
       return _buildMandalartGrid(context, isPortrait);
@@ -159,6 +162,7 @@ class _ExampleMandalartViewerState extends State<_ExampleMandalartViewer> {
   }
 
   Widget _buildMandalartGrid(BuildContext context, bool isPortrait) {
+    final primaryColor = CupertinoTheme.of(context).primaryColor;
     return SingleChildScrollView(
       padding: const EdgeInsets.all(16),
       child: Center(
@@ -179,11 +183,11 @@ class _ExampleMandalartViewerState extends State<_ExampleMandalartViewer> {
               itemBuilder: (context, index) {
                 if (index == 4) {
                   // 중심 목표
-                  return _buildCenterCell(widget.data.goalText);
+                  return _buildCenterCell(widget.data.goalText, primaryColor);
                 } else {
                   // 테마 영역
                   final themeIndex = index < 4 ? index : index - 1;
-                  return _buildThemeCell(context, themeIndex);
+                  return _buildThemeCell(context, themeIndex, primaryColor);
                 }
               },
             ),
@@ -193,14 +197,14 @@ class _ExampleMandalartViewerState extends State<_ExampleMandalartViewer> {
     );
   }
 
-  Widget _buildCenterCell(String goalText) {
+  Widget _buildCenterCell(String goalText, Color primaryColor) {
     return Container(
       decoration: BoxDecoration(
-        color: CupertinoColors.systemGreen,
+        color: primaryColor,
         borderRadius: BorderRadius.circular(12),
         boxShadow: [
           BoxShadow(
-            color: CupertinoColors.systemGreen.withOpacity(0.3),
+            color: primaryColor.withValues(alpha: 0.3),
             blurRadius: 8,
             offset: const Offset(0, 4),
           ),
@@ -223,7 +227,7 @@ class _ExampleMandalartViewerState extends State<_ExampleMandalartViewer> {
     );
   }
 
-  Widget _buildThemeCell(BuildContext context, int themeIndex) {
+  Widget _buildThemeCell(BuildContext context, int themeIndex, Color primaryColor) {
     final theme = widget.data.themes[themeIndex];
     final actions = _getActionsForTheme(themeIndex);
     final completedCount = actions.where((a) => a.isCompleted).length;
@@ -238,10 +242,10 @@ class _ExampleMandalartViewerState extends State<_ExampleMandalartViewer> {
       },
       child: Container(
         decoration: BoxDecoration(
-          color: CupertinoColors.systemGreen.withOpacity(0.1),
+          color: primaryColor.withValues(alpha: 0.1),
           borderRadius: BorderRadius.circular(12),
           border: Border.all(
-            color: CupertinoColors.systemGreen.withOpacity(0.3),
+            color: primaryColor.withValues(alpha: 0.3),
             width: 1,
           ),
         ),
@@ -268,9 +272,7 @@ class _ExampleMandalartViewerState extends State<_ExampleMandalartViewer> {
                 child: Container(
                   padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
                   decoration: BoxDecoration(
-                    color: completedCount == actions.length
-                        ? CupertinoColors.systemGreen
-                        : CupertinoColors.systemGreen,
+                    color: primaryColor,
                     borderRadius: BorderRadius.circular(10),
                   ),
                   child: Text(
@@ -289,7 +291,7 @@ class _ExampleMandalartViewerState extends State<_ExampleMandalartViewer> {
     );
   }
 
-  Widget _buildActionView(BuildContext context, int themeIndex) {
+  Widget _buildActionView(BuildContext context, int themeIndex, Color primaryColor) {
     final theme = widget.data.themes[themeIndex];
     final actions = _getActionsForTheme(themeIndex);
 
@@ -299,10 +301,10 @@ class _ExampleMandalartViewerState extends State<_ExampleMandalartViewer> {
         Container(
           padding: const EdgeInsets.all(16),
           decoration: BoxDecoration(
-            color: CupertinoColors.systemGreen.withOpacity(0.1),
+            color: primaryColor.withValues(alpha: 0.1),
             border: Border(
               bottom: BorderSide(
-                color: CupertinoColors.systemGreen.withOpacity(0.3),
+                color: primaryColor.withValues(alpha: 0.3),
                 width: 1,
               ),
             ),
@@ -317,9 +319,9 @@ class _ExampleMandalartViewerState extends State<_ExampleMandalartViewer> {
                     _selectedThemeIndex = null;
                   });
                 },
-                child: const Icon(
+                child: Icon(
                   CupertinoIcons.back,
-                  color: CupertinoColors.systemGreen,
+                  color: primaryColor,
                 ),
               ),
               const SizedBox(width: 12),
@@ -373,16 +375,16 @@ class _ExampleMandalartViewerState extends State<_ExampleMandalartViewer> {
                       width: 32,
                       height: 32,
                       decoration: BoxDecoration(
-                        color: CupertinoColors.systemGreen.withOpacity(0.1),
+                        color: primaryColor.withValues(alpha: 0.1),
                         shape: BoxShape.circle,
                       ),
                       child: Center(
                         child: Text(
                           '${index + 1}',
-                          style: const TextStyle(
+                          style: TextStyle(
                             fontSize: 14,
                             fontWeight: FontWeight.bold,
-                            color: CupertinoColors.systemGreen,
+                            color: primaryColor,
                           ),
                         ),
                       ),

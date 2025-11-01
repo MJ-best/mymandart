@@ -38,12 +38,13 @@ class _LandingScreenState extends ConsumerState<LandingScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final primaryColor = ref.watch(themeProvider).primaryColor;
     final currentName = ref.watch(mandalartProvider).displayName;
     final inferredName = _nameController.text.trim();
     final title = currentName.isNotEmpty
         ? currentName
         : (inferredName.isNotEmpty ? inferredName : '나만의 만다라트');
-    final accent = CupertinoColors.systemGreen.resolveFrom(context);
+    final accent = primaryColor;
     final secondary = CupertinoColors.secondaryLabel.resolveFrom(context);
     final iconShadow = accent.withAlpha((0.35 * 255).round());
 
@@ -53,7 +54,14 @@ class _LandingScreenState extends ConsumerState<LandingScreen> {
         middle: Text(title),
         backgroundColor: CupertinoColors.systemBackground,
         border: null,
-        trailing: _buildThemeToggleButton(),
+        trailing: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            _buildColorThemeButton(),
+            const SizedBox(width: 8),
+            _buildThemeToggleButton(),
+          ],
+        ),
       ),
       child: SafeArea(
         child: SingleChildScrollView(
@@ -194,11 +202,11 @@ class _LandingScreenState extends ConsumerState<LandingScreen> {
                   fontSize: 17,
                   color: CupertinoColors.secondaryLabel,
                 ),
-                prefix: const Padding(
-                  padding: EdgeInsets.only(left: 12),
+                prefix: Padding(
+                  padding: const EdgeInsets.only(left: 12),
                   child: Icon(
                     CupertinoIcons.pencil_outline,
-                    color: CupertinoColors.systemGreen,
+                    color: primaryColor,
                   ),
                 ),
               ),
@@ -249,7 +257,7 @@ class _LandingScreenState extends ConsumerState<LandingScreen> {
                 child: Container(
                   decoration: BoxDecoration(
                     border: Border.all(
-                      color: CupertinoColors.systemGreen.resolveFrom(context),
+                      color: primaryColor,
                       width: 2,
                     ),
                     borderRadius: BorderRadius.circular(12),
@@ -267,10 +275,10 @@ class _LandingScreenState extends ConsumerState<LandingScreen> {
                     child: Row(
                       mainAxisSize: MainAxisSize.min,
                       children: [
-                        const Icon(
+                        Icon(
                           CupertinoIcons.folder,
                           size: 20,
-                          color: CupertinoColors.systemGreen,
+                          color: primaryColor,
                         ),
                         const SizedBox(width: 8),
                         Text(
@@ -293,9 +301,33 @@ class _LandingScreenState extends ConsumerState<LandingScreen> {
     );
   }
 
+  /// 색상 테마 선택 버튼
+  Widget _buildColorThemeButton() {
+    final themeState = ref.watch(themeProvider);
+    final primaryColor = themeState.primaryColor;
+
+    return Semantics(
+      label: 'Select color theme',
+      button: true,
+      child: CupertinoButton(
+        padding: EdgeInsets.zero,
+        onPressed: () {
+          HapticFeedback.lightImpact();
+          _showColorThemePicker();
+        },
+        child: Icon(
+          CupertinoIcons.color_filter,
+          color: primaryColor,
+          size: 24,
+        ),
+      ),
+    );
+  }
+
   /// 다크모드 토글 버튼
   Widget _buildThemeToggleButton() {
     final themeState = ref.watch(themeProvider);
+    final primaryColor = themeState.primaryColor;
     final bool isLight = themeState.mode == ThemeMode.light;
     final IconData icon = isLight ? CupertinoIcons.sun_max_fill : CupertinoIcons.moon_fill;
     final String label = isLight ? 'Light mode' : 'Dark mode';
@@ -311,8 +343,127 @@ class _LandingScreenState extends ConsumerState<LandingScreen> {
         },
         child: Icon(
           icon,
-          color: CupertinoColors.systemGreen,
+          color: primaryColor,
           size: 24,
+        ),
+      ),
+    );
+  }
+
+  /// 색상 테마 선택 액션 시트 표시
+  void _showColorThemePicker() {
+    showCupertinoModalPopup<void>(
+      context: context,
+      builder: (BuildContext context) => CupertinoActionSheet(
+        title: const Text(
+          '색상 테마 선택',
+          style: TextStyle(fontSize: 17, fontWeight: FontWeight.w600),
+        ),
+        message: const Text('앱 전체의 강조 색상을 선택하세요'),
+        actions: <CupertinoActionSheetAction>[
+          CupertinoActionSheetAction(
+            onPressed: () {
+              HapticFeedback.lightImpact();
+              ref.read(themeProvider.notifier).setColorTheme(ColorTheme.green);
+              Navigator.pop(context);
+            },
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Container(
+                  width: 24,
+                  height: 24,
+                  decoration: const BoxDecoration(
+                    color: CupertinoColors.systemGreen,
+                    shape: BoxShape.circle,
+                  ),
+                ),
+                const SizedBox(width: 12),
+                const Text('녹색'),
+              ],
+            ),
+          ),
+          CupertinoActionSheetAction(
+            onPressed: () {
+              HapticFeedback.lightImpact();
+              ref.read(themeProvider.notifier).setColorTheme(ColorTheme.purple);
+              Navigator.pop(context);
+            },
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Container(
+                  width: 24,
+                  height: 24,
+                  decoration: const BoxDecoration(
+                    color: CupertinoColors.systemPurple,
+                    shape: BoxShape.circle,
+                  ),
+                ),
+                const SizedBox(width: 12),
+                const Text('보라색'),
+              ],
+            ),
+          ),
+          CupertinoActionSheetAction(
+            onPressed: () {
+              HapticFeedback.lightImpact();
+              ref.read(themeProvider.notifier).setColorTheme(ColorTheme.black);
+              Navigator.pop(context);
+            },
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Container(
+                  width: 24,
+                  height: 24,
+                  decoration: BoxDecoration(
+                    color: CupertinoColors.black,
+                    shape: BoxShape.circle,
+                    border: Border.all(
+                      color: CupertinoColors.systemGrey,
+                      width: 1,
+                    ),
+                  ),
+                ),
+                const SizedBox(width: 12),
+                const Text('검은색'),
+              ],
+            ),
+          ),
+          CupertinoActionSheetAction(
+            onPressed: () {
+              HapticFeedback.lightImpact();
+              ref.read(themeProvider.notifier).setColorTheme(ColorTheme.white);
+              Navigator.pop(context);
+            },
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Container(
+                  width: 24,
+                  height: 24,
+                  decoration: BoxDecoration(
+                    color: CupertinoColors.white,
+                    shape: BoxShape.circle,
+                    border: Border.all(
+                      color: CupertinoColors.systemGrey,
+                      width: 1,
+                    ),
+                  ),
+                ),
+                const SizedBox(width: 12),
+                const Text('흰색'),
+              ],
+            ),
+          ),
+        ],
+        cancelButton: CupertinoActionSheetAction(
+          isDefaultAction: true,
+          onPressed: () {
+            Navigator.pop(context);
+          },
+          child: const Text('취소'),
         ),
       ),
     );

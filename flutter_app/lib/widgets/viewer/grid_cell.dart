@@ -9,33 +9,34 @@ class GridCellWidget extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final primaryColor = CupertinoTheme.of(context).primaryColor;
     Color bg;
     Color fg;
     double fontSize;
     switch (cell.type) {
       case 'goal':
-        bg = CupertinoColors.systemGreen;
+        bg = primaryColor;
         fg = CupertinoColors.white;
         fontSize = 18;
         break;
       case 'theme':
-        bg = CupertinoColors.systemGreen.withOpacity(0.7);
+        bg = primaryColor.withValues(alpha: 0.7);
         fg = CupertinoColors.white;
         fontSize = 16;
         break;
       case 'outer-theme':
-        bg = CupertinoColors.systemGreen.withOpacity(0.4);
+        bg = primaryColor.withValues(alpha: 0.4);
         fg = CupertinoColors.white;
         fontSize = 14;
         break;
       case 'action':
         switch (cell.status) {
           case ActionStatus.completed:
-            bg = CupertinoColors.systemGreen.withOpacity(0.6);
+            bg = primaryColor.withValues(alpha: 0.6);
             fg = CupertinoColors.white;
             break;
           case ActionStatus.inProgress:
-            bg = CupertinoColors.systemOrange.withOpacity(0.6);
+            bg = CupertinoColors.systemOrange.withValues(alpha: 0.6);
             fg = CupertinoColors.white;
             break;
           case ActionStatus.notStarted:
@@ -59,7 +60,7 @@ class GridCellWidget extends StatelessWidget {
         decoration: BoxDecoration(
           color: bg,
           border: Border.all(
-            color: CupertinoColors.separator.resolveFrom(context).withOpacity(0.3),
+            color: CupertinoColors.separator.resolveFrom(context).withValues(alpha: 0.3),
           ),
         ),
         child: LayoutBuilder(

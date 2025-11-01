@@ -3,6 +3,7 @@ import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:mandarart_journey/models/streak.dart';
 import 'package:mandarart_journey/providers/streak_provider.dart';
+import 'package:mandarart_journey/providers/theme_provider.dart';
 
 class StreakWidget extends ConsumerWidget {
   const StreakWidget({super.key});
@@ -110,6 +111,8 @@ class StreakWidget extends ConsumerWidget {
                 const SizedBox(height: 4),
                 // 21일 진행바
                 _buildProgressBar(
+                  context,
+                  ref,
                   current: streak.currentStreak.clamp(0, 21),
                   max: 21,
                   label: '21일',
@@ -118,6 +121,8 @@ class StreakWidget extends ConsumerWidget {
                 const SizedBox(height: 3),
                 // 66일 진행바
                 _buildProgressBar(
+                  context,
+                  ref,
                   current: streak.currentStreak.clamp(0, 66),
                   max: 66,
                   label: '66일',
@@ -131,12 +136,15 @@ class StreakWidget extends ConsumerWidget {
     );
   }
 
-  Widget _buildProgressBar({
+  Widget _buildProgressBar(
+    BuildContext context,
+    WidgetRef ref, {
     required int current,
     required int max,
     required String label,
     required bool isComplete,
   }) {
+    final primaryColor = ref.watch(themeProvider).primaryColor;
     final progress = (current / max).clamp(0.0, 1.0);
 
     return Row(
@@ -154,7 +162,7 @@ class StreakWidget extends ConsumerWidget {
               child: Container(
                 decoration: BoxDecoration(
                   color: isComplete
-                      ? CupertinoColors.systemGreen
+                      ? primaryColor
                       : CupertinoColors.white,
                   borderRadius: BorderRadius.circular(3),
                 ),
@@ -283,19 +291,20 @@ class StreakWidget extends ConsumerWidget {
   }
 
   void _showCheckInSuccess(BuildContext context, StreakModel streak) {
+    final primaryColor = CupertinoTheme.of(context).primaryColor;
     showCupertinoDialog(
       context: context,
       builder: (context) => CupertinoAlertDialog(
-        title: const Row(
+        title: Row(
           mainAxisSize: MainAxisSize.min,
           children: [
             Icon(
               CupertinoIcons.checkmark_seal_fill,
-              color: CupertinoColors.systemGreen,
+              color: primaryColor,
               size: 24,
             ),
-            SizedBox(width: 8),
-            Text('출석 완료!'),
+            const SizedBox(width: 8),
+            const Text('출석 완료!'),
           ],
         ),
         content: Column(
@@ -308,9 +317,9 @@ class StreakWidget extends ConsumerWidget {
             const SizedBox(height: 8),
             Text(
               streak.phaseDescription,
-              style: const TextStyle(
+              style: TextStyle(
                 fontSize: 14,
-                color: CupertinoColors.systemGreen,
+                color: primaryColor,
                 fontWeight: FontWeight.w600,
               ),
             ),

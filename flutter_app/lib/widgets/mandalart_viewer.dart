@@ -175,6 +175,7 @@ class _MandalartViewerState extends ConsumerState<MandalartViewer> {
 
   /// 세로 모드 레이아웃
   Widget _buildPortraitLayout() {
+    final primaryColor = ref.watch(themeProvider).primaryColor;
     final isFull = currentView == 'full';
 
     return Column(
@@ -231,9 +232,9 @@ class _MandalartViewerState extends ConsumerState<MandalartViewer> {
                       child: Row(
                         mainAxisAlignment: MainAxisAlignment.center,
                         children: [
-                          const Icon(
+                          Icon(
                             CupertinoIcons.question_circle,
-                            color: CupertinoColors.systemGreen,
+                            color: primaryColor,
                             size: 20,
                           ),
                           const SizedBox(width: 8),
@@ -259,6 +260,7 @@ class _MandalartViewerState extends ConsumerState<MandalartViewer> {
 
   /// 가로 모드 레이아웃
   Widget _buildLandscapeLayout() {
+    final primaryColor = ref.watch(themeProvider).primaryColor;
     final isFull = currentView == 'full';
 
     return Column(
@@ -318,9 +320,9 @@ class _MandalartViewerState extends ConsumerState<MandalartViewer> {
                           child: Row(
                             mainAxisAlignment: MainAxisAlignment.center,
                             children: [
-                              const Icon(
+                              Icon(
                                 CupertinoIcons.question_circle,
-                                color: CupertinoColors.systemGreen,
+                                color: primaryColor,
                                 size: 20,
                               ),
                               const SizedBox(width: 8),
@@ -390,6 +392,7 @@ class _MandalartViewerState extends ConsumerState<MandalartViewer> {
 
   /// 세로모드용 TODO 리스트 미리보기 위젯 (3개 + 확장 가능)
   Widget _buildTodoListPreview() {
+    final primaryColor = ref.watch(themeProvider).primaryColor;
     final incompleteActions = widget.state.actionItems
         .where((action) => !action.isCompleted && action.actionText.trim().isNotEmpty)
         .toList();
@@ -398,27 +401,27 @@ class _MandalartViewerState extends ConsumerState<MandalartViewer> {
       return Container(
         padding: const EdgeInsets.all(20),
         decoration: BoxDecoration(
-          color: CupertinoColors.systemGreen.withOpacity(0.1),
+          color: primaryColor.withValues(alpha: 0.1),
           borderRadius: BorderRadius.circular(12),
           border: Border.all(
-            color: CupertinoColors.systemGreen.withOpacity(0.3),
+            color: primaryColor.withValues(alpha: 0.3),
           ),
         ),
-        child: const Column(
+        child: Column(
           children: [
             Icon(
               CupertinoIcons.checkmark_seal_fill,
-              color: CupertinoColors.systemGreen,
+              color: primaryColor,
               size: 32,
             ),
-            SizedBox(height: 8),
+            const SizedBox(height: 8),
             Text(
               '모든 할 일 완료!',
               textAlign: TextAlign.center,
               style: TextStyle(
                 fontSize: 16,
                 fontWeight: FontWeight.w600,
-                color: CupertinoColors.systemGreen,
+                color: primaryColor,
               ),
             ),
           ],
@@ -434,10 +437,10 @@ class _MandalartViewerState extends ConsumerState<MandalartViewer> {
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: CupertinoColors.systemGreen.withOpacity(0.05),
+        color: primaryColor.withValues(alpha: 0.05),
         borderRadius: BorderRadius.circular(12),
         border: Border.all(
-          color: CupertinoColors.systemGreen.withOpacity(0.2),
+          color: primaryColor.withValues(alpha: 0.2),
         ),
       ),
       child: Column(
@@ -445,9 +448,9 @@ class _MandalartViewerState extends ConsumerState<MandalartViewer> {
         children: [
           Row(
             children: [
-              const Icon(
+              Icon(
                 CupertinoIcons.list_bullet,
-                color: CupertinoColors.systemGreen,
+                color: primaryColor,
                 size: 20,
               ),
               const SizedBox(width: 8),
@@ -455,10 +458,10 @@ class _MandalartViewerState extends ConsumerState<MandalartViewer> {
                 incompleteActions.length <= 3
                     ? '오늘 집중할 ${incompleteActions.length}가지'
                     : '오늘 집중할 3가지',
-                style: const TextStyle(
+                style: TextStyle(
                   fontSize: 16,
                   fontWeight: FontWeight.w600,
-                  color: CupertinoColors.systemGreen,
+                  color: primaryColor,
                 ),
               ),
             ],
@@ -526,9 +529,9 @@ class _MandalartViewerState extends ConsumerState<MandalartViewer> {
                     _isTodoExpanded
                         ? '접기'
                         : '더 보기 (${incompleteActions.length - 3}개 더)',
-                    style: const TextStyle(
+                    style: TextStyle(
                       fontSize: 14,
-                      color: CupertinoColors.systemGreen,
+                      color: primaryColor,
                       fontWeight: FontWeight.w600,
                     ),
                   ),
@@ -537,7 +540,7 @@ class _MandalartViewerState extends ConsumerState<MandalartViewer> {
                     _isTodoExpanded
                         ? CupertinoIcons.chevron_up
                         : CupertinoIcons.chevron_down,
-                    color: CupertinoColors.systemGreen,
+                    color: primaryColor,
                     size: 14,
                   ),
                 ],
@@ -560,6 +563,7 @@ class _MandalartViewerState extends ConsumerState<MandalartViewer> {
 
   /// TODO 리스트 위젯
   Widget _buildTodoList() {
+    final primaryColor = ref.watch(themeProvider).primaryColor;
     final incompleteActions = widget.state.actionItems
         .where((action) => !action.isCompleted && action.actionText.trim().isNotEmpty)
         .toList();
@@ -568,27 +572,27 @@ class _MandalartViewerState extends ConsumerState<MandalartViewer> {
       return Container(
         padding: const EdgeInsets.all(20),
         decoration: BoxDecoration(
-          color: CupertinoColors.systemGreen.withOpacity(0.1),
+          color: primaryColor.withValues(alpha: 0.1),
           borderRadius: BorderRadius.circular(12),
           border: Border.all(
-            color: CupertinoColors.systemGreen.withOpacity(0.3),
+            color: primaryColor.withValues(alpha: 0.3),
           ),
         ),
-        child: const Column(
+        child: Column(
           children: [
             Icon(
               CupertinoIcons.checkmark_seal_fill,
-              color: CupertinoColors.systemGreen,
+              color: primaryColor,
               size: 32,
             ),
-            SizedBox(height: 8),
+            const SizedBox(height: 8),
             Text(
               '모든 할 일 완료!',
               textAlign: TextAlign.center,
               style: TextStyle(
                 fontSize: 16,
                 fontWeight: FontWeight.w600,
-                color: CupertinoColors.systemGreen,
+                color: primaryColor,
               ),
             ),
           ],
@@ -599,10 +603,10 @@ class _MandalartViewerState extends ConsumerState<MandalartViewer> {
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: CupertinoColors.systemGreen.withOpacity(0.05),
+        color: primaryColor.withValues(alpha: 0.05),
         borderRadius: BorderRadius.circular(12),
         border: Border.all(
-          color: CupertinoColors.systemGreen.withOpacity(0.2),
+          color: primaryColor.withValues(alpha: 0.2),
         ),
       ),
       child: Column(
@@ -610,18 +614,18 @@ class _MandalartViewerState extends ConsumerState<MandalartViewer> {
         children: [
           Row(
             children: [
-              const Icon(
+              Icon(
                 CupertinoIcons.list_bullet,
-                color: CupertinoColors.systemGreen,
+                color: primaryColor,
                 size: 20,
               ),
               const SizedBox(width: 8),
               Text(
                 '오늘 집중할 일 (${incompleteActions.length > 10 ? 10 : incompleteActions.length}개)',
-                style: const TextStyle(
+                style: TextStyle(
                   fontSize: 16,
                   fontWeight: FontWeight.w600,
-                  color: CupertinoColors.systemGreen,
+                  color: primaryColor,
                 ),
               ),
             ],
@@ -1041,6 +1045,7 @@ class _MandalartViewerState extends ConsumerState<MandalartViewer> {
 
   Widget _buildThemeToggleButton() {
     final themeState = ref.watch(themeProvider);
+    final primaryColor = themeState.primaryColor;
     final bool isLight = themeState.mode == ThemeMode.light;
     final IconData icon = isLight ? CupertinoIcons.sun_max_fill : CupertinoIcons.moon_fill;
     final String label = isLight ? 'Light mode' : 'Dark mode';
@@ -1056,7 +1061,7 @@ class _MandalartViewerState extends ConsumerState<MandalartViewer> {
         },
         child: Icon(
           icon,
-          color: CupertinoColors.systemGreen,
+          color: primaryColor,
           size: 24,
         ),
       ),

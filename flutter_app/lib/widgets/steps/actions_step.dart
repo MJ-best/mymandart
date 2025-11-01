@@ -88,6 +88,7 @@ class _ActionsStepState extends State<ActionsStep> {
 
   @override
   Widget build(BuildContext context) {
+    final primaryColor = CupertinoTheme.of(context).primaryColor;
     final filledThemes = widget.state.themes
         .asMap()
         .entries
@@ -111,15 +112,15 @@ class _ActionsStepState extends State<ActionsStep> {
             decoration: BoxDecoration(
               gradient: LinearGradient(
                 colors: [
-                  CupertinoColors.systemGreen.withOpacity(0.1),
-                  CupertinoColors.systemIndigo.withOpacity(0.05),
+                  primaryColor.withValues(alpha: 0.1),
+                  CupertinoColors.systemIndigo.withValues(alpha: 0.05),
                 ],
                 begin: Alignment.topLeft,
                 end: Alignment.bottomRight,
               ),
               borderRadius: BorderRadius.circular(12),
               border: Border.all(
-                color: CupertinoColors.systemGreen.withOpacity(0.2),
+                color: primaryColor.withValues(alpha: 0.2),
               ),
             ),
             child: Column(
@@ -130,24 +131,24 @@ class _ActionsStepState extends State<ActionsStep> {
                     Container(
                       padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
                       decoration: BoxDecoration(
-                        color: CupertinoColors.systemGreen.withOpacity(0.15),
+                        color: primaryColor.withValues(alpha: 0.15),
                         borderRadius: BorderRadius.circular(12),
                       ),
-                      child: const Row(
+                      child: Row(
                         mainAxisSize: MainAxisSize.min,
                         children: [
                           Icon(
                             CupertinoIcons.star_fill,
-                            color: CupertinoColors.systemGreen,
+                            color: primaryColor,
                             size: 12,
                           ),
-                          SizedBox(width: 4),
+                          const SizedBox(width: 4),
                           Text(
                             '중심 목표',
                             style: TextStyle(
                               fontSize: 12,
                               fontWeight: FontWeight.w600,
-                              color: CupertinoColors.systemGreen,
+                              color: primaryColor,
                             ),
                           ),
                         ],
@@ -189,13 +190,13 @@ class _ActionsStepState extends State<ActionsStep> {
             margin: const EdgeInsets.only(bottom: 16),
             decoration: BoxDecoration(
               color: isExpanded
-                  ? CupertinoColors.systemGreen.withOpacity(0.05)
+                  ? primaryColor.withValues(alpha: 0.05)
                   : CupertinoColors.secondarySystemGroupedBackground.resolveFrom(context),
               borderRadius: BorderRadius.circular(12),
               border: Border.all(
                 color: isExpanded
-                    ? CupertinoColors.systemGreen.withOpacity(0.3)
-                    : CupertinoColors.separator.resolveFrom(context).withOpacity(0.3),
+                    ? primaryColor.withValues(alpha: 0.3)
+                    : CupertinoColors.separator.resolveFrom(context).withValues(alpha: 0.3),
                 width: isExpanded ? 2 : 1,
               ),
             ),
@@ -271,7 +272,7 @@ class _ActionsStepState extends State<ActionsStep> {
                       isExpanded
                           ? CupertinoIcons.chevron_up
                           : CupertinoIcons.chevron_down,
-                      color: CupertinoColors.systemGreen,
+                      color: primaryColor,
                       size: 20,
                     ),
                   ],
@@ -282,7 +283,7 @@ class _ActionsStepState extends State<ActionsStep> {
                   padding: const EdgeInsets.symmetric(horizontal: 16),
                   child: Container(
                     height: 1,
-                    color: CupertinoColors.separator.resolveFrom(context).withOpacity(0.3),
+                    color: CupertinoColors.separator.resolveFrom(context).withValues(alpha: 0.3),
                   ),
                 ),
                 // 확장 메시지 추가
@@ -293,7 +294,7 @@ class _ActionsStepState extends State<ActionsStep> {
                     children: [
                       Icon(
                         CupertinoIcons.arrow_down_circle_fill,
-                        color: CupertinoColors.systemGreen.withOpacity(0.6),
+                        color: primaryColor.withValues(alpha: 0.6),
                         size: 16,
                       ),
                       const SizedBox(width: 8),
@@ -308,7 +309,7 @@ class _ActionsStepState extends State<ActionsStep> {
                       const SizedBox(width: 8),
                       Icon(
                         CupertinoIcons.arrow_down_circle_fill,
-                        color: CupertinoColors.systemGreen.withOpacity(0.6),
+                        color: primaryColor.withValues(alpha: 0.6),
                         size: 16,
                       ),
                     ],
@@ -352,7 +353,7 @@ class _ActionsStepState extends State<ActionsStep> {
                                   decoration: BoxDecoration(
                                     shape: BoxShape.circle,
                                     color: existing.status == ActionStatus.completed
-                                        ? CupertinoColors.systemGreen
+                                        ? primaryColor
                                         : existing.status == ActionStatus.inProgress
                                             ? CupertinoColors.systemOrange
                                             : CupertinoColors.systemGrey5,

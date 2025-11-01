@@ -109,10 +109,10 @@ class A4MandalartLayout extends StatelessWidget {
             Text(
               '$completed/$total 액션아이템 완료',
               textAlign: TextAlign.center,
-              style: const TextStyle(
+              style: TextStyle(
                 fontSize: 18,
                 fontWeight: FontWeight.w600,
-                color: CupertinoColors.systemGreen,
+                color: CupertinoTheme.of(context).primaryColor,
               ),
             ),
             const SizedBox(height: 16),

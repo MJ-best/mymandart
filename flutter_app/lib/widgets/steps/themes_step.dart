@@ -64,6 +64,7 @@ class _ThemesStepState extends State<ThemesStep> {
 
   @override
   Widget build(BuildContext context) {
+    final primaryColor = CupertinoTheme.of(context).primaryColor;
     final hasGoal = widget.goalText.trim().isNotEmpty;
 
     return Column(
@@ -76,15 +77,15 @@ class _ThemesStepState extends State<ThemesStep> {
             decoration: BoxDecoration(
               gradient: LinearGradient(
                 colors: [
-                  CupertinoColors.systemGreen.withOpacity(0.15),
-                  CupertinoColors.systemIndigo.withOpacity(0.1),
+                  primaryColor.withValues(alpha: 0.15),
+                  CupertinoColors.systemIndigo.withValues(alpha: 0.1),
                 ],
                 begin: Alignment.topLeft,
                 end: Alignment.bottomRight,
               ),
               borderRadius: BorderRadius.circular(16),
               border: Border.all(
-                color: CupertinoColors.systemGreen.withOpacity(0.3),
+                color: primaryColor.withValues(alpha: 0.3),
                 width: 2,
               ),
             ),
@@ -96,7 +97,7 @@ class _ThemesStepState extends State<ThemesStep> {
                     Container(
                       padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
                       decoration: BoxDecoration(
-                        color: CupertinoColors.systemGreen,
+                        color: primaryColor,
                         borderRadius: BorderRadius.circular(20),
                       ),
                       child: const Row(
@@ -138,7 +139,7 @@ class _ThemesStepState extends State<ThemesStep> {
                   children: [
                     Icon(
                       CupertinoIcons.arrow_down,
-                      color: CupertinoColors.systemGreen.withOpacity(0.6),
+                      color: primaryColor.withValues(alpha: 0.6),
                       size: 20,
                     ),
                     const SizedBox(width: 8),
@@ -153,7 +154,7 @@ class _ThemesStepState extends State<ThemesStep> {
                     const SizedBox(width: 8),
                     Icon(
                       CupertinoIcons.arrow_down,
-                      color: CupertinoColors.systemGreen.withOpacity(0.6),
+                      color: primaryColor.withValues(alpha: 0.6),
                       size: 20,
                     ),
                   ],
@@ -284,10 +285,10 @@ class _ThemesStepState extends State<ThemesStep> {
         const SizedBox(height: 8),
         Text(
           '진행률: ${widget.themes.where((t) => t.trim().isNotEmpty).length}/8',
-          style: const TextStyle(
+          style: TextStyle(
             fontSize: 15,
             fontWeight: FontWeight.w600,
-            color: CupertinoColors.systemGreen,
+            color: primaryColor,
           ),
         ),
       ],

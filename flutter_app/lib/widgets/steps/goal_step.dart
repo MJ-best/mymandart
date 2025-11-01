@@ -40,6 +40,8 @@ class _GoalStepState extends State<GoalStep> {
 
   @override
   Widget build(BuildContext context) {
+    final primaryColor = CupertinoTheme.of(context).primaryColor;
+
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -135,20 +137,20 @@ class _GoalStepState extends State<GoalStep> {
           ),
         ),
         const SizedBox(height: 32),
-        const Row(
+        Row(
           children: [
             Icon(
               CupertinoIcons.person_2,
               size: 18,
-              color: CupertinoColors.systemGreen,
+              color: primaryColor,
             ),
-            SizedBox(width: 8),
+            const SizedBox(width: 8),
             Text(
               '다른 사람들은 이런 목표를 세우고 있어요',
               style: TextStyle(
                 fontSize: 15,
                 fontWeight: FontWeight.w600,
-                color: CupertinoColors.systemGreen,
+                color: primaryColor,
               ),
             ),
           ],
