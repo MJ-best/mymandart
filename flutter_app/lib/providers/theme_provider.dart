@@ -2,7 +2,7 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import 'package:flutter_dynamic_icon/flutter_dynamic_icon.dart';
+import 'package:flutter_dynamic_icon_plus/flutter_dynamic_icon_plus.dart';
 
 /// 테마 모드 열거형
 enum ThemeMode {
@@ -169,7 +169,7 @@ class ThemeNotifier extends StateNotifier<ThemeState> {
           break;
       }
 
-      await FlutterDynamicIcon.setAlternateIconName(iconName);
+      await FlutterDynamicIconPlus.setAlternateIconName(iconName: iconName);
       if (kDebugMode) {
         print('App icon changed to: $iconName');
       }
