@@ -5,50 +5,50 @@ import 'package:screenshot/screenshot.dart';
 import 'package:mandarart_journey/utils/web_downloader.dart'
     if (dart.library.io) 'package:mandarart_journey/utils/web_downloader_mobile.dart';
 
-enum WallpaperPreset { original, iphone, ipad }
+enum WallpaperPreset { portrait, landscape, square }
 
 class ImageService {
   static double getPixelRatioForPreset(WallpaperPreset preset) {
     switch (preset) {
-      case WallpaperPreset.original:
+      case WallpaperPreset.portrait:
         return 3.0;
-      case WallpaperPreset.iphone:
-        return 4.0;
-      case WallpaperPreset.ipad:
+      case WallpaperPreset.landscape:
+        return 3.0;
+      case WallpaperPreset.square:
         return 4.0;
     }
   }
 
   static ui.Size? getTargetSizeForPreset(WallpaperPreset preset) {
     switch (preset) {
-      case WallpaperPreset.original:
-        return null;
-      case WallpaperPreset.iphone:
-        return const ui.Size(1290, 2796);
-      case WallpaperPreset.ipad:
-        return const ui.Size(2048, 2732);
+      case WallpaperPreset.portrait:
+        return const ui.Size(1080, 1920); // 세로모드 (9:16)
+      case WallpaperPreset.landscape:
+        return const ui.Size(1920, 1080); // 가로모드 (16:9)
+      case WallpaperPreset.square:
+        return const ui.Size(2048, 2048); // 정사각형
     }
   }
 
   static String getFileNameForPreset(WallpaperPreset preset) {
     switch (preset) {
-      case WallpaperPreset.original:
-        return 'mandalart.png';
-      case WallpaperPreset.iphone:
-        return 'mandalart_iphone.png';
-      case WallpaperPreset.ipad:
-        return 'mandalart_ipad.png';
+      case WallpaperPreset.portrait:
+        return 'mandalart_portrait.png';
+      case WallpaperPreset.landscape:
+        return 'mandalart_landscape.png';
+      case WallpaperPreset.square:
+        return 'mandalart_square.png';
     }
   }
 
   static String getPresetLabel(WallpaperPreset preset) {
     switch (preset) {
-      case WallpaperPreset.original:
-        return '현재 화면 크기로 저장';
-      case WallpaperPreset.iphone:
-        return '아이폰 배경화면 (1290×2796)';
-      case WallpaperPreset.ipad:
-        return '아이패드 배경화면 (2048×2732)';
+      case WallpaperPreset.portrait:
+        return '세로모드 (1080×1920)';
+      case WallpaperPreset.landscape:
+        return '가로모드 (1920×1080)';
+      case WallpaperPreset.square:
+        return '정사각형 만다라트만 (2048×2048)';
     }
   }
 

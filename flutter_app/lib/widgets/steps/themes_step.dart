@@ -76,7 +76,7 @@ class _ThemesStepState extends State<ThemesStep> {
             decoration: BoxDecoration(
               gradient: LinearGradient(
                 colors: [
-                  CupertinoColors.systemPurple.withOpacity(0.15),
+                  CupertinoColors.systemGreen.withOpacity(0.15),
                   CupertinoColors.systemIndigo.withOpacity(0.1),
                 ],
                 begin: Alignment.topLeft,
@@ -84,7 +84,7 @@ class _ThemesStepState extends State<ThemesStep> {
               ),
               borderRadius: BorderRadius.circular(16),
               border: Border.all(
-                color: CupertinoColors.systemPurple.withOpacity(0.3),
+                color: CupertinoColors.systemGreen.withOpacity(0.3),
                 width: 2,
               ),
             ),
@@ -96,7 +96,7 @@ class _ThemesStepState extends State<ThemesStep> {
                     Container(
                       padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
                       decoration: BoxDecoration(
-                        color: CupertinoColors.systemPurple,
+                        color: CupertinoColors.systemGreen,
                         borderRadius: BorderRadius.circular(20),
                       ),
                       child: const Row(
@@ -138,7 +138,7 @@ class _ThemesStepState extends State<ThemesStep> {
                   children: [
                     Icon(
                       CupertinoIcons.arrow_down,
-                      color: CupertinoColors.systemPurple.withOpacity(0.6),
+                      color: CupertinoColors.systemGreen.withOpacity(0.6),
                       size: 20,
                     ),
                     const SizedBox(width: 8),
@@ -153,7 +153,7 @@ class _ThemesStepState extends State<ThemesStep> {
                     const SizedBox(width: 8),
                     Icon(
                       CupertinoIcons.arrow_down,
-                      color: CupertinoColors.systemPurple.withOpacity(0.6),
+                      color: CupertinoColors.systemGreen.withOpacity(0.6),
                       size: 20,
                     ),
                   ],
@@ -287,7 +287,7 @@ class _ThemesStepState extends State<ThemesStep> {
           style: const TextStyle(
             fontSize: 15,
             fontWeight: FontWeight.w600,
-            color: CupertinoColors.systemPurple,
+            color: CupertinoColors.systemGreen,
           ),
         ),
       ],

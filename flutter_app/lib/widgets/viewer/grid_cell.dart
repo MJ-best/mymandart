@@ -14,24 +14,24 @@ class GridCellWidget extends StatelessWidget {
     double fontSize;
     switch (cell.type) {
       case 'goal':
-        bg = CupertinoColors.systemPurple;
+        bg = CupertinoColors.systemGreen;
         fg = CupertinoColors.white;
         fontSize = 18;
         break;
       case 'theme':
-        bg = CupertinoColors.systemPurple.withOpacity(0.7);
+        bg = CupertinoColors.systemGreen.withOpacity(0.7);
         fg = CupertinoColors.white;
         fontSize = 16;
         break;
       case 'outer-theme':
-        bg = CupertinoColors.systemPurple.withOpacity(0.4);
+        bg = CupertinoColors.systemGreen.withOpacity(0.4);
         fg = CupertinoColors.white;
         fontSize = 14;
         break;
       case 'action':
         switch (cell.status) {
           case ActionStatus.completed:
-            bg = CupertinoColors.systemPurple.withOpacity(0.6);
+            bg = CupertinoColors.systemGreen.withOpacity(0.6);
             fg = CupertinoColors.white;
             break;
           case ActionStatus.inProgress:

@@ -139,7 +139,7 @@ class _CombinedStepState extends ConsumerState<CombinedStep> {
             decoration: BoxDecoration(
               gradient: LinearGradient(
                 colors: [
-                  CupertinoColors.systemPurple.withOpacity(0.15),
+                  CupertinoColors.systemGreen.withOpacity(0.15),
                   CupertinoColors.systemIndigo.withOpacity(0.1),
                 ],
                 begin: Alignment.topLeft,
@@ -147,7 +147,7 @@ class _CombinedStepState extends ConsumerState<CombinedStep> {
               ),
               borderRadius: BorderRadius.circular(16),
               border: Border.all(
-                color: CupertinoColors.systemPurple.withOpacity(0.3),
+                color: CupertinoColors.systemGreen.withOpacity(0.3),
                 width: 2,
               ),
             ),
@@ -159,7 +159,7 @@ class _CombinedStepState extends ConsumerState<CombinedStep> {
                     Container(
                       padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
                       decoration: BoxDecoration(
-                        color: CupertinoColors.systemPurple,
+                        color: CupertinoColors.systemGreen,
                         borderRadius: BorderRadius.circular(20),
                       ),
                       child: const Row(
@@ -201,7 +201,7 @@ class _CombinedStepState extends ConsumerState<CombinedStep> {
                   children: [
                     Icon(
                       CupertinoIcons.arrow_down,
-                      color: CupertinoColors.systemPurple.withOpacity(0.6),
+                      color: CupertinoColors.systemGreen.withOpacity(0.6),
                       size: 20,
                     ),
                     const SizedBox(width: 8),
@@ -216,7 +216,7 @@ class _CombinedStepState extends ConsumerState<CombinedStep> {
                     const SizedBox(width: 8),
                     Icon(
                       CupertinoIcons.arrow_down,
-                      color: CupertinoColors.systemPurple.withOpacity(0.6),
+                      color: CupertinoColors.systemGreen.withOpacity(0.6),
                       size: 20,
                     ),
                   ],
@@ -249,12 +249,12 @@ class _CombinedStepState extends ConsumerState<CombinedStep> {
               Container(
                 decoration: BoxDecoration(
                   color: isExpanded
-                      ? CupertinoColors.systemPurple.withOpacity(0.05)
+                      ? CupertinoColors.systemGreen.withOpacity(0.05)
                       : CupertinoColors.secondarySystemGroupedBackground.resolveFrom(context),
                   borderRadius: BorderRadius.circular(12),
                   border: Border.all(
                     color: isExpanded
-                        ? CupertinoColors.systemPurple.withOpacity(0.3)
+                        ? CupertinoColors.systemGreen.withOpacity(0.3)
                         : CupertinoColors.separator.resolveFrom(context).withOpacity(0.3),
                     width: isExpanded ? 2 : 1,
                   ),
@@ -341,7 +341,7 @@ class _CombinedStepState extends ConsumerState<CombinedStep> {
                                         isExpanded
                                             ? CupertinoIcons.chevron_up
                                             : CupertinoIcons.chevron_down,
-                                        color: CupertinoColors.systemPurple,
+                                        color: CupertinoColors.systemGreen,
                                         size: 20,
                                       ),
                                     ),
@@ -411,7 +411,7 @@ class _CombinedStepState extends ConsumerState<CombinedStep> {
                           children: [
                             Icon(
                               CupertinoIcons.arrow_down_circle_fill,
-                              color: CupertinoColors.systemPurple.withOpacity(0.6),
+                              color: CupertinoColors.systemGreen.withOpacity(0.6),
                               size: 16,
                             ),
                             const SizedBox(width: 8),
@@ -426,7 +426,7 @@ class _CombinedStepState extends ConsumerState<CombinedStep> {
                             const SizedBox(width: 8),
                             Icon(
                               CupertinoIcons.arrow_down_circle_fill,
-                              color: CupertinoColors.systemPurple.withOpacity(0.6),
+                              color: CupertinoColors.systemGreen.withOpacity(0.6),
                               size: 16,
                             ),
                           ],
@@ -451,7 +451,7 @@ class _CombinedStepState extends ConsumerState<CombinedStep> {
           style: const TextStyle(
             fontSize: 15,
             fontWeight: FontWeight.w600,
-            color: CupertinoColors.systemPurple,
+            color: CupertinoColors.systemGreen,
           ),
         ),
       ],
@@ -498,7 +498,7 @@ class _CombinedStepState extends ConsumerState<CombinedStep> {
                       decoration: BoxDecoration(
                         shape: BoxShape.circle,
                         color: existing.status == ActionStatus.completed
-                            ? CupertinoColors.systemPurple
+                            ? CupertinoColors.systemGreen
                             : existing.status == ActionStatus.inProgress
                                 ? CupertinoColors.systemOrange
                                 : CupertinoColors.systemGrey5,

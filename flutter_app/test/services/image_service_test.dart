@@ -6,78 +6,79 @@ void main() {
 
   group('ImageService', () {
     group('getPixelRatioForPreset', () {
-      test('returns 3.0 for original preset', () {
-        final ratio = ImageService.getPixelRatioForPreset(WallpaperPreset.original);
+      test('returns 3.0 for portrait preset', () {
+        final ratio = ImageService.getPixelRatioForPreset(WallpaperPreset.portrait);
         expect(ratio, 3.0);
       });
 
-      test('returns 4.0 for iPhone preset', () {
-        final ratio = ImageService.getPixelRatioForPreset(WallpaperPreset.iphone);
-        expect(ratio, 4.0);
+      test('returns 3.0 for landscape preset', () {
+        final ratio = ImageService.getPixelRatioForPreset(WallpaperPreset.landscape);
+        expect(ratio, 3.0);
       });
 
-      test('returns 4.0 for iPad preset', () {
-        final ratio = ImageService.getPixelRatioForPreset(WallpaperPreset.ipad);
+      test('returns 4.0 for square preset', () {
+        final ratio = ImageService.getPixelRatioForPreset(WallpaperPreset.square);
         expect(ratio, 4.0);
       });
     });
 
     group('getTargetSizeForPreset', () {
-      test('returns null for original preset', () {
-        final size = ImageService.getTargetSizeForPreset(WallpaperPreset.original);
-        expect(size, isNull);
-      });
-
-      test('returns iPhone wallpaper size for iPhone preset', () {
-        final size = ImageService.getTargetSizeForPreset(WallpaperPreset.iphone);
+      test('returns portrait size for portrait preset', () {
+        final size = ImageService.getTargetSizeForPreset(WallpaperPreset.portrait);
         expect(size, isNotNull);
-        expect(size!.width, 1290);
-        expect(size.height, 2796);
+        expect(size!.width, 1080);
+        expect(size.height, 1920);
       });
 
-      test('returns iPad wallpaper size for iPad preset', () {
-        final size = ImageService.getTargetSizeForPreset(WallpaperPreset.ipad);
+      test('returns landscape size for landscape preset', () {
+        final size = ImageService.getTargetSizeForPreset(WallpaperPreset.landscape);
+        expect(size, isNotNull);
+        expect(size!.width, 1920);
+        expect(size.height, 1080);
+      });
+
+      test('returns square size for square preset', () {
+        final size = ImageService.getTargetSizeForPreset(WallpaperPreset.square);
         expect(size, isNotNull);
         expect(size!.width, 2048);
-        expect(size.height, 2732);
+        expect(size.height, 2048);
       });
     });
 
     group('getFileNameForPreset', () {
-      test('returns correct filename for original preset', () {
-        final filename = ImageService.getFileNameForPreset(WallpaperPreset.original);
-        expect(filename, 'mandalart.png');
+      test('returns correct filename for portrait preset', () {
+        final filename = ImageService.getFileNameForPreset(WallpaperPreset.portrait);
+        expect(filename, 'mandalart_portrait.png');
       });
 
-      test('returns correct filename for iPhone preset', () {
-        final filename = ImageService.getFileNameForPreset(WallpaperPreset.iphone);
-        expect(filename, 'mandalart_iphone.png');
+      test('returns correct filename for landscape preset', () {
+        final filename = ImageService.getFileNameForPreset(WallpaperPreset.landscape);
+        expect(filename, 'mandalart_landscape.png');
       });
 
-      test('returns correct filename for iPad preset', () {
-        final filename = ImageService.getFileNameForPreset(WallpaperPreset.ipad);
-        expect(filename, 'mandalart_ipad.png');
+      test('returns correct filename for square preset', () {
+        final filename = ImageService.getFileNameForPreset(WallpaperPreset.square);
+        expect(filename, 'mandalart_square.png');
       });
     });
 
     group('getPresetLabel', () {
-      test('returns Korean label for original preset', () {
-        final label = ImageService.getPresetLabel(WallpaperPreset.original);
-        expect(label, '현재 화면 크기로 저장');
+      test('returns Korean label for portrait preset', () {
+        final label = ImageService.getPresetLabel(WallpaperPreset.portrait);
+        expect(label, '세로모드 (1080×1920)');
       });
 
-      test('returns Korean label with dimensions for iPhone preset', () {
-        final label = ImageService.getPresetLabel(WallpaperPreset.iphone);
-        expect(label, '아이폰 배경화면 (1290×2796)');
-        expect(label.contains('1290'), true);
-        expect(label.contains('2796'), true);
+      test('returns Korean label with dimensions for landscape preset', () {
+        final label = ImageService.getPresetLabel(WallpaperPreset.landscape);
+        expect(label, '가로모드 (1920×1080)');
+        expect(label.contains('1920'), true);
+        expect(label.contains('1080'), true);
       });
 
-      test('returns Korean label with dimensions for iPad preset', () {
-        final label = ImageService.getPresetLabel(WallpaperPreset.ipad);
-        expect(label, '아이패드 배경화면 (2048×2732)');
+      test('returns Korean label with dimensions for square preset', () {
+        final label = ImageService.getPresetLabel(WallpaperPreset.square);
+        expect(label, '정사각형 만다라트만 (2048×2048)');
         expect(label.contains('2048'), true);
-        expect(label.contains('2732'), true);
       });
     });
 
@@ -87,9 +88,9 @@ void main() {
       });
 
       test('contains all expected preset types', () {
-        expect(WallpaperPreset.values.contains(WallpaperPreset.original), true);
-        expect(WallpaperPreset.values.contains(WallpaperPreset.iphone), true);
-        expect(WallpaperPreset.values.contains(WallpaperPreset.ipad), true);
+        expect(WallpaperPreset.values.contains(WallpaperPreset.portrait), true);
+        expect(WallpaperPreset.values.contains(WallpaperPreset.landscape), true);
+        expect(WallpaperPreset.values.contains(WallpaperPreset.square), true);
       });
     });
 
@@ -116,43 +117,37 @@ void main() {
         }
       });
 
-      test('all presets have target size or null', () {
+      test('all presets have target size', () {
         for (final preset in WallpaperPreset.values) {
           final size = ImageService.getTargetSizeForPreset(preset);
-          if (preset == WallpaperPreset.original) {
-            expect(size, isNull);
-          } else {
-            expect(size, isNotNull);
-            expect(size!.width, greaterThan(0));
-            expect(size.height, greaterThan(0));
-          }
+          expect(size, isNotNull);
+          expect(size!.width, greaterThan(0));
+          expect(size.height, greaterThan(0));
         }
       });
     });
 
     group('size validation', () {
-      test('iPhone size is portrait orientation', () {
-        final size = ImageService.getTargetSizeForPreset(WallpaperPreset.iphone);
+      test('portrait size is portrait orientation', () {
+        final size = ImageService.getTargetSizeForPreset(WallpaperPreset.portrait);
         expect(size!.height, greaterThan(size.width));
       });
 
-      test('iPad size is portrait orientation', () {
-        final size = ImageService.getTargetSizeForPreset(WallpaperPreset.ipad);
-        expect(size!.height, greaterThan(size.width));
+      test('landscape size is landscape orientation', () {
+        final size = ImageService.getTargetSizeForPreset(WallpaperPreset.landscape);
+        expect(size!.width, greaterThan(size.height));
       });
 
-      test('iPhone size has correct aspect ratio', () {
-        final size = ImageService.getTargetSizeForPreset(WallpaperPreset.iphone);
-        final aspectRatio = size!.width / size.height;
-        // iPhone 15 Pro Max aspect ratio is approximately 0.461
-        expect(aspectRatio, closeTo(0.461, 0.01));
+      test('square size has equal dimensions', () {
+        final size = ImageService.getTargetSizeForPreset(WallpaperPreset.square);
+        expect(size!.width, equals(size.height));
       });
 
-      test('iPad size has correct aspect ratio', () {
-        final size = ImageService.getTargetSizeForPreset(WallpaperPreset.ipad);
+      test('portrait size has correct aspect ratio', () {
+        final size = ImageService.getTargetSizeForPreset(WallpaperPreset.portrait);
         final aspectRatio = size!.width / size.height;
-        // iPad Pro 12.9" aspect ratio is approximately 0.749
-        expect(aspectRatio, closeTo(0.749, 0.01));
+        // 9:16 aspect ratio
+        expect(aspectRatio, closeTo(0.5625, 0.01));
       });
     });
 
@@ -165,13 +160,13 @@ void main() {
         }
       });
 
-      test('higher quality presets have equal or higher pixel ratios', () {
-        final originalRatio = ImageService.getPixelRatioForPreset(WallpaperPreset.original);
-        final iphoneRatio = ImageService.getPixelRatioForPreset(WallpaperPreset.iphone);
-        final ipadRatio = ImageService.getPixelRatioForPreset(WallpaperPreset.ipad);
+      test('square preset has highest pixel ratio', () {
+        final portraitRatio = ImageService.getPixelRatioForPreset(WallpaperPreset.portrait);
+        final landscapeRatio = ImageService.getPixelRatioForPreset(WallpaperPreset.landscape);
+        final squareRatio = ImageService.getPixelRatioForPreset(WallpaperPreset.square);
 
-        expect(iphoneRatio, greaterThanOrEqualTo(originalRatio));
-        expect(ipadRatio, greaterThanOrEqualTo(originalRatio));
+        expect(squareRatio, greaterThanOrEqualTo(portraitRatio));
+        expect(squareRatio, greaterThanOrEqualTo(landscapeRatio));
       });
     });
 
@@ -214,13 +209,15 @@ void main() {
       });
 
       test('sized presets include dimensions in label', () {
-        final iphoneLabel = ImageService.getPresetLabel(WallpaperPreset.iphone);
-        final ipadLabel = ImageService.getPresetLabel(WallpaperPreset.ipad);
+        final portraitLabel = ImageService.getPresetLabel(WallpaperPreset.portrait);
+        final landscapeLabel = ImageService.getPresetLabel(WallpaperPreset.landscape);
+        final squareLabel = ImageService.getPresetLabel(WallpaperPreset.square);
 
-        expect(iphoneLabel.contains('1290'), true);
-        expect(iphoneLabel.contains('2796'), true);
-        expect(ipadLabel.contains('2048'), true);
-        expect(ipadLabel.contains('2732'), true);
+        expect(portraitLabel.contains('1080'), true);
+        expect(portraitLabel.contains('1920'), true);
+        expect(landscapeLabel.contains('1920'), true);
+        expect(landscapeLabel.contains('1080'), true);
+        expect(squareLabel.contains('2048'), true);
       });
     });
   });

@@ -1,13 +1,13 @@
 import 'package:flutter/cupertino.dart';
-import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:mandarart_journey/screens/mandalart_app.dart';
 import 'package:mandarart_journey/screens/landing_screen.dart';
 import 'package:mandarart_journey/screens/saved_mandalarts_screen.dart';
+import 'package:mandarart_journey/screens/example_mandalart_screen.dart';
 import 'package:mandarart_journey/providers/theme_provider.dart';
-import 'package:flutter_gen/gen_l10n/app_localizations.dart';
+import 'package:mandarart_journey/l10n/app_localizations.dart';
 
 void main() {
   runApp(const ProviderScope(child: MandarartRoot()));
@@ -41,6 +41,10 @@ final _router = GoRouter(
       path: '/saved-mandalarts',
       builder: (context, state) => const SavedMandalartsScreen(),
     ),
+    GoRoute(
+      path: '/example',
+      builder: (context, state) => const ExampleMandalartScreen(),
+    ),
   ],
 );
 
@@ -69,7 +73,7 @@ class MandarartRoot extends ConsumerWidget {
 
     return CupertinoThemeData(
       brightness: brightness,
-      primaryColor: CupertinoColors.systemPurple,
+      primaryColor: CupertinoColors.systemGreen,
       scaffoldBackgroundColor: isDark
           ? CupertinoColors.black
           : CupertinoColors.systemGroupedBackground,
@@ -80,7 +84,7 @@ class MandarartRoot extends ConsumerWidget {
             )
           : CupertinoColors.systemBackground,
       textTheme: CupertinoTextThemeData(
-        primaryColor: CupertinoColors.systemPurple,
+        primaryColor: CupertinoColors.systemGreen,
         navLargeTitleTextStyle: TextStyle(
           fontSize: 34,
           fontWeight: FontWeight.bold,

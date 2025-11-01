@@ -4,9 +4,9 @@ import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import 'package:mandarart_journey/providers/mandarart_provider.dart';
+import 'package:mandarart_journey/providers/mandalart_provider.dart';
 import 'package:mandarart_journey/providers/theme_provider.dart';
-import 'package:flutter_gen/gen_l10n/app_localizations.dart';
+import 'package:mandarart_journey/l10n/app_localizations.dart';
 
 class LandingScreen extends ConsumerStatefulWidget {
   final bool isModal;
@@ -43,7 +43,7 @@ class _LandingScreenState extends ConsumerState<LandingScreen> {
     final title = currentName.isNotEmpty
         ? currentName
         : (inferredName.isNotEmpty ? inferredName : '나만의 만다라트');
-    final accent = CupertinoColors.systemPurple.resolveFrom(context);
+    final accent = CupertinoColors.systemGreen.resolveFrom(context);
     final secondary = CupertinoColors.secondaryLabel.resolveFrom(context);
     final iconShadow = accent.withAlpha((0.35 * 255).round());
 
@@ -198,7 +198,7 @@ class _LandingScreenState extends ConsumerState<LandingScreen> {
                   padding: EdgeInsets.only(left: 12),
                   child: Icon(
                     CupertinoIcons.pencil_outline,
-                    color: CupertinoColors.systemPurple,
+                    color: CupertinoColors.systemGreen,
                   ),
                 ),
               ),
@@ -218,18 +218,22 @@ class _LandingScreenState extends ConsumerState<LandingScreen> {
                         .updateDisplayName(name);
                     FocusScope.of(context).unfocus();
 
+                    // Capture context before async gap
+                    final navigator = Navigator.of(context);
+                    final router = GoRouter.of(context);
+
                     // 사용자가 시작했음을 기록
                     final prefs = await SharedPreferences.getInstance();
                     await prefs.setBool('has_started', true);
 
                     if (!mounted) return;
                     if (widget.isModal) {
-                      Navigator.of(context).pop();
+                      navigator.pop();
                       if (widget.onComplete != null) {
                         widget.onComplete!();
                       }
                     } else {
-                      GoRouter.of(context).go('/create');
+                      router.go('/create');
                     }
                   },
                   child: Text(
@@ -245,7 +249,7 @@ class _LandingScreenState extends ConsumerState<LandingScreen> {
                 child: Container(
                   decoration: BoxDecoration(
                     border: Border.all(
-                      color: CupertinoColors.systemPurple.resolveFrom(context),
+                      color: CupertinoColors.systemGreen.resolveFrom(context),
                       width: 2,
                     ),
                     borderRadius: BorderRadius.circular(12),
@@ -258,7 +262,7 @@ class _LandingScreenState extends ConsumerState<LandingScreen> {
                       if (widget.isModal) {
                         Navigator.of(context).pop();
                       }
-                      GoRouter.of(context).push('/saved-mandalarts');
+                      GoRouter.of(context).push('/example');
                     },
                     child: Row(
                       mainAxisSize: MainAxisSize.min,
@@ -266,11 +270,11 @@ class _LandingScreenState extends ConsumerState<LandingScreen> {
                         const Icon(
                           CupertinoIcons.folder,
                           size: 20,
-                          color: CupertinoColors.systemPurple,
+                          color: CupertinoColors.systemGreen,
                         ),
                         const SizedBox(width: 8),
                         Text(
-                          '이전 만다라트 보기',
+                          '만다라트 예시보기',
                           style: TextStyle(
                             fontSize: 17,
                             fontWeight: FontWeight.w600,
@@ -307,7 +311,7 @@ class _LandingScreenState extends ConsumerState<LandingScreen> {
         },
         child: Icon(
           icon,
-          color: CupertinoColors.systemPurple,
+          color: CupertinoColors.systemGreen,
           size: 24,
         ),
       ),

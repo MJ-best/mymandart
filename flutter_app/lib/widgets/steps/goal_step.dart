@@ -140,7 +140,7 @@ class _GoalStepState extends State<GoalStep> {
             Icon(
               CupertinoIcons.person_2,
               size: 18,
-              color: CupertinoColors.systemPurple,
+              color: CupertinoColors.systemGreen,
             ),
             SizedBox(width: 8),
             Text(
@@ -148,7 +148,7 @@ class _GoalStepState extends State<GoalStep> {
               style: TextStyle(
                 fontSize: 15,
                 fontWeight: FontWeight.w600,
-                color: CupertinoColors.systemPurple,
+                color: CupertinoColors.systemGreen,
               ),
             ),
           ],

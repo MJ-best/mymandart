@@ -111,7 +111,7 @@ class _ActionsStepState extends State<ActionsStep> {
             decoration: BoxDecoration(
               gradient: LinearGradient(
                 colors: [
-                  CupertinoColors.systemPurple.withOpacity(0.1),
+                  CupertinoColors.systemGreen.withOpacity(0.1),
                   CupertinoColors.systemIndigo.withOpacity(0.05),
                 ],
                 begin: Alignment.topLeft,
@@ -119,7 +119,7 @@ class _ActionsStepState extends State<ActionsStep> {
               ),
               borderRadius: BorderRadius.circular(12),
               border: Border.all(
-                color: CupertinoColors.systemPurple.withOpacity(0.2),
+                color: CupertinoColors.systemGreen.withOpacity(0.2),
               ),
             ),
             child: Column(
@@ -130,7 +130,7 @@ class _ActionsStepState extends State<ActionsStep> {
                     Container(
                       padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
                       decoration: BoxDecoration(
-                        color: CupertinoColors.systemPurple.withOpacity(0.15),
+                        color: CupertinoColors.systemGreen.withOpacity(0.15),
                         borderRadius: BorderRadius.circular(12),
                       ),
                       child: const Row(
@@ -138,7 +138,7 @@ class _ActionsStepState extends State<ActionsStep> {
                         children: [
                           Icon(
                             CupertinoIcons.star_fill,
-                            color: CupertinoColors.systemPurple,
+                            color: CupertinoColors.systemGreen,
                             size: 12,
                           ),
                           SizedBox(width: 4),
@@ -147,7 +147,7 @@ class _ActionsStepState extends State<ActionsStep> {
                             style: TextStyle(
                               fontSize: 12,
                               fontWeight: FontWeight.w600,
-                              color: CupertinoColors.systemPurple,
+                              color: CupertinoColors.systemGreen,
                             ),
                           ),
                         ],
@@ -189,12 +189,12 @@ class _ActionsStepState extends State<ActionsStep> {
             margin: const EdgeInsets.only(bottom: 16),
             decoration: BoxDecoration(
               color: isExpanded
-                  ? CupertinoColors.systemPurple.withOpacity(0.05)
+                  ? CupertinoColors.systemGreen.withOpacity(0.05)
                   : CupertinoColors.secondarySystemGroupedBackground.resolveFrom(context),
               borderRadius: BorderRadius.circular(12),
               border: Border.all(
                 color: isExpanded
-                    ? CupertinoColors.systemPurple.withOpacity(0.3)
+                    ? CupertinoColors.systemGreen.withOpacity(0.3)
                     : CupertinoColors.separator.resolveFrom(context).withOpacity(0.3),
                 width: isExpanded ? 2 : 1,
               ),
@@ -271,7 +271,7 @@ class _ActionsStepState extends State<ActionsStep> {
                       isExpanded
                           ? CupertinoIcons.chevron_up
                           : CupertinoIcons.chevron_down,
-                      color: CupertinoColors.systemPurple,
+                      color: CupertinoColors.systemGreen,
                       size: 20,
                     ),
                   ],
@@ -293,7 +293,7 @@ class _ActionsStepState extends State<ActionsStep> {
                     children: [
                       Icon(
                         CupertinoIcons.arrow_down_circle_fill,
-                        color: CupertinoColors.systemPurple.withOpacity(0.6),
+                        color: CupertinoColors.systemGreen.withOpacity(0.6),
                         size: 16,
                       ),
                       const SizedBox(width: 8),
@@ -308,7 +308,7 @@ class _ActionsStepState extends State<ActionsStep> {
                       const SizedBox(width: 8),
                       Icon(
                         CupertinoIcons.arrow_down_circle_fill,
-                        color: CupertinoColors.systemPurple.withOpacity(0.6),
+                        color: CupertinoColors.systemGreen.withOpacity(0.6),
                         size: 16,
                       ),
                     ],
@@ -352,7 +352,7 @@ class _ActionsStepState extends State<ActionsStep> {
                                   decoration: BoxDecoration(
                                     shape: BoxShape.circle,
                                     color: existing.status == ActionStatus.completed
-                                        ? CupertinoColors.systemPurple
+                                        ? CupertinoColors.systemGreen
                                         : existing.status == ActionStatus.inProgress
                                             ? CupertinoColors.systemOrange
                                             : CupertinoColors.systemGrey5,

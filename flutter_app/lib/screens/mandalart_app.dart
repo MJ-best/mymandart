@@ -4,7 +4,6 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:mandarart_journey/models/mandalart.dart';
 import 'package:mandarart_journey/providers/mandalart_provider.dart';
-import 'package:mandarart_journey/providers/theme_provider.dart';
 import 'package:mandarart_journey/widgets/mandalart_viewer.dart';
 import 'package:mandarart_journey/widgets/step_progress_indicator.dart';
 import 'package:mandarart_journey/widgets/step_arrow_button.dart';

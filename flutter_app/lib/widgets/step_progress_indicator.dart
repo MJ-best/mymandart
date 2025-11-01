@@ -21,7 +21,7 @@ class StepProgressIndicator extends StatelessWidget {
             decoration: BoxDecoration(
               shape: BoxShape.circle,
               color: isActive
-                  ? CupertinoColors.systemPurple
+                  ? CupertinoColors.systemGreen
                   : CupertinoColors.systemGrey3,
             ),
           );

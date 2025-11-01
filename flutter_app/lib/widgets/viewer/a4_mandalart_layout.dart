@@ -12,6 +12,7 @@ class A4MandalartLayout extends StatelessWidget {
   final void Function(int themeIndex) onThemeClick;
   final void Function(int themeIndex, int actionIndex) onToggleAction;
   final bool forScreenshot;
+  final Map<String, String>? randomQuote;
 
   const A4MandalartLayout({
     super.key,
@@ -20,6 +21,7 @@ class A4MandalartLayout extends StatelessWidget {
     required this.onThemeClick,
     required this.onToggleAction,
     this.forScreenshot = false,
+    this.randomQuote,
   });
 
   // A4 용지 비율을 유지하면서 적절한 크기로 조정
@@ -84,7 +86,7 @@ class A4MandalartLayout extends StatelessWidget {
                   : '나만의 만다라트',
               textAlign: TextAlign.center,
               style: TextStyle(
-                fontSize: 22,
+                fontSize: 28,
                 fontWeight: FontWeight.w700,
                 color: textColor,
                 height: 1.2,
@@ -96,7 +98,7 @@ class A4MandalartLayout extends StatelessWidget {
                 state.goalText.trim(),
                 textAlign: TextAlign.center,
                 style: TextStyle(
-                  fontSize: 16,
+                  fontSize: 22,
                   fontWeight: FontWeight.w600,
                   color: textColor,
                   height: 1.3,
@@ -108,9 +110,9 @@ class A4MandalartLayout extends StatelessWidget {
               '$completed/$total 액션아이템 완료',
               textAlign: TextAlign.center,
               style: const TextStyle(
-                fontSize: 14,
+                fontSize: 18,
                 fontWeight: FontWeight.w600,
-                color: CupertinoColors.systemPurple,
+                color: CupertinoColors.systemGreen,
               ),
             ),
             const SizedBox(height: 16),
@@ -173,6 +175,37 @@ class A4MandalartLayout extends StatelessWidget {
             ),
 
             const SizedBox(height: 12),
+
+            // 명언 (날짜 위에 표시)
+            if (randomQuote != null) ...[
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                child: Column(
+                  children: [
+                    Text(
+                      '"${randomQuote!['quote']!}"',
+                      textAlign: TextAlign.center,
+                      style: TextStyle(
+                        fontSize: 13,
+                        fontStyle: FontStyle.italic,
+                        color: textColor,
+                        height: 1.4,
+                      ),
+                    ),
+                    const SizedBox(height: 4),
+                    Text(
+                      '- ${randomQuote!['author']} -',
+                      style: TextStyle(
+                        fontSize: 11,
+                        fontWeight: FontWeight.w600,
+                        color: secondaryTextColor,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              const SizedBox(height: 8),
+            ],
 
             // 푸터 - 현재 날짜
             Text(

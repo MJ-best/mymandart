@@ -17,6 +17,7 @@ class StreakWidget extends ConsumerWidget {
       onTap: () async {
         HapticFeedback.lightImpact();
         final success = await ref.read(streakProvider.notifier).checkIn();
+        if (!context.mounted) return;
         if (success) {
           HapticFeedback.mediumImpact();
           _showCheckInSuccess(context, ref.read(streakProvider));
@@ -35,7 +36,7 @@ class StreakWidget extends ConsumerWidget {
           borderRadius: BorderRadius.circular(12),
           boxShadow: [
             BoxShadow(
-              color: _getPrimaryColor(streak.status, isDark).withOpacity(0.3),
+              color: _getPrimaryColor(streak.status, isDark).withValues(alpha: 0.3),
               blurRadius: 6,
               offset: const Offset(0, 3),
             ),
@@ -66,7 +67,7 @@ class StreakWidget extends ConsumerWidget {
                           _getStatusText(streak.status),
                           style: TextStyle(
                             fontSize: 11,
-                            color: CupertinoColors.white.withOpacity(0.9),
+                            color: CupertinoColors.white.withValues(alpha: 0.9),
                             fontWeight: FontWeight.w500,
                           ),
                         ),
@@ -76,7 +77,7 @@ class StreakWidget extends ConsumerWidget {
                 ),
                 Icon(
                   CupertinoIcons.hand_raised_fill,
-                  color: CupertinoColors.white.withOpacity(0.7),
+                  color: CupertinoColors.white.withValues(alpha: 0.7),
                   size: 20,
                 ),
               ],
@@ -93,7 +94,7 @@ class StreakWidget extends ConsumerWidget {
                       streak.phaseDescription,
                       style: TextStyle(
                         fontSize: 10,
-                        color: CupertinoColors.white.withOpacity(0.9),
+                        color: CupertinoColors.white.withValues(alpha: 0.9),
                         fontWeight: FontWeight.w600,
                       ),
                     ),
@@ -101,7 +102,7 @@ class StreakWidget extends ConsumerWidget {
                       '최고 ${streak.longestStreak}일',
                       style: TextStyle(
                         fontSize: 9,
-                        color: CupertinoColors.white.withOpacity(0.7),
+                        color: CupertinoColors.white.withValues(alpha: 0.7),
                       ),
                     ),
                   ],
@@ -144,7 +145,7 @@ class StreakWidget extends ConsumerWidget {
           child: Container(
             height: 6,
             decoration: BoxDecoration(
-              color: CupertinoColors.white.withOpacity(0.3),
+              color: CupertinoColors.white.withValues(alpha: 0.3),
               borderRadius: BorderRadius.circular(3),
             ),
             child: FractionallySizedBox(
@@ -168,7 +169,7 @@ class StreakWidget extends ConsumerWidget {
             label,
             style: TextStyle(
               fontSize: 9,
-              color: CupertinoColors.white.withOpacity(0.8),
+              color: CupertinoColors.white.withValues(alpha: 0.8),
               fontWeight: FontWeight.w600,
             ),
           ),
@@ -179,24 +180,19 @@ class StreakWidget extends ConsumerWidget {
 
   Widget _buildStreakIcon(StreakStatus status) {
     IconData icon;
-    Color color;
 
     switch (status) {
       case StreakStatus.ash:
         icon = CupertinoIcons.circle;
-        color = CupertinoColors.systemGrey;
         break;
       case StreakStatus.smoke:
         icon = CupertinoIcons.smoke;
-        color = CupertinoColors.systemGrey2;
         break;
       case StreakStatus.fire:
         icon = CupertinoIcons.flame;
-        color = CupertinoColors.systemOrange;
         break;
       case StreakStatus.strongFire:
         icon = CupertinoIcons.flame_fill;
-        color = CupertinoColors.systemRed;
         break;
     }
 
@@ -205,7 +201,7 @@ class StreakWidget extends ConsumerWidget {
       height: 32,
       decoration: BoxDecoration(
         shape: BoxShape.circle,
-        color: CupertinoColors.white.withOpacity(0.2),
+        color: CupertinoColors.white.withValues(alpha: 0.2),
       ),
       child: Icon(
         icon,
@@ -290,16 +286,16 @@ class StreakWidget extends ConsumerWidget {
     showCupertinoDialog(
       context: context,
       builder: (context) => CupertinoAlertDialog(
-        title: Row(
+        title: const Row(
           mainAxisSize: MainAxisSize.min,
           children: [
-            const Icon(
+            Icon(
               CupertinoIcons.checkmark_seal_fill,
               color: CupertinoColors.systemGreen,
               size: 24,
             ),
-            const SizedBox(width: 8),
-            const Text('출석 완료!'),
+            SizedBox(width: 8),
+            Text('출석 완료!'),
           ],
         ),
         content: Column(
@@ -314,7 +310,7 @@ class StreakWidget extends ConsumerWidget {
               streak.phaseDescription,
               style: const TextStyle(
                 fontSize: 14,
-                color: CupertinoColors.systemPurple,
+                color: CupertinoColors.systemGreen,
                 fontWeight: FontWeight.w600,
               ),
             ),

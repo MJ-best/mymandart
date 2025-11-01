@@ -16,10 +16,10 @@ class StepArrowButton extends StatelessWidget {
   Widget build(BuildContext context) {
     final isEnabled = onPressed != null;
     final Color iconColor = isEnabled
-        ? CupertinoColors.systemPurple.resolveFrom(context)
+        ? CupertinoColors.systemGreen.resolveFrom(context)
         : CupertinoColors.systemGrey3.resolveFrom(context);
     final Color backgroundColor = isEnabled
-        ? CupertinoColors.systemPurple.resolveFrom(context).withOpacity(0.16)
+        ? CupertinoColors.systemGreen.resolveFrom(context).withOpacity(0.16)
         : CupertinoColors.systemGrey4.resolveFrom(context).withOpacity(0.28);
 
     return Semantics(

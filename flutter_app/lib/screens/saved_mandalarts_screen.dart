@@ -141,7 +141,7 @@ class _SavedMandalartsScreenState extends ConsumerState<SavedMandalartsScreen> {
                 decoration: BoxDecoration(
                   gradient: LinearGradient(
                     colors: [
-                      CupertinoColors.systemPurple.withOpacity(0.15),
+                      CupertinoColors.systemGreen.withOpacity(0.15),
                       CupertinoColors.systemIndigo.withOpacity(0.1),
                     ],
                     begin: Alignment.topLeft,
@@ -149,7 +149,7 @@ class _SavedMandalartsScreenState extends ConsumerState<SavedMandalartsScreen> {
                   ),
                   borderRadius: BorderRadius.circular(12),
                   border: Border.all(
-                    color: CupertinoColors.systemPurple.withOpacity(0.3),
+                    color: CupertinoColors.systemGreen.withOpacity(0.3),
                     width: 2,
                   ),
                 ),
@@ -159,7 +159,7 @@ class _SavedMandalartsScreenState extends ConsumerState<SavedMandalartsScreen> {
                     Container(
                       padding: const EdgeInsets.all(8),
                       decoration: const BoxDecoration(
-                        color: CupertinoColors.systemPurple,
+                        color: CupertinoColors.systemGreen,
                         shape: BoxShape.circle,
                       ),
                       child: const Icon(
@@ -174,7 +174,7 @@ class _SavedMandalartsScreenState extends ConsumerState<SavedMandalartsScreen> {
                       style: TextStyle(
                         fontSize: 18,
                         fontWeight: FontWeight.w600,
-                        color: CupertinoColors.systemPurple,
+                        color: CupertinoColors.systemGreen,
                       ),
                     ),
                   ],
@@ -296,7 +296,7 @@ class _SavedMandalartsScreenState extends ConsumerState<SavedMandalartsScreen> {
                           : 0,
                       child: Container(
                         decoration: BoxDecoration(
-                          color: CupertinoColors.systemPurple,
+                          color: CupertinoColors.systemGreen,
                           borderRadius: BorderRadius.circular(3),
                         ),
                       ),
@@ -309,7 +309,7 @@ class _SavedMandalartsScreenState extends ConsumerState<SavedMandalartsScreen> {
                   style: TextStyle(
                     fontSize: 14,
                     fontWeight: FontWeight.w600,
-                    color: CupertinoColors.systemPurple.resolveFrom(context),
+                    color: CupertinoColors.systemGreen.resolveFrom(context),
                   ),
                 ),
               ],

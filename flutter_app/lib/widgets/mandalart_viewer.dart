@@ -222,8 +222,6 @@ class _MandalartViewerState extends ConsumerState<MandalartViewer> {
                   // TODO 리스트 미리보기 (확장 시 명언이 아래로 밀림)
                   _buildTodoListPreview(),
                   const SizedBox(height: 12),
-                  // 명언 (더보기 확장 시 스크롤로 가려짐)
-                  _buildMotivationalQuote(),
                   // withScaffold가 false일 때만 도움말 버튼 표시
                   if (!widget.withScaffold && widget.onShowHelp != null) ...[
                     const SizedBox(height: 12),
@@ -235,7 +233,7 @@ class _MandalartViewerState extends ConsumerState<MandalartViewer> {
                         children: [
                           const Icon(
                             CupertinoIcons.question_circle,
-                            color: CupertinoColors.systemPurple,
+                            color: CupertinoColors.systemGreen,
                             size: 20,
                           ),
                           const SizedBox(width: 8),
@@ -311,7 +309,6 @@ class _MandalartViewerState extends ConsumerState<MandalartViewer> {
                       // TODO 리스트 추가
                       _buildTodoList(),
                       const SizedBox(height: 20),
-                      _buildMotivationalQuote(),
                       // withScaffold가 false일 때만 도움말 버튼 표시
                       if (!widget.withScaffold && widget.onShowHelp != null) ...[
                         const SizedBox(height: 20),
@@ -323,7 +320,7 @@ class _MandalartViewerState extends ConsumerState<MandalartViewer> {
                             children: [
                               const Icon(
                                 CupertinoIcons.question_circle,
-                                color: CupertinoColors.systemPurple,
+                                color: CupertinoColors.systemGreen,
                                 size: 20,
                               ),
                               const SizedBox(width: 8),
@@ -372,6 +369,7 @@ class _MandalartViewerState extends ConsumerState<MandalartViewer> {
               widget.onToggleAction(themeIndex, actionIndex);
             },
             forScreenshot: false, // 화면에는 다크모드 적용
+            randomQuote: _randomQuote,
           ),
         ),
       ),
@@ -386,6 +384,7 @@ class _MandalartViewerState extends ConsumerState<MandalartViewer> {
       onThemeClick: (themeIndex) {},
       onToggleAction: (themeIndex, actionIndex) {},
       forScreenshot: true, // 스크린샷은 밝은 배경
+      randomQuote: _randomQuote,
     );
   }
 
@@ -435,10 +434,10 @@ class _MandalartViewerState extends ConsumerState<MandalartViewer> {
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: CupertinoColors.systemPurple.withOpacity(0.05),
+        color: CupertinoColors.systemGreen.withOpacity(0.05),
         borderRadius: BorderRadius.circular(12),
         border: Border.all(
-          color: CupertinoColors.systemPurple.withOpacity(0.2),
+          color: CupertinoColors.systemGreen.withOpacity(0.2),
         ),
       ),
       child: Column(
@@ -448,7 +447,7 @@ class _MandalartViewerState extends ConsumerState<MandalartViewer> {
             children: [
               const Icon(
                 CupertinoIcons.list_bullet,
-                color: CupertinoColors.systemPurple,
+                color: CupertinoColors.systemGreen,
                 size: 20,
               ),
               const SizedBox(width: 8),
@@ -459,7 +458,7 @@ class _MandalartViewerState extends ConsumerState<MandalartViewer> {
                 style: const TextStyle(
                   fontSize: 16,
                   fontWeight: FontWeight.w600,
-                  color: CupertinoColors.systemPurple,
+                  color: CupertinoColors.systemGreen,
                 ),
               ),
             ],
@@ -529,7 +528,7 @@ class _MandalartViewerState extends ConsumerState<MandalartViewer> {
                         : '더 보기 (${incompleteActions.length - 3}개 더)',
                     style: const TextStyle(
                       fontSize: 14,
-                      color: CupertinoColors.systemPurple,
+                      color: CupertinoColors.systemGreen,
                       fontWeight: FontWeight.w600,
                     ),
                   ),
@@ -538,7 +537,7 @@ class _MandalartViewerState extends ConsumerState<MandalartViewer> {
                     _isTodoExpanded
                         ? CupertinoIcons.chevron_up
                         : CupertinoIcons.chevron_down,
-                    color: CupertinoColors.systemPurple,
+                    color: CupertinoColors.systemGreen,
                     size: 14,
                   ),
                 ],
@@ -600,10 +599,10 @@ class _MandalartViewerState extends ConsumerState<MandalartViewer> {
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: CupertinoColors.systemPurple.withOpacity(0.05),
+        color: CupertinoColors.systemGreen.withOpacity(0.05),
         borderRadius: BorderRadius.circular(12),
         border: Border.all(
-          color: CupertinoColors.systemPurple.withOpacity(0.2),
+          color: CupertinoColors.systemGreen.withOpacity(0.2),
         ),
       ),
       child: Column(
@@ -613,7 +612,7 @@ class _MandalartViewerState extends ConsumerState<MandalartViewer> {
             children: [
               const Icon(
                 CupertinoIcons.list_bullet,
-                color: CupertinoColors.systemPurple,
+                color: CupertinoColors.systemGreen,
                 size: 20,
               ),
               const SizedBox(width: 8),
@@ -622,7 +621,7 @@ class _MandalartViewerState extends ConsumerState<MandalartViewer> {
                 style: const TextStyle(
                   fontSize: 16,
                   fontWeight: FontWeight.w600,
-                  color: CupertinoColors.systemPurple,
+                  color: CupertinoColors.systemGreen,
                 ),
               ),
             ],
@@ -703,46 +702,6 @@ class _MandalartViewerState extends ConsumerState<MandalartViewer> {
   /// 테마 내에서 액션 아이템의 인덱스 가져오기
   int _getActionIndexForTheme(ActionItemModel action, int themeIndex) {
     return action.order.clamp(0, 7);
-  }
-
-  /// 동기부여 명언 위젯
-  Widget _buildMotivationalQuote() {
-    return Container(
-      padding: const EdgeInsets.all(20),
-      decoration: BoxDecoration(
-        color: CupertinoColors.systemPurple.withOpacity(0.1),
-        borderRadius: BorderRadius.circular(12),
-      ),
-      child: Column(
-        children: [
-          const Icon(
-            CupertinoIcons.quote_bubble,
-            color: CupertinoColors.systemPurple,
-            size: 24,
-          ),
-          const SizedBox(height: 12),
-          Text(
-            _randomQuote['quote']!,
-            textAlign: TextAlign.center,
-            style: TextStyle(
-              fontSize: 15,
-              fontWeight: FontWeight.w500,
-              color: CupertinoColors.label.resolveFrom(context),
-              height: 1.5,
-            ),
-          ),
-          const SizedBox(height: 12),
-          Text(
-            '- ${_randomQuote['author']} -',
-            style: const TextStyle(
-              fontSize: 13,
-              fontWeight: FontWeight.w600,
-              color: CupertinoColors.systemPurple,
-            ),
-          ),
-        ],
-      ),
-    );
   }
 
   /// withScaffold가 false일 때 표시할 액션 버튼들
@@ -1097,7 +1056,7 @@ class _MandalartViewerState extends ConsumerState<MandalartViewer> {
         },
         child: Icon(
           icon,
-          color: CupertinoColors.systemPurple,
+          color: CupertinoColors.systemGreen,
           size: 24,
         ),
       ),
