@@ -272,3 +272,137 @@ color.withValues(alpha: 0.5)
 - Dart SDK: 3.6.0
 - macOS: 26.0.1
 - 테스트 통과율: 100% (74/74)
+
+---
+
+## 2025-11-01 세션 2: 햅틱 피드백 구현
+
+### 1. 할일 완료 시 햅틱 피드백 추가
+
+#### 1.1 문제 인식
+사용자 피드백: "만다라트에서 터치해서 할일을 완료로 만들 때 터치 피드백으로 햅틱 피드백을 달라고 했는데 어플에서 실행해보니 그런 기능은 구현되지 않았네요."
+
+기존 구현 상태:
+- 터치 시 `HapticFeedback.lightImpact()` 있음 (모든 터치에 동일)
+- 완료 상태로 변경될 때 특별한 피드백 없음
+
+#### 1.2 구현 방식
+**핵심 아이디어**: 할일이 "완료(completed)" 상태로 전환될 때만 더 강한 햅틱 피드백 제공
+
+**수정된 파일 (5개)**:
+1. `lib/providers/mandalart_provider.dart` - toggleActionStatus()가 새로운 상태 반환하도록 수정
+2. `lib/screens/mandalart_app.dart` - 완료 시 mediumImpact 추가
+3. `lib/widgets/mandalart_viewer.dart` - 3곳에서 완료 시 mediumImpact 추가
+4. `lib/widgets/steps/actions_step.dart` - 완료 시 mediumImpact 추가
+5. `lib/widgets/steps/combined_step.dart` - 완료 시 mediumImpact 추가
+
+#### 1.3 Provider 수정 (`lib/providers/mandalart_provider.dart`)
+
+**변경 전**:
+```dart
+void toggleActionStatus({required int themeIndex, required int actionIndex}) {
+  // ... 상태 토글 로직
+  // 반환값 없음
+}
+```
+
+**변경 후**:
+```dart
+ActionStatus? toggleActionStatus({required int themeIndex, required int actionIndex}) {
+  // ... 상태 토글 로직
+  return newStatus; // 새로운 상태 반환
+}
+```
+
+#### 1.4 UI 레이어 수정
+
+**패턴 1: Provider 반환값 활용** (`mandalart_app.dart`, `actions_step.dart`, `combined_step.dart`)
+```dart
+onTap: () {
+  HapticFeedback.lightImpact(); // 모든 터치에 기본 피드백
+  final newStatus = notifier.toggleActionStatus(
+    themeIndex: themeIndex,
+    actionIndex: actionIndex,
+  );
+  // 완료 상태로 변경될 때만 강한 피드백
+  if (newStatus == ActionStatus.completed) {
+    HapticFeedback.mediumImpact();
+  }
+},
+```
+
+**패턴 2: 현재 상태 확인** (`mandalart_viewer.dart` - TODO 리스트)
+```dart
+onTap: () {
+  HapticFeedback.lightImpact();
+  widget.onToggleAction(themeIndex, actionIndex);
+  // inProgress → completed 전환 시에만 강한 피드백
+  if (action.status == ActionStatus.inProgress) {
+    HapticFeedback.mediumImpact();
+  }
+},
+```
+
+**패턴 3: 현재 상태 조회** (`mandalart_viewer.dart` - A4 레이아웃)
+```dart
+onToggleAction: (themeIndex, actionIndex) {
+  HapticFeedback.lightImpact();
+  // 현재 상태 조회
+  final currentItem = widget.state.actionItems.firstWhere(
+    (item) => item.themeId == 'theme-$themeIndex' && item.order == actionIndex,
+    orElse: () => ActionItemModel(...),
+  );
+  widget.onToggleAction(themeIndex, actionIndex);
+  // inProgress → completed 전환 시에만 강한 피드백
+  if (currentItem.status == ActionStatus.inProgress) {
+    HapticFeedback.mediumImpact();
+  }
+},
+```
+
+#### 1.5 햅틱 피드백 레벨
+- **lightImpact**: 모든 터치 (notStarted → inProgress, completed → notStarted)
+- **mediumImpact**: 할일 완료 시만 (inProgress → completed)
+
+이 차이로 사용자가 실제로 할일을 완료했을 때 더 만족스러운 피드백을 느낄 수 있음
+
+### 2. 코드 품질
+
+#### 2.1 Flutter Analyze
+```
+Analyzing flutter_app...
+No issues found! (ran in 1.9s)
+```
+
+#### 2.2 Flutter Test
+```
++74: All tests passed!
+```
+
+## 주요 성과 (세션 2)
+
+### 기능 구현
+- ✅ 할일 완료 시 햅틱 피드백 (mediumImpact)
+- ✅ 일반 터치 시 가벼운 햅틱 피드백 (lightImpact)
+- ✅ 5개 파일에 일관된 패턴 적용
+- ✅ Provider API 개선 (반환값 추가)
+
+### 코드 품질
+- ✅ Flutter analyze: 0 issues
+- ✅ Flutter test: 74/74 passed
+- ✅ 타입 안전성 유지
+- ✅ 크로스 플랫폼 호환성 (iOS, Android - 웹은 햅틱 미지원)
+
+### 사용자 경험
+- ✅ 완료 액션에 대한 명확한 피드백
+- ✅ 일관된 햅틱 경험 (모든 UI 요소)
+- ✅ 직관적인 피드백 차별화 (light vs medium)
+
+## 구현 위치
+
+### 햅틱 피드백이 적용된 곳
+1. **만다라트 뷰어 - A4 레이아웃**: 그리드 셀 터치 시
+2. **만다라트 뷰어 - TODO 리스트** (세로/가로 모드): 리스트 항목 터치 시
+3. **액션 단계**: 액션 아이템 상태 아이콘 터치 시
+4. **통합 단계**: 액션 아이템 상태 아이콘 터치 시
+5. **앱 메인 화면**: 뷰어에서 액션 토글 시

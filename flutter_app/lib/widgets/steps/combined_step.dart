@@ -489,10 +489,14 @@ class _CombinedStepState extends ConsumerState<CombinedStep> {
                   GestureDetector(
                     onTap: () {
                       HapticFeedback.lightImpact();
-                      widget.notifier.toggleActionStatus(
+                      final newStatus = widget.notifier.toggleActionStatus(
                         themeIndex: themeIndex,
                         actionIndex: actionIndex,
                       );
+                      // Add strong haptic feedback when completing a task
+                      if (newStatus == ActionStatus.completed) {
+                        HapticFeedback.mediumImpact();
+                      }
                     },
                     child: Builder(
                       builder: (context) {

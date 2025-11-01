@@ -214,10 +214,14 @@ class _MandalartAppScreenState extends ConsumerState<MandalartAppScreen> {
             );
           },
           onToggleAction: (themeIndex, actionIndex) {
-            notifier.toggleActionStatus(
+            final newStatus = notifier.toggleActionStatus(
               themeIndex: themeIndex,
               actionIndex: actionIndex,
             );
+            // Add strong haptic feedback when completing a task
+            if (newStatus == ActionStatus.completed) {
+              HapticFeedback.mediumImpact();
+            }
           },
         ),
       ],

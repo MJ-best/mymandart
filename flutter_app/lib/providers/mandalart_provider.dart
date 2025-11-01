@@ -136,7 +136,8 @@ class MandalartNotifier extends StateNotifier<MandalartStateModel> {
   }
 
   // 액션 아이템 상태 토글 (notStarted -> inProgress -> completed -> notStarted)
-  void toggleActionStatus({required int themeIndex, required int actionIndex}) {
+  // Returns the new status for haptic feedback purposes
+  ActionStatus? toggleActionStatus({required int themeIndex, required int actionIndex}) {
     final themeId = 'theme-$themeIndex';
     final List<ActionItemModel> updated = List<ActionItemModel>.from(state.actionItems);
     final idx = updated.indexWhere((a) => a.themeId == themeId && a.order == actionIndex);
@@ -160,7 +161,9 @@ class MandalartNotifier extends StateNotifier<MandalartStateModel> {
       updated[idx] = updated[idx].copyWith(status: newStatus);
       state = state.copyWith(actionItems: updated);
       _persist();
+      return newStatus;
     }
+    return null;
   }
 
   void setStep(int step) {

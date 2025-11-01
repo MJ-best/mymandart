@@ -368,7 +368,25 @@ class _MandalartViewerState extends ConsumerState<MandalartViewer> {
             },
             onToggleAction: (themeIndex, actionIndex) {
               HapticFeedback.lightImpact();
+              // Get the current status before toggling
+              final currentItem = widget.state.actionItems.firstWhere(
+                (item) => item.themeId == 'theme-$themeIndex' && item.order == actionIndex,
+                orElse: () => ActionItemModel(
+                  id: '',
+                  themeId: 'theme-$themeIndex',
+                  actionText: '',
+                  status: ActionStatus.notStarted,
+                  order: actionIndex,
+                  createdAt: DateTime.now(),
+                  updatedAt: DateTime.now(),
+                ),
+              );
               widget.onToggleAction(themeIndex, actionIndex);
+              // Add strong haptic feedback when moving to completed
+              if (currentItem.status == ActionStatus.inProgress) {
+                // Next status will be completed
+                HapticFeedback.mediumImpact();
+              }
             },
             forScreenshot: false, // 화면에는 다크모드 적용
             randomQuote: _randomQuote,
@@ -477,6 +495,10 @@ class _MandalartViewerState extends ConsumerState<MandalartViewer> {
                 onTap: () {
                   HapticFeedback.lightImpact();
                   widget.onToggleAction(themeIndex, actionIndex);
+                  // Add strong haptic feedback when moving to completed
+                  if (action.status == ActionStatus.inProgress) {
+                    HapticFeedback.mediumImpact();
+                  }
                 },
                 child: Container(
                   padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
@@ -641,6 +663,10 @@ class _MandalartViewerState extends ConsumerState<MandalartViewer> {
                 onTap: () {
                   HapticFeedback.lightImpact();
                   widget.onToggleAction(themeIndex, actionIndex);
+                  // Add strong haptic feedback when moving to completed
+                  if (action.status == ActionStatus.inProgress) {
+                    HapticFeedback.mediumImpact();
+                  }
                 },
                 child: Container(
                   padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),

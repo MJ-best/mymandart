@@ -342,10 +342,14 @@ class _ActionsStepState extends State<ActionsStep> {
                               GestureDetector(
                                 onTap: () {
                                   HapticFeedback.lightImpact();
-                                  widget.notifier.toggleActionStatus(
+                                  final newStatus = widget.notifier.toggleActionStatus(
                                     themeIndex: actualThemeIndex,
                                     actionIndex: actionIndex,
                                   );
+                                  // Add strong haptic feedback when completing a task
+                                  if (newStatus == ActionStatus.completed) {
+                                    HapticFeedback.mediumImpact();
+                                  }
                                 },
                                 child: Container(
                                   width: 32,
