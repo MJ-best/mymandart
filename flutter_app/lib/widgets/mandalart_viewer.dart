@@ -1100,12 +1100,131 @@ class _MandalartViewerState extends ConsumerState<MandalartViewer> {
 
   Future<void> _saveMandalart() async {
     try {
-      await ref.read(mandalartProvider.notifier).saveCurrentMandalart();
+      final currentTitle = widget.state.displayName.trim();
+
+      // 제목이 비어있으면 먼저 제목 입력 요청
+      if (currentTitle.isEmpty) {
+        if (mounted) {
+          _showCupertinoAlert('만다라트 제목을 먼저 입력해주세요.');
+        }
+        return;
+      }
+
+      // 동일한 제목이 있는지 확인
+      final hasExisting = await ref.read(mandalartProvider.notifier).hasMandalartWithTitle(currentTitle);
+
+      if (hasExisting && mounted) {
+        // 덮어쓰기 확인 다이얼로그 표시
+        showCupertinoDialog(
+          context: context,
+          builder: (dialogContext) => CupertinoAlertDialog(
+            title: const Text('덮어쓰기 확인'),
+            content: Text('기존 "$currentTitle"을(를) 덮어쓰시겠습니까?'),
+            actions: [
+              CupertinoDialogAction(
+                child: const Text('취소'),
+                onPressed: () => Navigator.pop(dialogContext),
+              ),
+              CupertinoDialogAction(
+                child: const Text('다른 이름으로 저장'),
+                onPressed: () async {
+                  Navigator.pop(dialogContext);
+                  if (mounted) {
+                    await _showSaveAsDialog();
+                  }
+                },
+              ),
+              CupertinoDialogAction(
+                isDefaultAction: true,
+                onPressed: () async {
+                  Navigator.pop(dialogContext);
+                  await _performSave(forceNew: false);
+                },
+                child: const Text('덮어쓰기'),
+              ),
+            ],
+          ),
+        );
+      } else {
+        // 새로 저장
+        await _performSave(forceNew: false);
+      }
+    } catch (error) {
+      if (mounted) {
+        _showCupertinoAlert('저장 중 오류가 발생했습니다. 다시 시도해주세요.');
+      }
+    }
+  }
+
+  Future<void> _showSaveAsDialog() async {
+    final TextEditingController titleController = TextEditingController(text: widget.state.displayName.trim());
+
+    return showCupertinoDialog(
+      context: context,
+      builder: (dialogContext) => CupertinoAlertDialog(
+        title: const Text('다른 이름으로 저장'),
+        content: Column(
+          children: [
+            const SizedBox(height: 12),
+            const Text('새로운 제목을 입력하세요.'),
+            const SizedBox(height: 12),
+            CupertinoTextField(
+              controller: titleController,
+              placeholder: '만다라트 제목',
+              autofocus: true,
+              textAlign: TextAlign.center,
+            ),
+          ],
+        ),
+        actions: [
+          CupertinoDialogAction(
+            child: const Text('취소'),
+            onPressed: () => Navigator.pop(dialogContext),
+          ),
+          CupertinoDialogAction(
+            isDefaultAction: true,
+            onPressed: () async {
+              final newTitle = titleController.text.trim();
+              Navigator.pop(dialogContext);
+
+              if (newTitle.isEmpty) {
+                if (mounted) {
+                  _showCupertinoAlert('제목을 입력해주세요.');
+                }
+                return;
+              }
+
+              // 새로운 제목으로 업데이트
+              ref.read(mandalartProvider.notifier).updateDisplayName(newTitle);
+
+              // 새로운 만다라트로 저장
+              await _performSave(forceNew: true);
+            },
+            child: const Text('저장'),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Future<void> _performSave({required bool forceNew}) async {
+    try {
+      final (id, isOverwrite) = await ref.read(mandalartProvider.notifier).saveCurrentMandalart(forceNew: forceNew);
+
       if (mounted) {
         HapticFeedback.mediumImpact();
+
+        // 저장 성공 메시지 표시
+        final message = isOverwrite ? '만다라트를 업데이트했습니다.' : '만다라트를 저장했습니다.';
+        _showCupertinoAlert(message);
+
         // 저장 후 저장된 만다라트 페이지로 이동
-        widget.onClose(); // 먼저 뷰어 닫기
-        context.push('/saved-mandalarts');
+        Future.delayed(const Duration(milliseconds: 1500), () {
+          if (mounted) {
+            widget.onClose(); // 먼저 뷰어 닫기
+            context.push('/saved-mandalarts');
+          }
+        });
       }
     } catch (error) {
       if (mounted) {
