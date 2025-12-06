@@ -27,17 +27,21 @@ This document outlines the core architecture, logic, and features of the Mandala
 - **Rule**: `resolveFrom(context)` is used for `CupertinoDynamicColor` to support Dark Mode.
 
 #### 2. Navigation Flow (3 Main Pages)
-The app follows a strict linear flow with swipe support:
-1.  **Goal Step (Page 0)**:
-    - User enters the main "Final Goal".
-    - Input is validated to ensure meaningful content.
-2.  **Combined Step (Page 1)**:
-    - Integrates "Themes" (8 Core Areas) and "Actions" (8 Actions per Theme).
-    - Features an **Accordion UI** for managing themes.
-    - Includes a **Streak Widget** at the top for engagement.
-3.  **Mandalart Viewer (Page 2)**:
+The app follows a strict linear flow with swipe support, optimized for visualization first:
+1.  **Mandalart Viewer (Page 0)**:
+    - **Primary Landing Screen**.
     - Visualizes the full 9x9 Mandalart chart.
-    - Supports zooming (InteractiveViewer) and saving functionality.
+    - **Context Sync**: Zooming into a theme and swiping left to Page 1 auto-expands that theme for editing.
+2.  **Combined Step (Page 1)**:
+    - Main editing interface.
+    - Integrates "Themes" (8 Core Areas) and "Actions" (8 Actions per Theme).
+    - Features an **Accordion UI** (Tap to expand) and **Swipe-to-Delete** gestures.
+3.  **Calendar & History (Page 2)**:
+    - **Activity Log**: Visualizes the history of **Started** and **Completed** tasks.
+    - **Interaction**:
+        - 1 Tap: Start (In Progress).
+        - 2 Taps: Complete.
+    - Powered by `startedAt` and `completedAt` timestamps.
 
 #### 3. Data Model
 - **MandalartStateModel**:
@@ -48,7 +52,9 @@ The app follows a strict linear flow with swipe support:
 - **ActionItem**:
     - `id`: UUID.
     - `title`: String.
-    - `isCompleted`: Boolean.
+    - `status`: Enum (notStarted, inProgress, completed).
+    - `startedAt`: DateTime? (Timestamp of start).
+    - `completedAt`: DateTime? (Timestamp of completion).
 - **Persistence**:
     - JSON serialization.
     - Meta-data saved separately for list views (`SavedMandalartMeta`).
@@ -75,8 +81,9 @@ The app follows a strict linear flow with swipe support:
 ### 3. Mandalart Logic
 - **Connections**: Changing a Theme in Step 1 automatically updates the center cell of the corresponding sub-grid in the 9x9 chart.
 - **Progress Tracking**:
-    - Completion of an action updates the visual progress.
-    - "Streak" logic tracks checking into the app.
+    - **Context Awareness**: "Active Focus" state is shared between List and Viewer.
+    - **History Tracking**: Tasks are not just "checked" but "recorded" with a timestamp.
+    - **Streak**: Calculated based on daily activity (at least one completion).
 
 ### 4. Storage & Management
 - **Multiple Saves**: UUID-based storage allows unlimited saved Mandalarts.
@@ -87,6 +94,7 @@ The app follows a strict linear flow with swipe support:
 
 ## 📜 Historical Timeline (Major Milestones)
 
+- **2025-12-06**: UI/UX Overhaul (Context-Aware Nav, Calendar Activity Log, Goal Popup).
 - **2025-11-01**: Implemented Color Theme System & Dynamic App Icons. Context7 Migration completed.
 - **2025-10-27**: UI/UX Overhaul (Removed top bars, optimized for phone).
 - **2025-10-26**: Restructured into 3-page flow & Combined Step implemented.

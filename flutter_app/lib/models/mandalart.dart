@@ -53,6 +53,8 @@ class ActionItemModel {
   final int order;
   final DateTime createdAt;
   final DateTime updatedAt;
+  final DateTime? startedAt;
+  final DateTime? completedAt;
 
   const ActionItemModel({
     required this.id,
@@ -62,6 +64,8 @@ class ActionItemModel {
     required this.order,
     required this.createdAt,
     required this.updatedAt,
+    this.startedAt,
+    this.completedAt,
   });
 
   // 하위 호환성을 위한 getter
@@ -72,6 +76,8 @@ class ActionItemModel {
   ActionItemModel copyWith({
     String? actionText,
     ActionStatus? status,
+    DateTime? startedAt,
+    DateTime? completedAt,
   }) {
     return ActionItemModel(
       id: id,
@@ -81,6 +87,8 @@ class ActionItemModel {
       order: order,
       createdAt: createdAt,
       updatedAt: DateTime.now(),
+      startedAt: startedAt ?? this.startedAt,
+      completedAt: completedAt ?? this.completedAt,
     );
   }
 
@@ -93,6 +101,8 @@ class ActionItemModel {
       'order': order,
       'createdAt': createdAt.toIso8601String(),
       'updatedAt': updatedAt.toIso8601String(),
+      'startedAt': startedAt?.toIso8601String(),
+      'completedAt': completedAt?.toIso8601String(),
     };
   }
 
@@ -117,6 +127,12 @@ class ActionItemModel {
       order: json['order'] as int,
       createdAt: DateTime.parse(json['createdAt'] as String),
       updatedAt: DateTime.parse(json['updatedAt'] as String),
+      startedAt: json['startedAt'] != null
+          ? DateTime.parse(json['startedAt'] as String)
+          : null,
+      completedAt: json['completedAt'] != null 
+          ? DateTime.parse(json['completedAt'] as String)
+          : null,
     );
   }
 }
@@ -128,6 +144,7 @@ class MandalartStateModel {
   final List<ActionItemModel> actionItems;
   final int currentStep;
   final bool showViewer;
+  final Map<String, int> calendarLog;
 
   const MandalartStateModel({
     required this.displayName,
@@ -136,6 +153,7 @@ class MandalartStateModel {
     required this.actionItems,
     required this.currentStep,
     required this.showViewer,
+    required this.calendarLog,
   });
 
   factory MandalartStateModel.initial() => MandalartStateModel(
@@ -145,6 +163,7 @@ class MandalartStateModel {
         actionItems: const [],
         currentStep: 0,
         showViewer: false,
+        calendarLog: const {},
       );
 
   MandalartStateModel copyWith({
@@ -154,6 +173,7 @@ class MandalartStateModel {
     List<ActionItemModel>? actionItems,
     int? currentStep,
     bool? showViewer,
+    Map<String, int>? calendarLog,
   }) {
     return MandalartStateModel(
       displayName: displayName ?? this.displayName,
@@ -162,6 +182,7 @@ class MandalartStateModel {
       actionItems: actionItems ?? this.actionItems,
       currentStep: currentStep ?? this.currentStep,
       showViewer: showViewer ?? this.showViewer,
+      calendarLog: calendarLog ?? this.calendarLog,
     );
   }
 
@@ -172,6 +193,7 @@ class MandalartStateModel {
       'themes': themes,
       'actionItems': actionItems.map((a) => a.toJson()).toList(),
       'currentStep': currentStep,
+      'calendarLog': calendarLog,
     };
   }
 
@@ -186,6 +208,10 @@ class MandalartStateModel {
           [],
       currentStep: json['currentStep'] as int? ?? 0,
       showViewer: false,
+      calendarLog: (json['calendarLog'] as Map<String, dynamic>?)?.map(
+            (k, v) => MapEntry(k, v as int),
+          ) ??
+          const {},
     );
   }
 }

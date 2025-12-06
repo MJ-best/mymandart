@@ -7,9 +7,10 @@ import 'package:mandarart_journey/providers/mandalart_provider.dart';
 import 'package:mandarart_journey/widgets/mandalart_viewer.dart';
 import 'package:mandarart_journey/widgets/step_progress_indicator.dart';
 import 'package:mandarart_journey/widgets/step_arrow_button.dart';
-import 'package:mandarart_journey/widgets/steps/goal_step.dart';
+import 'package:mandarart_journey/widgets/steps/calendar_step.dart';
+import 'package:mandarart_journey/widgets/goal_input_dialog.dart';
 import 'package:mandarart_journey/widgets/steps/combined_step.dart';
-import 'package:mandarart_journey/screens/landing_screen.dart';
+
 import 'package:responsive_builder/responsive_builder.dart';
 
 
@@ -29,6 +30,19 @@ class _MandalartAppScreenState extends ConsumerState<MandalartAppScreen> {
     super.initState();
     _pageController = PageController(initialPage: 0);
     _checkAndNavigateToViewer();
+    
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+       // Check if goal is empty (New User or Reset)
+       if (mounted) {
+         final state = ref.read(mandalartProvider);
+         if (state.goalText.isEmpty) {
+           showCupertinoModalPopup(
+             context: context,
+             builder: (_) => const GoalInputDialog(isNew: true),
+           );
+         }
+       }
+    });
   }
 
   Future<void> _checkAndNavigateToViewer() async {
@@ -36,10 +50,10 @@ class _MandalartAppScreenState extends ConsumerState<MandalartAppScreen> {
     final hasStarted = prefs.getBool('has_started') ?? false;
 
     if (hasStarted && mounted) {
-      // 사용자가 이미 시작했다면 3페이지(뷰어)로 이동
+      // 사용자가 이미 시작했다면 0페이지(뷰어)로 이동 (기본값이지만 명시적 설정)
       WidgetsBinding.instance.addPostFrameCallback((_) {
         if (mounted) {
-          ref.read(mandalartProvider.notifier).setStep(2);
+          ref.read(mandalartProvider.notifier).setStep(0);
         }
       });
     }
@@ -163,22 +177,39 @@ class _MandalartAppScreenState extends ConsumerState<MandalartAppScreen> {
         }
       },
       children: [
-        // Page 0: 목표 입력
-        SingleChildScrollView(
-          physics: const BouncingScrollPhysics(),
-          padding: padding,
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              GoalStep(
-                value: state.goalText,
-                onChange: notifier.updateGoal,
-              ),
-              const SizedBox(height: 32),
-            ],
-          ),
+        // Page 0: 만다라트 뷰어 (메인)
+        MandalartViewer(
+          state: state,
+          withScaffold: false,
+          onClose: () {
+            // 편집(리스트) 페이지로 이동
+            if (mounted && _pageController.hasClients) {
+              notifier.setStep(1);
+            }
+          },
+          onNavigateToActions: () {
+            // 편집(리스트) 페이지로 이동
+            if (mounted && _pageController.hasClients) {
+              notifier.setStep(1);
+            }
+          },
+          onShowHelp: () {
+             showCupertinoModalPopup(
+              context: context,
+              builder: (context) => const GoalInputDialog(),
+            );
+          },
+          onToggleAction: (themeIndex, actionIndex) {
+            final newStatus = notifier.toggleActionStatus(
+              themeIndex: themeIndex,
+              actionIndex: actionIndex,
+            );
+            if (newStatus == ActionStatus.completed) {
+              HapticFeedback.mediumImpact();
+            }
+          },
         ),
-        // Page 1: 테마 + 액션 아이템 (통합)
+        // Page 1: 테마 + 액션 아이템 (리스트 / 편집)
         SingleChildScrollView(
           physics: const BouncingScrollPhysics(),
           padding: padding,
@@ -190,39 +221,17 @@ class _MandalartAppScreenState extends ConsumerState<MandalartAppScreen> {
             ],
           ),
         ),
-        // Page 2: 만다라트 뷰어
-        MandalartViewer(
-          state: state,
-          withScaffold: false,
-          onClose: () {
-            // 이전 페이지로 돌아가기
-            if (mounted && _pageController.hasClients) {
-              notifier.setStep(1);
-            }
-          },
-          onNavigateToActions: () {
-            // Page 1로 이동
-            if (mounted && _pageController.hasClients) {
-              notifier.setStep(1);
-            }
-          },
-          onShowHelp: () {
-            // 도움말 모달 표시
-            showCupertinoModalPopup(
-              context: context,
-              builder: (context) => const LandingScreen(isModal: true),
-            );
-          },
-          onToggleAction: (themeIndex, actionIndex) {
-            final newStatus = notifier.toggleActionStatus(
-              themeIndex: themeIndex,
-              actionIndex: actionIndex,
-            );
-            // Add strong haptic feedback when completing a task
-            if (newStatus == ActionStatus.completed) {
-              HapticFeedback.mediumImpact();
-            }
-          },
+        // Page 2: 캘린더 (기록)
+        SingleChildScrollView(
+          physics: const BouncingScrollPhysics(),
+          padding: padding,
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              CalendarStep(),
+              const SizedBox(height: 32),
+            ],
+          ),
         ),
       ],
     );

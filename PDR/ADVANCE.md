@@ -6,17 +6,16 @@ This document serves as the guide for future development, improvements, and AI A
 
 These are the immediate next steps for the project.
 
-### 1. Step 1: "Others' Goals" Feature
+## Active Implementation Plan (Pending)
+
+### 1. Step 1: "Others' Goals" Feature (Lower Priority)
 **Objective**: Connect the user with the community by showing examples of goals others have set.
 - **Requirement**:
     - Prepare a static list of 100 new year goals (`keywords.dart`).
     - Randomly display 3-5 goals on the Step 1 screen.
     - Implement a "Others are planning this" section.
-- **Technical approach**:
-    - Avoid backend complexity; use a robust local list.
-    - Add a sliding animation for rotation (Optional).
 
-### 2. UI Refinement: Purple Theme Unification
+### 5. UI Refinement: Purple Theme Unification
 **Objective**: Align "Completion" visualization with the new Purple theme identity.
 - **Current**: Completed items are Green.
 - **Change**: Change completion active color to `CupertinoColors.systemPurple`.
@@ -24,18 +23,9 @@ These are the immediate next steps for the project.
     - `MandalartAppScreen`: Switch/Checkbox active color.
     - `MandalartViewer`: Completed cell background.
 
-### 3. Step 2 Interaction: Accordion/Collapsible
-**Objective**: Reduce cognitive load by hiding non-active themes.
-- **Requirement**:
-    - Step 2 (Combined Step) action lists should fold/expand.
-    - Default state: Collapsed.
-    - Tapping a theme title expands its 8 action items.
-    - Auto-collapse others when opening one (Accordion style).
-
-### 4. Component Update: Toggle → Checkbox
+### 6. Component Update: Toggle → Checkbox
 **Objective**: Improve clarity for "Done" state.
 - **Requirement**: Replace `CupertinoSwitch` with `CupertinoCheckbox`.
-- **Why**: Switches imply "turning on a setting", Checkboxes imply "completing a task".
 - **Design**: Use a circular checkbox or iOS style checkmark.
 
 ---

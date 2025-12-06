@@ -64,6 +64,7 @@ void main() {
         ],
         currentStep: 0,
         showViewer: false,
+        calendarLog: const {},
       );
 
       await ExportService.exportToJson(state);
@@ -117,7 +118,9 @@ void main() {
         themes: List.filled(8, ''),
         actionItems: const [],
         currentStep: 0,
+
         showViewer: false,
+        calendarLog: const {},
       );
 
       await ExportService.exportToJson(state);
@@ -171,7 +174,9 @@ void main() {
           ),
         ],
         currentStep: 0,
+
         showViewer: false,
+        calendarLog: const {},
       );
 
       await ExportService.exportToJson(state);
@@ -228,7 +233,9 @@ void main() {
           ),
         ],
         currentStep: 0,
+
         showViewer: false,
+        calendarLog: const {},
       );
 
       await ExportService.exportToJson(state);
@@ -267,7 +274,9 @@ void main() {
           ),
         ],
         currentStep: 0,
+
         showViewer: false,
+        calendarLog: const {},
       );
 
       await ExportService.exportToJson(state);

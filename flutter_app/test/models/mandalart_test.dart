@@ -183,6 +183,7 @@ void main() {
         actionItems: actionItems,
         currentStep: 1,
         showViewer: false,
+        calendarLog: const {},
       );
 
       final updated = original.copyWith(currentStep: 2);

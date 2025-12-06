@@ -22,12 +22,38 @@ class _CombinedStepState extends ConsumerState<CombinedStep> {
   final Map<String, TextEditingController> _actionControllers = {};
   final Map<String, FocusNode> _focusNodes = {};
   int? _expandedThemeIndex;
+  final List<GlobalKey> _itemKeys = List.generate(8, (_) => GlobalKey());
 
   @override
   void initState() {
     super.initState();
+
     _initializeThemeControllers();
     _initializeActionControllers();
+
+    // Check for active theme context on init
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      final activeTheme = ref.read(activeThemeIndexProvider);
+      if (activeTheme != null) {
+        setState(() => _expandedThemeIndex = activeTheme);
+        // Wait for one more frame for the expansion animation/layout to settle or start
+        WidgetsBinding.instance.addPostFrameCallback((_) {
+          _scrollToTheme(activeTheme);
+        });
+      }
+    });
+  }
+
+  void _scrollToTheme(int index) {
+      final context = _itemKeys[index].currentContext;
+      if (context != null) {
+        Scrollable.ensureVisible(
+          context,
+          duration: const Duration(milliseconds: 300),
+          curve: Curves.easeInOut,
+          alignment: 0.1, // Scroll so it's slightly below the top
+        );
+      }
   }
 
   void _initializeThemeControllers() {
@@ -126,6 +152,15 @@ class _CombinedStepState extends ConsumerState<CombinedStep> {
   Widget build(BuildContext context) {
     final primaryColor = ref.watch(themeProvider).primaryColor;
     final hasGoal = widget.state.goalText.trim().isNotEmpty;
+    
+    ref.listen<int?>(activeThemeIndexProvider, (previous, next) {
+      if (next != null) {
+        setState(() => _expandedThemeIndex = next);
+        WidgetsBinding.instance.addPostFrameCallback((_) {
+          _scrollToTheme(next);
+        });
+      }
+    });
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -244,32 +279,85 @@ class _CombinedStepState extends ConsumerState<CombinedStep> {
           final hasTheme = _themeControllers[themeIndex].text.trim().isNotEmpty;
           final isExpanded = _expandedThemeIndex == themeIndex && hasTheme;
 
-          return Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              // 테마 입력 필드
-              Container(
-                decoration: BoxDecoration(
-                  color: isExpanded
-                      ? primaryColor.withValues(alpha: 0.05)
-                      : CupertinoColors.secondarySystemGroupedBackground.resolveFrom(context),
-                  borderRadius: BorderRadius.circular(12),
-                  border: Border.all(
-                    color: isExpanded
-                        ? primaryColor.withValues(alpha: 0.3)
-                        : CupertinoColors.separator.resolveFrom(context).withValues(alpha: 0.3),
-                    width: isExpanded ? 2 : 1,
-                  ),
+          return Dismissible(
+            key: _itemKeys[themeIndex],
+            direction: DismissDirection.endToStart,
+            background: Container(
+              margin: const EdgeInsets.only(bottom: 12),
+              decoration: BoxDecoration(
+                color: CupertinoColors.destructiveRed,
+                borderRadius: BorderRadius.circular(12),
+              ),
+              alignment: Alignment.centerRight,
+              padding: const EdgeInsets.only(right: 20),
+              child: const Icon(
+                CupertinoIcons.delete,
+                color: CupertinoColors.white,
+              ),
+            ),
+            confirmDismiss: (direction) async {
+              if (!hasTheme) return false;
+              return await showCupertinoDialog<bool>(
+                context: context,
+                builder: (context) => CupertinoAlertDialog(
+                  title: const Text('테마 초기화'),
+                  content: Text('액션타겟 ${themeIndex + 1}을(를) 삭제하시겠습니까?'),
+                  actions: [
+                    CupertinoDialogAction(
+                      child: const Text('취소'),
+                      onPressed: () => Navigator.pop(context, false),
+                    ),
+                    CupertinoDialogAction(
+                      isDestructiveAction: true,
+                      onPressed: () {
+                        HapticFeedback.mediumImpact();
+                        // Delete logic is handled in onDismissed
+                        Navigator.pop(context, true);
+                      },
+                      child: const Text('삭제'),
+                    ),
+                  ],
                 ),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Padding(
-                      padding: const EdgeInsets.all(16),
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Row(
+              );
+            },
+            onDismissed: (direction) {
+              _themeControllers[themeIndex].clear();
+              widget.notifier.clearThemeActions(themeIndex);
+              setState(() {
+                _expandedThemeIndex = null;
+              });
+            },
+            child: Container(
+              margin: const EdgeInsets.only(bottom: 12),
+              decoration: BoxDecoration(
+                color: isExpanded
+                    ? primaryColor.withValues(alpha: 0.05)
+                    : CupertinoColors.secondarySystemGroupedBackground.resolveFrom(context),
+                borderRadius: BorderRadius.circular(12),
+                border: Border.all(
+                  color: isExpanded
+                      ? primaryColor.withValues(alpha: 0.3)
+                      : CupertinoColors.separator.resolveFrom(context).withValues(alpha: 0.3),
+                  width: isExpanded ? 2 : 1,
+                ),
+              ),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Padding(
+                    padding: const EdgeInsets.all(16),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        GestureDetector(
+                          behavior: HitTestBehavior.translucent,
+                          onTap: () {
+                            HapticFeedback.selectionClick();
+                            setState(() {
+                              _expandedThemeIndex = isExpanded ? null : themeIndex;
+                            });
+                          },
+                          child: Row(
                             mainAxisAlignment: MainAxisAlignment.spaceBetween,
                             children: [
                               Text(
@@ -351,99 +439,98 @@ class _CombinedStepState extends ConsumerState<CombinedStep> {
                               ),
                             ],
                           ),
-                          const SizedBox(height: 8),
-                          CupertinoTextField(
-                            controller: _themeControllers[themeIndex],
-                            padding: const EdgeInsets.all(16),
-                            decoration: BoxDecoration(
-                              color: CupertinoColors.tertiarySystemFill,
-                              borderRadius: BorderRadius.circular(8),
+                        ),
+                        const SizedBox(height: 8),
+                        CupertinoTextField(
+                          controller: _themeControllers[themeIndex],
+                          padding: const EdgeInsets.all(16),
+                          decoration: BoxDecoration(
+                            color: CupertinoColors.tertiarySystemFill,
+                            borderRadius: BorderRadius.circular(8),
+                          ),
+                          style: const TextStyle(
+                            fontSize: 17,
+                            color: CupertinoColors.label,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+
+                  // 테마 예제 키워드
+                  if (!hasTheme) ...[
+                    Padding(
+                      padding: const EdgeInsets.fromLTRB(16, 0, 16, 16),
+                      child: Wrap(
+                        spacing: 8,
+                        runSpacing: 8,
+                        children: Keywords.themeExamples.map((keyword) {
+                          return CupertinoButton(
+                            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                            minimumSize: const Size(44, 44),
+                            color: CupertinoColors.systemGrey5,
+                            onPressed: () {
+                              HapticFeedback.selectionClick();
+                              _themeControllers[themeIndex].text = keyword;
+                            },
+                            child: Text(
+                              keyword,
+                              style: const TextStyle(
+                                fontSize: 15,
+                                color: CupertinoColors.label,
+                              ),
                             ),
-                            style: const TextStyle(
-                              fontSize: 17,
-                              color: CupertinoColors.label,
+                          );
+                        }).toList(),
+                      ),
+                    ),
+                  ],
+
+                  // 액션 아이템 (확장 시에만 표시)
+                  if (isExpanded) ...[
+                    Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 16),
+                      child: Container(
+                        height: 1,
+                        color: CupertinoColors.separator.resolveFrom(context).withValues(alpha: 0.3),
+                      ),
+                    ),
+                    Padding(
+                      padding: const EdgeInsets.all(16),
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          Icon(
+                            CupertinoIcons.arrow_down_circle_fill,
+                            color: primaryColor.withValues(alpha: 0.6),
+                            size: 16,
+                          ),
+                          const SizedBox(width: 8),
+                          Text(
+                            '8가지 측정가능한 구체적 행동',
+                            style: TextStyle(
+                              fontSize: 13,
+                              fontWeight: FontWeight.w500,
+                              color: CupertinoColors.secondaryLabel.resolveFrom(context),
                             ),
+                          ),
+                          const SizedBox(width: 8),
+                          Icon(
+                            CupertinoIcons.arrow_down_circle_fill,
+                            color: primaryColor.withValues(alpha: 0.6),
+                            size: 16,
                           ),
                         ],
                       ),
                     ),
-
-                    // 테마 예제 키워드
-                    if (!hasTheme) ...[
-                      Padding(
-                        padding: const EdgeInsets.fromLTRB(16, 0, 16, 16),
-                        child: Wrap(
-                          spacing: 8,
-                          runSpacing: 8,
-                          children: Keywords.themeExamples.map((keyword) {
-                            return CupertinoButton(
-                              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-                              minimumSize: const Size(44, 44),
-                              color: CupertinoColors.systemGrey5,
-                              onPressed: () {
-                                HapticFeedback.selectionClick();
-                                _themeControllers[themeIndex].text = keyword;
-                              },
-                              child: Text(
-                                keyword,
-                                style: const TextStyle(
-                                  fontSize: 15,
-                                  color: CupertinoColors.label,
-                                ),
-                              ),
-                            );
-                          }).toList(),
-                        ),
-                      ),
-                    ],
-
-                    // 액션 아이템 (확장 시에만 표시)
-                    if (isExpanded) ...[
-                      Padding(
-                        padding: const EdgeInsets.symmetric(horizontal: 16),
-                        child: Container(
-                          height: 1,
-                          color: CupertinoColors.separator.resolveFrom(context).withValues(alpha: 0.3),
-                        ),
-                      ),
-                      Padding(
-                        padding: const EdgeInsets.all(16),
-                        child: Row(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          children: [
-                            Icon(
-                              CupertinoIcons.arrow_down_circle_fill,
-                              color: primaryColor.withValues(alpha: 0.6),
-                              size: 16,
-                            ),
-                            const SizedBox(width: 8),
-                            Text(
-                              '8가지 측정가능한 구체적 행동',
-                              style: TextStyle(
-                                fontSize: 13,
-                                fontWeight: FontWeight.w500,
-                                color: CupertinoColors.secondaryLabel.resolveFrom(context),
-                              ),
-                            ),
-                            const SizedBox(width: 8),
-                            Icon(
-                              CupertinoIcons.arrow_down_circle_fill,
-                              color: primaryColor.withValues(alpha: 0.6),
-                              size: 16,
-                            ),
-                          ],
-                        ),
-                      ),
-                      Padding(
-                        padding: const EdgeInsets.fromLTRB(16, 0, 16, 16),
-                        child: _buildActionItems(themeIndex, _themeControllers[themeIndex].text),
-                      ),
-                    ],
+                    Padding(
+                      padding: const EdgeInsets.fromLTRB(16, 0, 16, 16),
+                      child: _buildActionItems(themeIndex, _themeControllers[themeIndex].text),
+                    ),
                   ],
-                ),
+                ],
               ),
-              const SizedBox(height: 12),
-            ],
+            ),
           );
         }),
 

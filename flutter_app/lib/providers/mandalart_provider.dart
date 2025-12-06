@@ -18,6 +18,7 @@ class MandalartNotifier extends StateNotifier<MandalartStateModel> {
   static const _keySavedMandalartIds = 'saved-mandalart-ids';
   static const _keyCurrentMandalartId = 'current-mandalart-id';
   static const _keyCurrentMandalartCreatedAt = 'current-mandalart-created-at';
+  static const _keyCalendarLog = 'mandalart-calendar-log';
 
   String? _currentMandalartId;
   DateTime? _currentMandalartCreatedAt;
@@ -37,6 +38,15 @@ class MandalartNotifier extends StateNotifier<MandalartStateModel> {
     final actionsRaw = prefs.getString(_keyActions);
     final step = prefs.getInt(_keyStep) ?? 0;
     final displayName = prefs.getString(_keyDisplayName) ?? '';
+    final calendarLogRaw = prefs.getString(_keyCalendarLog);
+    Map<String, int> calendarLog = {};
+    if (calendarLogRaw != null) {
+      try {
+        calendarLog = Map<String, int>.from(jsonDecode(calendarLogRaw));
+      } catch (e) {
+        // ignore
+      }
+    }
 
     final actions = <ActionItemModel>[];
     if (actionsRaw != null) {
@@ -69,8 +79,10 @@ class MandalartNotifier extends StateNotifier<MandalartStateModel> {
       displayName: displayName,
       goalText: goal,
       themes: themes,
+
       actionItems: actions,
       currentStep: step,
+      calendarLog: calendarLog,
     );
   }
 
@@ -92,8 +104,10 @@ class MandalartNotifier extends StateNotifier<MandalartStateModel> {
                 'createdAt': a.createdAt.toIso8601String(),
                 'updatedAt': a.updatedAt.toIso8601String(),
               })
+
           .toList()),
     );
+    await prefs.setString(_keyCalendarLog, jsonEncode(state.calendarLog));
   }
 
   void updateDisplayName(String value) {
@@ -158,13 +172,41 @@ class MandalartNotifier extends StateNotifier<MandalartStateModel> {
           break;
       }
 
-      updated[idx] = updated[idx].copyWith(status: newStatus);
+
+
+      DateTime? startedAt = updated[idx].startedAt;
+      DateTime? completedAt = updated[idx].completedAt;
+
+      switch (newStatus) {
+        case ActionStatus.inProgress:
+          startedAt = DateTime.now();
+          // completedAt remains null
+          break;
+        case ActionStatus.completed:
+           // Keep startedAt if it exists, otherwise set it (if jumped straight to complete?)
+           // Logic says inProgress -> completed, so startedAt should exist.
+           if (startedAt == null) startedAt = DateTime.now(); 
+           completedAt = DateTime.now();
+           break;
+        case ActionStatus.notStarted:
+           startedAt = null;
+           completedAt = null;
+           break;
+      }
+
+      updated[idx] = updated[idx].copyWith(
+        status: newStatus, 
+        startedAt: startedAt, 
+        completedAt: completedAt,
+      );
       state = state.copyWith(actionItems: updated);
       _persist();
       return newStatus;
     }
     return null;
   }
+
+
 
   void setStep(int step) {
     state = state.copyWith(currentStep: step);
@@ -447,3 +489,5 @@ class MandalartNotifier extends StateNotifier<MandalartStateModel> {
 final mandalartProvider = StateNotifierProvider<MandalartNotifier, MandalartStateModel>((ref) {
   return MandalartNotifier();
 });
+
+final activeThemeIndexProvider = StateProvider<int?>((ref) => null);

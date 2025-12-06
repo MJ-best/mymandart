@@ -205,6 +205,7 @@ class _MandalartViewerState extends ConsumerState<MandalartViewer> {
                         onPressed: () {
                           HapticFeedback.lightImpact();
                           setState(() => currentView = 'full');
+                          ref.read(activeThemeIndexProvider.notifier).state = null;
                         },
                         child: const Row(
                           mainAxisSize: MainAxisSize.min,
@@ -293,6 +294,7 @@ class _MandalartViewerState extends ConsumerState<MandalartViewer> {
                             onPressed: () {
                               HapticFeedback.lightImpact();
                               setState(() => currentView = 'full');
+                              ref.read(activeThemeIndexProvider.notifier).state = null;
                             },
                             child: const Row(
                               mainAxisSize: MainAxisSize.min,
@@ -369,6 +371,7 @@ class _MandalartViewerState extends ConsumerState<MandalartViewer> {
             onThemeClick: (themeIndex) {
               HapticFeedback.lightImpact();
               setState(() => currentView = themeIndex);
+              ref.read(activeThemeIndexProvider.notifier).state = themeIndex;
             },
             onToggleAction: (themeIndex, actionIndex) {
               HapticFeedback.lightImpact();

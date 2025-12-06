@@ -108,6 +108,7 @@ class ExportService {
         actionItems: actionItems,
         currentStep: 0,
         showViewer: false,
+        calendarLog: const {},
       );
     } catch (e) {
       return null;

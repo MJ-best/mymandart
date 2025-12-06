@@ -132,8 +132,9 @@ class OhtaniMandalartExample {
       goalText: '8구단 드래프트 1위 지명',
       themes: themes,
       actionItems: actionItems,
-      currentStep: 2, // 바로 viewer로 표시
+      currentStep: 0, // 기본값: Viewer
       showViewer: false,
+      calendarLog: const {},
     );
   }
 }
