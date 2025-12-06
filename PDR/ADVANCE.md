@@ -8,7 +8,12 @@ These are the immediate next steps for the project.
 
 ## Active Implementation Plan (Pending)
 
-### 1. Step 1: "Others' Goals" Feature (Lower Priority)
+### 1. Urgent UI Modifications
+**Objective**: Improve usability and layout based on immediate user feedback.
+- **Requirement 1**: Disable "Slide to Delete" in CombinedStep (List). Deletion must only happen via 'X' button.
+- **Requirement 2**: Compact Project Calendar. Reduce visual size of the activity log calendar while preserving Start/Complete date information.
+
+### 2. Step 1: "Others' Goals" Feature (Lower Priority)
 **Objective**: Connect the user with the community by showing examples of goals others have set.
 - **Requirement**:
     - Prepare a static list of 100 new year goals (`keywords.dart`).

@@ -301,8 +301,9 @@ class _CalendarStepState extends ConsumerState<CalendarStep> {
       physics: const NeverScrollableScrollPhysics(),
       gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
         crossAxisCount: 7,
-        mainAxisSpacing: 8,
-        crossAxisSpacing: 8,
+        mainAxisSpacing: 4, // Reduced from 8
+        crossAxisSpacing: 4, // Reduced from 8
+        childAspectRatio: 1.3, // Compressed vertical height
       ),
       itemCount: totalCells,
       itemBuilder: (context, index) {
@@ -343,14 +344,14 @@ class _CalendarStepState extends ConsumerState<CalendarStep> {
                         ? CupertinoColors.white 
                         : (hasActivity ? primaryColor : CupertinoColors.label.resolveFrom(context)),
                     fontWeight: isSelected || isToday ? FontWeight.bold : FontWeight.normal,
-                    fontSize: 14,
+                    fontSize: 13, // Slightly smaller font
                   ),
                 ),
                 if (hasActivity && !isSelected)
                   Container(
                     margin: const EdgeInsets.only(top: 2),
-                    width: 4,
-                    height: 4,
+                    width: 3, // Smaller dot
+                    height: 3,
                     decoration: BoxDecoration(
                       color: primaryColor,
                       shape: BoxShape.circle,

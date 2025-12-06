@@ -279,55 +279,7 @@ class _CombinedStepState extends ConsumerState<CombinedStep> {
           final hasTheme = _themeControllers[themeIndex].text.trim().isNotEmpty;
           final isExpanded = _expandedThemeIndex == themeIndex && hasTheme;
 
-          return Dismissible(
-            key: _itemKeys[themeIndex],
-            direction: DismissDirection.endToStart,
-            background: Container(
-              margin: const EdgeInsets.only(bottom: 12),
-              decoration: BoxDecoration(
-                color: CupertinoColors.destructiveRed,
-                borderRadius: BorderRadius.circular(12),
-              ),
-              alignment: Alignment.centerRight,
-              padding: const EdgeInsets.only(right: 20),
-              child: const Icon(
-                CupertinoIcons.delete,
-                color: CupertinoColors.white,
-              ),
-            ),
-            confirmDismiss: (direction) async {
-              if (!hasTheme) return false;
-              return await showCupertinoDialog<bool>(
-                context: context,
-                builder: (context) => CupertinoAlertDialog(
-                  title: const Text('테마 초기화'),
-                  content: Text('액션타겟 ${themeIndex + 1}을(를) 삭제하시겠습니까?'),
-                  actions: [
-                    CupertinoDialogAction(
-                      child: const Text('취소'),
-                      onPressed: () => Navigator.pop(context, false),
-                    ),
-                    CupertinoDialogAction(
-                      isDestructiveAction: true,
-                      onPressed: () {
-                        HapticFeedback.mediumImpact();
-                        // Delete logic is handled in onDismissed
-                        Navigator.pop(context, true);
-                      },
-                      child: const Text('삭제'),
-                    ),
-                  ],
-                ),
-              );
-            },
-            onDismissed: (direction) {
-              _themeControllers[themeIndex].clear();
-              widget.notifier.clearThemeActions(themeIndex);
-              setState(() {
-                _expandedThemeIndex = null;
-              });
-            },
-            child: Container(
+          return Container(
               margin: const EdgeInsets.only(bottom: 12),
               decoration: BoxDecoration(
                 color: isExpanded
@@ -530,8 +482,7 @@ class _CombinedStepState extends ConsumerState<CombinedStep> {
                   ],
                 ],
               ),
-            ),
-          );
+            );
         }),
 
         const SizedBox(height: 8),
