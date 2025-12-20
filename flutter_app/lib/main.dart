@@ -2,10 +2,14 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import 'package:mandarart_journey/screens/mandalart_app.dart';
 import 'package:mandarart_journey/screens/landing_screen.dart';
 import 'package:mandarart_journey/screens/saved_mandalarts_screen.dart';
 import 'package:mandarart_journey/screens/example_mandalart_screen.dart';
+import 'package:mandarart_journey/screens/mandalart_detail_screen.dart';
+import 'package:mandarart_journey/screens/calendar_screen.dart';
+import 'package:mandarart_journey/screens/new_mandalart_screen.dart';
+import 'package:mandarart_journey/screens/edit_mandalart_screen.dart';
+import 'package:mandarart_journey/screens/settings_screen.dart';
 import 'package:mandarart_journey/providers/theme_provider.dart';
 import 'package:mandarart_journey/l10n/app_localizations.dart';
 
@@ -21,9 +25,9 @@ final _router = GoRouter(
       final prefs = await SharedPreferences.getInstance();
       final hasStarted = prefs.getBool('has_started') ?? false;
 
-      // 사용자가 이미 시작했다면 /create로 리다이렉트
+      // 사용자가 이미 시작했다면 /detail 로 리다이렉트 (기존 만다라트 보기)
       if (hasStarted) {
-        return '/create';
+        return '/detail';
       }
     }
     return null; // 리다이렉트 없음
@@ -34,8 +38,24 @@ final _router = GoRouter(
       builder: (context, state) => const LandingScreen(),
     ),
     GoRoute(
-      path: '/create',
-      builder: (context, state) => const MandalartAppScreen(),
+      path: '/detail',
+      builder: (context, state) => const MandalartDetailScreen(),
+    ),
+    GoRoute(
+      path: '/calendar',
+      builder: (context, state) => const CalendarScreen(),
+    ),
+    GoRoute(
+      path: '/new',
+      builder: (context, state) => const NewMandalartScreen(),
+    ),
+    GoRoute(
+      path: '/edit',
+      builder: (context, state) => const EditMandalartScreen(),
+    ),
+    GoRoute(
+      path: '/settings',
+      builder: (context, state) => const SettingsScreen(),
     ),
     GoRoute(
       path: '/saved-mandalarts',
