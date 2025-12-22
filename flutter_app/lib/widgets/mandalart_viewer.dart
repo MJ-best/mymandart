@@ -1,6 +1,7 @@
 import 'dart:math';
 
 import 'package:flutter/cupertino.dart';
+import 'package:flutter/material.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -73,7 +74,7 @@ class _MandalartViewerState extends ConsumerState<MandalartViewer> {
           switchOutCurve: Curves.easeIn,
           child: Container(
             key: ValueKey(currentView),
-            color: CupertinoColors.systemGroupedBackground.resolveFrom(context),
+            color: Theme.of(context).scaffoldBackgroundColor,
             child: body,
           ),
         ),
@@ -89,14 +90,15 @@ class _MandalartViewerState extends ConsumerState<MandalartViewer> {
         switchOutCurve: Curves.easeIn,
         child: CupertinoPageScaffold(
           key: ValueKey(currentView),
-          backgroundColor: CupertinoColors.systemGroupedBackground.resolveFrom(context),
+          backgroundColor: Theme.of(context).scaffoldBackgroundColor,
           navigationBar: CupertinoNavigationBar(
             middle: Text(
               widget.state.displayName.trim().isNotEmpty
                   ? widget.state.displayName.trim()
                   : '만다라트 차트',
+              style: TextStyle(color: Theme.of(context).colorScheme.onSurface),
             ),
-            backgroundColor: CupertinoColors.systemBackground.resolveFrom(context),
+            backgroundColor: Theme.of(context).appBarTheme.backgroundColor,
             trailing: Row(
               mainAxisSize: MainAxisSize.min,
               children: [
@@ -356,7 +358,7 @@ class _MandalartViewerState extends ConsumerState<MandalartViewer> {
     final isPortrait = mediaQuery.orientation == Orientation.portrait;
 
     return Container(
-      color: CupertinoColors.systemGrey6.resolveFrom(context),
+      color: Theme.of(context).scaffoldBackgroundColor,
       child: Center(
         child: InteractiveViewer(
           minScale: 0.5,
@@ -1079,7 +1081,7 @@ class _MandalartViewerState extends ConsumerState<MandalartViewer> {
   Widget _buildThemeToggleButton() {
     final themeState = ref.watch(themeProvider);
     final primaryColor = themeState.primaryColor;
-    final bool isLight = themeState.mode == ThemeMode.light;
+    final bool isLight = themeState.mode == AppThemeMode.light;
     final IconData icon = isLight ? CupertinoIcons.sun_max_fill : CupertinoIcons.moon_fill;
     final String label = isLight ? 'Light mode' : 'Dark mode';
 
@@ -1224,8 +1226,8 @@ class _MandalartViewerState extends ConsumerState<MandalartViewer> {
         // 저장 후 저장된 만다라트 페이지로 이동
         Future.delayed(const Duration(milliseconds: 1500), () {
           if (mounted) {
-            widget.onClose(); // 먼저 뷰어 닫기
-            context.push('/saved-mandalarts');
+            // widget.onClose(); // 뷰어 닫지 않고 이동
+             context.push('/saved-mandalarts');
           }
         });
       }

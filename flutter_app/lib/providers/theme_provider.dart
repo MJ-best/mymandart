@@ -3,9 +3,10 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:flutter_dynamic_icon_plus/flutter_dynamic_icon_plus.dart';
+import 'package:mandarart_journey/utils/app_theme.dart';
 
 /// 테마 모드 열거형
-enum ThemeMode {
+enum AppThemeMode {
   /// 항상 밝은 테마
   light,
 
@@ -30,7 +31,7 @@ enum ColorTheme {
 
 /// 테마 상태 모델
 class ThemeState {
-  final ThemeMode mode;
+  final AppThemeMode mode;
   final ColorTheme colorTheme;
 
   const ThemeState({
@@ -41,9 +42,9 @@ class ThemeState {
   /// 실제 적용될 brightness 계산
   Brightness get effectiveBrightness {
     switch (mode) {
-      case ThemeMode.light:
+      case AppThemeMode.light:
         return Brightness.light;
-      case ThemeMode.dark:
+      case AppThemeMode.dark:
         return Brightness.dark;
     }
   }
@@ -52,18 +53,18 @@ class ThemeState {
   Color get primaryColor {
     switch (colorTheme) {
       case ColorTheme.green:
-        return CupertinoColors.systemGreen;
+        return AppTheme.statusDone; // Greenish
       case ColorTheme.purple:
-        return CupertinoColors.systemPurple;
+        return AppTheme.primary; // Future Dusk
       case ColorTheme.black:
-        return CupertinoColors.black;
+        return AppTheme.textMainLight;
       case ColorTheme.white:
-        return CupertinoColors.white;
+        return AppTheme.surfaceLight;
     }
   }
 
   ThemeState copyWith({
-    ThemeMode? mode,
+    AppThemeMode? mode,
     ColorTheme? colorTheme,
   }) {
     return ThemeState(
@@ -80,7 +81,7 @@ class ThemeNotifier extends StateNotifier<ThemeState> {
 
   ThemeNotifier()
       : super(const ThemeState(
-          mode: ThemeMode.light,
+          mode: AppThemeMode.light,
           colorTheme: ColorTheme.green,
         )) {
     _loadTheme();
@@ -93,11 +94,11 @@ class ThemeNotifier extends StateNotifier<ThemeState> {
 
       // 테마 모드 불러오기
       final modeString = prefs.getString(_themeModeKey);
-      ThemeMode mode = ThemeMode.light;
+      AppThemeMode mode = AppThemeMode.light;
       if (modeString != null) {
-        mode = ThemeMode.values.firstWhere(
+        mode = AppThemeMode.values.firstWhere(
           (e) => e.name == modeString,
-          orElse: () => ThemeMode.light,
+          orElse: () => AppThemeMode.light,
         );
       }
 
@@ -118,7 +119,7 @@ class ThemeNotifier extends StateNotifier<ThemeState> {
   }
 
   /// 테마 모드 변경
-  Future<void> setThemeMode(ThemeMode mode) async {
+  Future<void> setThemeMode(AppThemeMode mode) async {
     state = state.copyWith(mode: mode);
     try {
       final prefs = await SharedPreferences.getInstance();
@@ -128,7 +129,7 @@ class ThemeNotifier extends StateNotifier<ThemeState> {
     }
   }
 
-  /// 색상 테마 변경
+  /// 색상 테마 변경 (No change needed here)
   Future<void> setColorTheme(ColorTheme colorTheme) async {
     state = state.copyWith(colorTheme: colorTheme);
     try {
@@ -145,7 +146,7 @@ class ThemeNotifier extends StateNotifier<ThemeState> {
     }
   }
 
-  /// 앱 아이콘 변경 (모바일 전용)
+  /// 앱 아이콘 변경 (모바일 전용) (No change)
   Future<void> _changeAppIcon(ColorTheme colorTheme) async {
     // 웹이나 데스크톱에서는 동작하지 않음
     if (kIsWeb) return;
@@ -183,9 +184,9 @@ class ThemeNotifier extends StateNotifier<ThemeState> {
 
   /// light/dark 토글 (light ↔ dark)
   Future<void> toggleTheme() async {
-    final nextMode = state.mode == ThemeMode.light
-        ? ThemeMode.dark
-        : ThemeMode.light;
+    final nextMode = state.mode == AppThemeMode.light
+        ? AppThemeMode.dark
+        : AppThemeMode.light;
     await setThemeMode(nextMode);
   }
 }

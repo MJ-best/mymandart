@@ -1,11 +1,12 @@
 import 'package:flutter/cupertino.dart';
-
+import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
 import 'package:mandarart_journey/providers/mandalart_provider.dart';
-import 'package:mandarart_journey/providers/theme_provider.dart';
+
 import 'package:mandarart_journey/models/mandalart.dart';
+import 'package:mandarart_journey/utils/app_theme.dart';
 
 class CalendarStep extends ConsumerStatefulWidget {
   const CalendarStep({super.key});
@@ -46,7 +47,10 @@ class _CalendarStepState extends ConsumerState<CalendarStep> {
   @override
   Widget build(BuildContext context) {
     final state = ref.watch(mandalartProvider);
-    final primaryColor = ref.watch(themeProvider).primaryColor;
+    final theme = Theme.of(context);
+    final colorScheme = theme.colorScheme;
+    final primaryColor = colorScheme.primary;
+    final isDark = theme.brightness == Brightness.dark;
 
     // Event wrapper to distinguish start vs complete
     final Map<String, List<Map<String, dynamic>>> logsByDate = {}; // {'type': 'start'|'complete', 'item': ActionItemModel}
@@ -64,11 +68,6 @@ class _CalendarStepState extends ConsumerState<CalendarStep> {
       }
     }
     
-    // Calculate total distinct completed items for the header count (or total events?)
-    // User asked to record start. Let's show "Total X Events" or keep "X Completed"?
-    // User text: "X goals completed" (original).
-    // Let's change to "X Started / Y Completed" or just total activities.
-    // Let's stick to "X Activities Recorded" ("X개의 활동 기록")
     int totalEvents = 0;
     logsByDate.forEach((_, events) => totalEvents += events.length);
 
@@ -80,14 +79,18 @@ class _CalendarStepState extends ConsumerState<CalendarStep> {
       children: [
         // --- Header ---
         Container(
-          padding: const EdgeInsets.symmetric(vertical: 20, horizontal: 16),
+          padding: const EdgeInsets.symmetric(vertical: 24, horizontal: 20),
           margin: const EdgeInsets.only(bottom: 24),
           decoration: BoxDecoration(
-            color: CupertinoColors.secondarySystemGroupedBackground.resolveFrom(context),
-            borderRadius: BorderRadius.circular(16),
+            color: colorScheme.surface,
+            borderRadius: BorderRadius.circular(24),
+            border: Border.all(
+              color: isDark ? const Color(0xFF333220) : const Color(0xFFE6E6DB),
+              width: 1,
+            ),
             boxShadow: [
               BoxShadow(
-                color: CupertinoColors.systemGrey.withOpacity(0.1),
+                color: Colors.black.withValues(alpha: 0.05),
                 blurRadius: 10,
                 offset: const Offset(0, 4),
               ),
@@ -96,22 +99,32 @@ class _CalendarStepState extends ConsumerState<CalendarStep> {
           child: Column(
             children: [
                Text(
-                 '나의 발자취',
+                 'TOTAL ACTIVITIES',
                  style: TextStyle(
-                   fontSize: 14,
-                   fontWeight: FontWeight.w600,
-                   color: CupertinoColors.secondaryLabel.resolveFrom(context),
+                   fontSize: 12,
+                   fontWeight: FontWeight.bold,
+                   letterSpacing: 1.2,
+                   color: isDark ? const Color(0xFF8C8B5F) : const Color(0xFF8C8B5F),
                  ),
                ),
-               const SizedBox(height: 4),
+               const SizedBox(height: 8),
                Text(
-                  '$totalEvents개의 활동 기록',
+                  '$totalEvents',
                   style: TextStyle(
-                    fontSize: 24,
+                    fontSize: 32,
                     fontWeight: FontWeight.bold,
                     color: primaryColor,
+                    height: 1.0,
                   ),
                 ),
+               const SizedBox(height: 4),
+               Text(
+                 'Recorded actions',
+                 style: TextStyle(
+                   fontSize: 14,
+                   color: colorScheme.onSurface.withValues(alpha: 0.6),
+                 ),
+               ),
             ],
           ),
         ),
@@ -122,23 +135,23 @@ class _CalendarStepState extends ConsumerState<CalendarStep> {
           child: Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              CupertinoButton(
+              IconButton(
                 padding: EdgeInsets.zero,
                 onPressed: () => _changeMonth(-1),
-                child: const Icon(CupertinoIcons.chevron_left),
+                icon: Icon(Icons.chevron_left, color: colorScheme.onSurface),
               ),
               Text(
-                DateFormat('yyyy년 M월').format(_focusedDate),
-                style: const TextStyle(
+                DateFormat('MMMM yyyy').format(_focusedDate),
+                style: TextStyle(
                   fontSize: 18,
                   fontWeight: FontWeight.bold,
-                  color: CupertinoColors.label,
+                  color: colorScheme.onSurface,
                 ),
               ),
-              CupertinoButton(
+              IconButton(
                 padding: EdgeInsets.zero,
                 onPressed: () => _changeMonth(1),
-                child: const Icon(CupertinoIcons.chevron_right),
+                icon: Icon(Icons.chevron_right, color: colorScheme.onSurface),
               ),
             ],
           ),
@@ -149,7 +162,7 @@ class _CalendarStepState extends ConsumerState<CalendarStep> {
           padding: const EdgeInsets.only(bottom: 12.0),
           child: Row(
             mainAxisAlignment: MainAxisAlignment.spaceAround,
-            children: ['일', '월', '화', '수', '목', '금', '토'].map((day) {
+            children: ['S', 'M', 'T', 'W', 'T', 'F', 'S'].map((day) {
               return SizedBox(
                 width: 32,
                 child: Text(
@@ -158,9 +171,9 @@ class _CalendarStepState extends ConsumerState<CalendarStep> {
                   style: TextStyle(
                     fontSize: 13,
                     fontWeight: FontWeight.w600,
-                    color: day == '일' 
+                    color: day == 'S' 
                         ? CupertinoColors.systemRed 
-                        : CupertinoColors.secondaryLabel.resolveFrom(context),
+                        : colorScheme.onSurface.withValues(alpha: 0.5),
                   ),
                 ),
               );
@@ -169,7 +182,7 @@ class _CalendarStepState extends ConsumerState<CalendarStep> {
         ),
 
         // --- Calendar Grid ---
-        _buildMonthGrid(logsByDate, primaryColor),
+        _buildMonthGrid(logsByDate, primaryColor, context),
         
         const SizedBox(height: 32),
         
@@ -177,11 +190,11 @@ class _CalendarStepState extends ConsumerState<CalendarStep> {
         Padding(
           padding: const EdgeInsets.symmetric(horizontal: 8.0),
           child: Text(
-            '${DateFormat('M월 d일 (E)', 'ko_KR').format(_selectedDate)} 활동',
-            style: const TextStyle(
+            DateFormat('MMMM d (E)').format(_selectedDate),
+            style: TextStyle(
               fontSize: 16,
               fontWeight: FontWeight.w700,
-              color: CupertinoColors.label,
+              color: colorScheme.onSurface,
             ),
           ),
         ),
@@ -191,14 +204,14 @@ class _CalendarStepState extends ConsumerState<CalendarStep> {
             width: double.infinity,
             padding: const EdgeInsets.all(24),
             decoration: BoxDecoration(
-              color: CupertinoColors.tertiarySystemGroupedBackground.resolveFrom(context),
-              borderRadius: BorderRadius.circular(12),
+              color: colorScheme.surfaceContainerHighest,
+              borderRadius: BorderRadius.circular(16),
             ),
             child: Text(
-              '달성한 목표가 없습니다.',
+              'No activities recorded.',
               textAlign: TextAlign.center,
               style: TextStyle(
-                color: CupertinoColors.secondaryLabel.resolveFrom(context),
+                color: colorScheme.onSurfaceVariant,
                 fontSize: 14,
               ),
             ),
@@ -212,21 +225,25 @@ class _CalendarStepState extends ConsumerState<CalendarStep> {
              // Find theme text
              final themeIndex = int.tryParse(item.themeId.split('-').last) ?? -1;
              final themeText = (themeIndex >= 0 && themeIndex < state.themes.length)
-                 ? state.themes[themeIndex]
+                 ? state.themes[themeIndex].themeText
                  : '';
                  
              return Container(
                margin: const EdgeInsets.only(bottom: 8),
                padding: const EdgeInsets.all(16),
                decoration: BoxDecoration(
-                 color: CupertinoColors.secondarySystemGroupedBackground.resolveFrom(context),
-                 borderRadius: BorderRadius.circular(12),
-                 border: Border(
-                   left: BorderSide(
-                     color: isStart ? primaryColor.withValues(alpha: 0.5) : primaryColor, 
-                     width: 4
-                   )
+                 color: colorScheme.surface,
+                 borderRadius: BorderRadius.circular(16),
+                 border: Border.all(
+                   color: colorScheme.outline.withValues(alpha: 0.2),
                  ),
+                 boxShadow: [
+                    BoxShadow(
+                      color: Colors.black.withValues(alpha: 0.02),
+                      blurRadius: 4,
+                      offset: const Offset(0, 2),
+                    )
+                 ]
                ),
                child: Row(
                  children: [
@@ -237,48 +254,64 @@ class _CalendarStepState extends ConsumerState<CalendarStep> {
                          Row(
                            children: [
                              Container(
-                               padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                               padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
                                decoration: BoxDecoration(
                                  color: isStart 
-                                    ? CupertinoColors.systemGrey5.resolveFrom(context)
+                                    ? colorScheme.surfaceContainerHighest
                                     : primaryColor.withValues(alpha: 0.1),
-                                 borderRadius: BorderRadius.circular(4),
+                                 borderRadius: BorderRadius.circular(6),
                                ),
                                child: Text(
-                                 isStart ? '시작' : '완료',
+                                 isStart ? 'STARTED' : 'COMPLETED',
                                  style: TextStyle(
                                    fontSize: 10,
                                    fontWeight: FontWeight.bold,
-                                   color: isStart ? CupertinoColors.secondaryLabel : primaryColor,
+                                   color: isStart ? colorScheme.onSurfaceVariant : primaryColor,
+                                   letterSpacing: 0.5,
                                  ),
                                ),
                              ),
-                             const SizedBox(width: 6),
+                             const SizedBox(width: 8),
                              if (themeText.isNotEmpty)
-                               Text(
-                                 themeText,
-                                 style: TextStyle(
-                                   fontSize: 12,
-                                   color: CupertinoColors.secondaryLabel.resolveFrom(context),
+                               Expanded(
+                                 child: Text(
+                                   themeText,
+                                   style: TextStyle(
+                                     fontSize: 12,
+                                     color: colorScheme.onSurface.withValues(alpha: 0.6),
+                                     overflow: TextOverflow.ellipsis,
+                                   ),
                                  ),
                                ),
                            ],
                          ),
-                         const SizedBox(height: 4),
+                         const SizedBox(height: 8),
                          Text(
-                           item.actionText.isEmpty ? '새로운 목표' : item.actionText,
-                           style: const TextStyle(
+                           item.actionText.isEmpty ? 'New Goal' : item.actionText,
+                           style: TextStyle(
                              fontSize: 16,
-                             fontWeight: FontWeight.w500,
-                             color: CupertinoColors.label,
+                             fontWeight: FontWeight.w600,
+                             color: colorScheme.onSurface,
                            ),
                          ),
                        ],
                      ),
                    ),
-                   Icon(
-                     isStart ? CupertinoIcons.play_circle : CupertinoIcons.check_mark_circled_solid,
-                     color: isStart ? CupertinoColors.secondaryLabel.resolveFrom(context) : primaryColor,
+                   const SizedBox(width: 12),
+                   Container(
+                     width: 32, 
+                     height: 32,
+                     decoration: BoxDecoration(
+                       shape: BoxShape.circle,
+                       color: isStart ? Colors.transparent : primaryColor,
+                       border: isStart ? Border.all(color: AppTheme.statusExec, width: 2) : null,
+                     ),
+                     alignment: Alignment.center,
+                     child: Icon(
+                       isStart ? Icons.play_arrow : Icons.check,
+                       color: isStart ? AppTheme.statusExec : Colors.white,
+                       size: 16,
+                     ),
                    ),
                  ],
                ),
@@ -291,19 +324,21 @@ class _CalendarStepState extends ConsumerState<CalendarStep> {
     );
   }
 
-  Widget _buildMonthGrid(Map<String, List<Map<String, dynamic>>> logs, Color primaryColor) {
+  Widget _buildMonthGrid(Map<String, List<Map<String, dynamic>>> logs, Color primaryColor, BuildContext context) {
+    final theme = Theme.of(context);
+    final colorScheme = theme.colorScheme;
     final firstDayOfMonth = DateTime(_focusedDate.year, _focusedDate.month, 1);
     final prevMonthDays = (firstDayOfMonth.weekday % 7); // Sunday = 0
-    final totalCells = 42; // 6 rows * 7 cols
+    const totalCells = 42; // 6 rows * 7 cols
 
     return GridView.builder(
       shrinkWrap: true,
       physics: const NeverScrollableScrollPhysics(),
       gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
         crossAxisCount: 7,
-        mainAxisSpacing: 4, // Reduced from 8
-        crossAxisSpacing: 4, // Reduced from 8
-        childAspectRatio: 1.3, // Compressed vertical height
+        mainAxisSpacing: 8,
+        crossAxisSpacing: 8,
+        childAspectRatio: 1.0, 
       ),
       itemCount: totalCells,
       itemBuilder: (context, index) {
@@ -328,7 +363,7 @@ class _CalendarStepState extends ConsumerState<CalendarStep> {
               shape: BoxShape.circle,
               color: isSelected 
                   ? primaryColor 
-                  : (hasActivity ? primaryColor.withValues(alpha: 0.15) : const Color(0x00000000)),
+                  : (hasActivity ? primaryColor.withValues(alpha: 0.15) : Colors.transparent),
               border: isToday && !isSelected
                   ? Border.all(color: primaryColor.withValues(alpha: 0.5), width: 1)
                   : null,
@@ -341,17 +376,17 @@ class _CalendarStepState extends ConsumerState<CalendarStep> {
                   '${date.day}',
                   style: TextStyle(
                     color: isSelected 
-                        ? CupertinoColors.white 
-                        : (hasActivity ? primaryColor : CupertinoColors.label.resolveFrom(context)),
+                        ? (theme.brightness == Brightness.dark ? Colors.black : Colors.white) 
+                        : (hasActivity ? primaryColor : colorScheme.onSurface),
                     fontWeight: isSelected || isToday ? FontWeight.bold : FontWeight.normal,
-                    fontSize: 13, // Slightly smaller font
+                    fontSize: 14, 
                   ),
                 ),
                 if (hasActivity && !isSelected)
                   Container(
-                    margin: const EdgeInsets.only(top: 2),
-                    width: 3, // Smaller dot
-                    height: 3,
+                    margin: const EdgeInsets.only(top: 4),
+                    width: 4, 
+                    height: 4,
                     decoration: BoxDecoration(
                       color: primaryColor,
                       shape: BoxShape.circle,
@@ -366,7 +401,6 @@ class _CalendarStepState extends ConsumerState<CalendarStep> {
   }
 }
 
-// Helper needed because Flutter's DateUtils isn't fully available/reliable in straight Cupertino context sometimes or strict analysis
 class DateUtils {
   static bool isSameDay(DateTime? dateA, DateTime? dateB) {
     return dateA?.year == dateB?.year &&

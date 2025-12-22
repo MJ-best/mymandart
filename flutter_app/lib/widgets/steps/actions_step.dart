@@ -92,7 +92,7 @@ class _ActionsStepState extends State<ActionsStep> {
     final filledThemes = widget.state.themes
         .asMap()
         .entries
-        .where((entry) => entry.value.trim().isNotEmpty)
+        .where((entry) => entry.value.themeText.trim().isNotEmpty)
         .toList();
     if (filledThemes.isEmpty) {
       return const Text(
@@ -183,7 +183,7 @@ class _ActionsStepState extends State<ActionsStep> {
         ...List.generate(filledThemes.length, (themeIndex) {
           final themeEntry = filledThemes[themeIndex];
           final actualThemeIndex = themeEntry.key;
-          final themeTitle = themeEntry.value;
+          final themeTitle = themeEntry.value.themeText;
           final themeKeywords = Keywords.getActionsForTheme(themeTitle);
           final isExpanded = _expandedThemeIndex == themeIndex;
           return Container(

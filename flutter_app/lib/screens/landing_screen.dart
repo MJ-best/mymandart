@@ -241,7 +241,7 @@ class _LandingScreenState extends ConsumerState<LandingScreen> {
                         widget.onComplete!();
                       }
                     } else {
-                      router.go('/create');
+                      router.go('/start');
                     }
                   },
                   child: Text(
@@ -328,7 +328,7 @@ class _LandingScreenState extends ConsumerState<LandingScreen> {
   Widget _buildThemeToggleButton() {
     final themeState = ref.watch(themeProvider);
     final primaryColor = themeState.primaryColor;
-    final bool isLight = themeState.mode == ThemeMode.light;
+    final bool isLight = themeState.mode == AppThemeMode.light;
     final IconData icon = isLight ? CupertinoIcons.sun_max_fill : CupertinoIcons.moon_fill;
     final String label = isLight ? 'Light mode' : 'Dark mode';
 

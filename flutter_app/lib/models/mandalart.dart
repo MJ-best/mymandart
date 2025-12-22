@@ -12,11 +12,28 @@ class GoalModel {
   });
 }
 
+enum GoalPriority {
+  high,
+  medium,
+  low,
+  none;
+
+  String toJson() => name;
+  
+  static GoalPriority fromJson(String value) {
+    return GoalPriority.values.firstWhere(
+      (e) => e.name == value,
+      orElse: () => GoalPriority.none,
+    );
+  }
+}
+
 class ThemeModel {
   final String id;
   final String goalId;
   final String themeText;
   final int order;
+  final GoalPriority priority; // Added priority
   final DateTime createdAt;
   final DateTime updatedAt;
 
@@ -25,6 +42,7 @@ class ThemeModel {
     required this.goalId,
     required this.themeText,
     required this.order,
+    this.priority = GoalPriority.none, // Default to none
     required this.createdAt,
     required this.updatedAt,
   });
@@ -140,7 +158,7 @@ class ActionItemModel {
 class MandalartStateModel {
   final String displayName;
   final String goalText;
-  final List<String> themes;
+  final List<ThemeModel> themes;
   final List<ActionItemModel> actionItems;
   final int currentStep;
   final bool showViewer;
@@ -159,7 +177,15 @@ class MandalartStateModel {
   factory MandalartStateModel.initial() => MandalartStateModel(
         displayName: '',
         goalText: '',
-        themes: List.filled(8, ''),
+        themes: List.generate(8, (i) => ThemeModel(
+          id: 'placeholder', 
+          goalId: 'placeholder', 
+          themeText: '', 
+          order: i, 
+          priority: GoalPriority.none,
+          createdAt: DateTime.now(), 
+          updatedAt: DateTime.now()
+        )),
         actionItems: const [],
         currentStep: 0,
         showViewer: false,
@@ -169,7 +195,7 @@ class MandalartStateModel {
   MandalartStateModel copyWith({
     String? displayName,
     String? goalText,
-    List<String>? themes,
+    List<ThemeModel>? themes,
     List<ActionItemModel>? actionItems,
     int? currentStep,
     bool? showViewer,
@@ -190,7 +216,15 @@ class MandalartStateModel {
     return {
       'displayName': displayName,
       'goalText': goalText,
-      'themes': themes,
+      'themes': themes.map((t) => {
+        'id': t.id,
+        'goalId': t.goalId,
+        'themeText': t.themeText,
+        'order': t.order,
+        'priority': t.priority.toJson(),
+        'createdAt': t.createdAt.toIso8601String(),
+        'updatedAt': t.updatedAt.toIso8601String(),
+      }).toList(),
       'actionItems': actionItems.map((a) => a.toJson()).toList(),
       'currentStep': currentStep,
       'calendarLog': calendarLog,
@@ -198,10 +232,50 @@ class MandalartStateModel {
   }
 
   factory MandalartStateModel.fromJson(Map<String, dynamic> json) {
+    List<ThemeModel> themes;
+    if (json['themes'] != null) {
+      final list = json['themes'] as List;
+      if (list.isNotEmpty && list.first is String) {
+        // Backward compatibility: Convert string list to ThemeModels
+        themes = List.generate(8, (i) {
+          final text = i < list.length ? list[i] as String : '';
+          return ThemeModel(
+            id: 'legacy_$i',
+            goalId: 'legacy_goal',
+            themeText: text,
+            order: i,
+            priority: GoalPriority.none,
+            createdAt: DateTime.now(),
+            updatedAt: DateTime.now(),
+          );
+        });
+      } else {
+        // Parse ThemeModel objects
+        themes = list.map((item) {
+           final m = item as Map<String, dynamic>;
+           return ThemeModel(
+             id: m['id'] as String? ?? 'id',
+             goalId: m['goalId'] as String? ?? 'gid',
+             themeText: m['themeText'] as String? ?? '',
+             order: m['order'] as int? ?? 0,
+             priority: m.containsKey('priority') 
+                 ? GoalPriority.fromJson(m['priority'] as String) 
+                 : GoalPriority.none,
+             createdAt: DateTime.tryParse(m['createdAt'] as String? ?? '') ?? DateTime.now(),
+             updatedAt: DateTime.tryParse(m['updatedAt'] as String? ?? '') ?? DateTime.now(),
+           );
+        }).toList();
+      }
+    } else {
+      themes = List.generate(8, (i) => ThemeModel(
+          id: 'placeholder', goalId: 'placeholder', themeText: '', order: i, priority: GoalPriority.none, createdAt: DateTime.now(), updatedAt: DateTime.now()
+      ));
+    }
+
     return MandalartStateModel(
       displayName: json['displayName'] as String? ?? '',
       goalText: json['goalText'] as String? ?? '',
-      themes: (json['themes'] as List<dynamic>?)?.cast<String>() ?? List.filled(8, ''),
+      themes: themes,
       actionItems: (json['actionItems'] as List<dynamic>?)
               ?.map((item) => ActionItemModel.fromJson(item as Map<String, dynamic>))
               .toList() ??

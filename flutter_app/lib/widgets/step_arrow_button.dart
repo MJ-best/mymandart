@@ -1,4 +1,5 @@
 import 'package:flutter/cupertino.dart';
+import 'package:flutter/material.dart';
 
 class StepArrowButton extends StatelessWidget {
   const StepArrowButton({
@@ -14,7 +15,8 @@ class StepArrowButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final primaryColor = CupertinoTheme.of(context).primaryColor;
+    // Stitch Theme Integration
+    final primaryColor = Theme.of(context).primaryColor;
     final isEnabled = onPressed != null;
     final Color iconColor = isEnabled
         ? primaryColor

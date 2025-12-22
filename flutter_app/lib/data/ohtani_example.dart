@@ -8,7 +8,7 @@ class OhtaniMandalartExample {
     final now = DateTime.now();
 
     // 8가지 핵심 영역
-    final themes = [
+    final themeTexts = [
       '체력',
       '컨트롤',
       '구위 160km/h',
@@ -18,6 +18,16 @@ class OhtaniMandalartExample {
       '변화구',
       '스피드',
     ];
+
+    final themes = List<ThemeModel>.generate(8, (i) => ThemeModel(
+      id: uuid.v4(),
+      goalId: 'ohtani_goal',
+      themeText: themeTexts[i],
+      order: i,
+      priority: GoalPriority.high, // Example priority
+      createdAt: now,
+      updatedAt: now,
+    ));
 
     // 각 테마별 8가지 액션 아이템
     final actionsData = [

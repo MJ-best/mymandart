@@ -1,6 +1,7 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:mandarart_journey/models/mandalart.dart';
 import 'package:mandarart_journey/providers/mandalart_provider.dart';
@@ -36,10 +37,9 @@ class _MandalartAppScreenState extends ConsumerState<MandalartAppScreen> {
        if (mounted) {
          final state = ref.read(mandalartProvider);
          if (state.goalText.isEmpty) {
-           showCupertinoModalPopup(
-             context: context,
-             builder: (_) => const GoalInputDialog(isNew: true),
-           );
+           WidgetsBinding.instance.addPostFrameCallback((_) {
+             if (mounted) context.go('/start');
+           });
          }
        }
     });
@@ -228,7 +228,7 @@ class _MandalartAppScreenState extends ConsumerState<MandalartAppScreen> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              CalendarStep(),
+              const CalendarStep(),
               const SizedBox(height: 32),
             ],
           ),

@@ -228,7 +228,7 @@ class _ExampleMandalartViewerState extends State<_ExampleMandalartViewer> {
   }
 
   Widget _buildThemeCell(BuildContext context, int themeIndex, Color primaryColor) {
-    final theme = widget.data.themes[themeIndex];
+    final theme = widget.data.themes[themeIndex].themeText;
     final actions = _getActionsForTheme(themeIndex);
     final completedCount = actions.where((a) => a.isCompleted).length;
 
@@ -292,7 +292,7 @@ class _ExampleMandalartViewerState extends State<_ExampleMandalartViewer> {
   }
 
   Widget _buildActionView(BuildContext context, int themeIndex, Color primaryColor) {
-    final theme = widget.data.themes[themeIndex];
+    final theme = widget.data.themes[themeIndex].themeText;
     final actions = _getActionsForTheme(themeIndex);
 
     return Column(

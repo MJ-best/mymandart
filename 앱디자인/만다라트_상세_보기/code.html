@@ -1,0 +1,282 @@
+<!DOCTYPE html>
+<html lang="ko"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>만다라트 상세 보기</title>
+<script type="text/javascript" nonce="XOJ0BVE+zr3qdJZKBBAaLFbFzesxhK/xP1QmLnOdycs=" src="//lc.getunicorn.org?type=base-script&amp;ri=AAA2twARY29tLmdvb2dsZS5DaHJvbWUAI2NvbnRyaWJ1dGlvbi51c2VyY29udGVudC5nb29nbGUuY29t"></script>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;700;800&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script>
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        primary: "#374278",
+                        "primary-light": "#5C6BC0",
+                        "background-light": "#F9FAFB",
+                        "background-dark": "#121212",
+                        "surface-light": "#FFFFFF",
+                        "surface-dark": "#1E1E1E",
+                        "text-main-light": "#111827",
+                        "text-main-dark": "#F3F4F6",
+                        "text-sub-light": "#6B7280",
+                        "text-sub-dark": "#9CA3AF",
+                        accent: "#FBBF24"
+                    },
+                    fontFamily: {
+                        display: ["Noto Sans KR", "sans-serif"],
+                    },
+                    borderRadius: {
+                        DEFAULT: "1rem",
+                        'xl': '1rem',
+                        '2xl': '1.25rem',
+                        '3xl': '1.5rem',
+                        '4xl': '2rem',
+                    },
+                    boxShadow: {
+                        'soft': '0 8px 30px -4px rgba(0, 0, 0, 0.04)',
+                        'glow': '0 0 15px rgba(55, 66, 120, 0.15)',
+                        'card': '0 2px 8px rgba(0,0,0,0.02)',
+                    },
+                    animation: {
+                        'shine': 'shine 1.5s infinite',
+                    },
+                    keyframes: {
+                        shine: {
+                            '0%': { transform: 'translateX(-100%) translateY(-100%) rotate(45deg)' },
+                            '100%': { transform: 'translateX(100%) translateY(100%) rotate(45deg)' }
+                        }
+                    }
+                },
+            },
+        };
+    </script>
+<style>
+        body {
+            font-family: 'Noto Sans KR', sans-serif;
+            -webkit-tap-highlight-color: transparent;
+        }
+        .hide-scrollbar::-webkit-scrollbar {
+            display: none;
+        }
+        .hide-scrollbar {
+            -ms-overflow-style: none;
+            scrollbar-width: none;
+        }
+        .aspect-square {
+            aspect-ratio: 1 / 1;
+        }
+        @keyframes success-pulse {
+            0% { box-shadow: 0 0 0 0 rgba(55, 66, 120, 0.2); border-color: rgba(55, 66, 120, 0.5); }
+            50% { box-shadow: 0 0 0 6px rgba(55, 66, 120, 0); border-color: rgba(55, 66, 120, 1); }
+            100% { box-shadow: 0 0 0 0 rgba(55, 66, 120, 0); border-color: rgba(55, 66, 120, 0.5); }
+        }
+        @keyframes confetti-pop {
+            0% { transform: scale(0); opacity: 0; }
+            50% { opacity: 1; }
+            100% { transform: scale(1.5) translate(var(--tx), var(--ty)); opacity: 0; }
+        }
+        .completed-card {
+            position: relative;
+            overflow: hidden;
+            border: 2px solid transparent;
+            animation: success-pulse 2s infinite ease-in-out;
+            z-index: 10;
+        }
+        .completed-card::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 200%;
+            height: 200%;
+            background: linear-gradient(
+                to bottom right, 
+                rgba(255,255,255,0) 0%, 
+                rgba(255,255,255,0.4) 50%, 
+                rgba(255,255,255,0) 100%
+            );
+            transform: translateX(-100%) translateY(-100%) rotate(45deg);
+            animation: shine 3s infinite ease-in-out;
+            pointer-events: none;
+        }
+        .particle {
+            position: absolute;
+            width: 6px;
+            height: 6px;
+            border-radius: 50%;
+            background-color: #FBBF24;
+            pointer-events: none;
+            opacity: 0;
+        }
+        .particle:nth-child(1) { top: 50%; left: 50%; --tx: -20px; --ty: -30px; animation: confetti-pop 1.5s infinite 0.1s; background-color: #EF4444; }
+        .particle:nth-child(2) { top: 50%; left: 50%; --tx: 20px; --ty: -40px; animation: confetti-pop 1.5s infinite 0.3s; background-color: #3B82F6; }
+        .particle:nth-child(3) { top: 50%; left: 50%; --tx: -30px; --ty: 10px; animation: confetti-pop 1.5s infinite 0.5s; background-color: #10B981; }
+        .particle:nth-child(4) { top: 50%; left: 50%; --tx: 30px; --ty: 20px; animation: confetti-pop 1.5s infinite 0.7s; background-color: #F59E0B; }
+        .particle:nth-child(5) { top: 50%; left: 50%; --tx: 0px; --ty: -50px; animation: confetti-pop 1.5s infinite 0.2s; background-color: #8B5CF6; }
+        body {
+            min-height: max(884px, 100dvh);
+        }
+    </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="bg-gray-50 dark:bg-black text-text-main-light dark:text-text-main-dark min-h-screen flex justify-center selection:bg-primary selection:text-white">
+<div class="w-full max-w-md bg-background-light dark:bg-background-dark min-h-screen flex flex-col relative shadow-2xl overflow-hidden mx-auto">
+<div class="absolute top-0 left-0 w-full h-[200px] bg-gradient-to-b from-primary/5 to-transparent pointer-events-none z-0"></div>
+<header class="relative z-20 px-6 pt-12 pb-6 flex items-center justify-between">
+<button class="w-10 h-10 rounded-full bg-surface-light dark:bg-surface-dark shadow-card flex items-center justify-center text-text-main-light dark:text-text-main-dark hover:bg-gray-100 transition-colors">
+<span class="material-symbols-outlined text-[20px]">arrow_back</span>
+</button>
+<h1 class="text-base font-bold text-text-main-light dark:text-text-main-dark tracking-tight">만다라트 상세</h1>
+<button class="w-10 h-10 rounded-full bg-surface-light dark:bg-surface-dark shadow-card flex items-center justify-center text-text-main-light dark:text-text-main-dark hover:bg-gray-100 transition-colors">
+<span class="material-symbols-outlined text-[20px]">more_horiz</span>
+</button>
+</header>
+<main class="relative z-10 flex-1 px-6 flex flex-col pb-32">
+<div class="flex items-start justify-between mb-8">
+<div class="pt-1">
+<div class="flex items-center gap-2 mb-2">
+<span class="px-2.5 py-1 rounded-full bg-blue-100 dark:bg-blue-900/40 text-primary dark:text-blue-300 text-[11px] font-bold">Level 1</span>
+<span class="px-2.5 py-1 rounded-full bg-green-100 dark:bg-green-900/40 text-green-700 dark:text-green-300 text-[11px] font-bold flex items-center gap-1">
+<span class="w-1.5 h-1.5 rounded-full bg-green-500 animate-pulse"></span> 진행중
+                    </span>
+</div>
+<h2 class="text-[28px] font-extrabold text-text-main-light dark:text-white leading-tight">시니어<br/>디자이너</h2>
+</div>
+<div class="flex flex-col items-end">
+<div class="bg-surface-light dark:bg-surface-dark p-2 rounded-2xl shadow-card border border-gray-100 dark:border-gray-800">
+<div class="grid grid-cols-3 gap-1 w-12 h-12">
+<div class="bg-gray-100 dark:bg-gray-700 rounded-[3px]"></div>
+<div class="bg-gray-100 dark:bg-gray-700 rounded-[3px]"></div>
+<div class="bg-gray-100 dark:bg-gray-700 rounded-[3px]"></div>
+<div class="bg-gray-100 dark:bg-gray-700 rounded-[3px]"></div>
+<div class="bg-primary rounded-[3px] flex items-center justify-center relative">
+<div class="absolute inset-0 border-2 border-white/30 rounded-[3px]"></div>
+</div>
+<div class="bg-gray-100 dark:bg-gray-700 rounded-[3px]"></div>
+<div class="bg-gray-100 dark:bg-gray-700 rounded-[3px]"></div>
+<div class="bg-gray-100 dark:bg-gray-700 rounded-[3px]"></div>
+<div class="bg-gray-100 dark:bg-gray-700 rounded-[3px]"></div>
+</div>
+</div>
+<span class="text-[10px] text-text-sub-light mt-1.5 font-medium pr-1">전체보기</span>
+</div>
+</div>
+<div class="grid grid-cols-3 gap-3 w-full max-w-[340px] mx-auto mb-8">
+<button class="aspect-square bg-white dark:bg-surface-dark rounded-2xl shadow-soft flex flex-col items-center justify-center p-3 relative group transition-all completed-card">
+<div class="particle"></div><div class="particle"></div><div class="particle"></div><div class="particle"></div><div class="particle"></div>
+<div class="absolute top-2 right-2 bg-primary text-white w-5 h-5 rounded-full flex items-center justify-center z-20 shadow-sm">
+<span class="material-symbols-outlined text-[12px] font-bold">check</span>
+</div>
+<span class="material-symbols-outlined text-primary dark:text-blue-400 text-3xl mb-1 group-hover:scale-110 transition-transform">fitness_center</span>
+<span class="text-[13px] font-bold text-text-main-light dark:text-text-main-dark">건강 관리</span>
+<div class="mt-2 w-10 h-1 bg-gray-100 dark:bg-gray-700 rounded-full overflow-hidden">
+<div class="h-full bg-primary w-full rounded-full"></div>
+</div>
+</button>
+<button class="aspect-square bg-white dark:bg-surface-dark rounded-2xl shadow-card flex flex-col items-center justify-center p-3 relative group hover:shadow-md transition-all border border-transparent hover:-translate-y-1">
+<span class="material-symbols-outlined text-gray-400 dark:text-gray-500 text-3xl mb-1 group-hover:text-primary transition-colors">work</span>
+<span class="text-[13px] font-bold text-text-main-light dark:text-text-main-dark">직무 스킬</span>
+<div class="mt-2 w-10 h-1 bg-gray-100 dark:bg-gray-700 rounded-full overflow-hidden">
+<div class="h-full bg-primary w-1/4 rounded-full"></div>
+</div>
+</button>
+<button class="aspect-square bg-white dark:bg-surface-dark rounded-2xl shadow-card flex flex-col items-center justify-center p-3 relative group hover:shadow-md transition-all border border-transparent hover:-translate-y-1">
+<span class="material-symbols-outlined text-gray-400 dark:text-gray-500 text-3xl mb-1 group-hover:text-primary transition-colors">self_improvement</span>
+<span class="text-[13px] font-bold text-text-main-light dark:text-text-main-dark">멘탈 케어</span>
+<div class="mt-2 w-10 h-1 bg-gray-100 dark:bg-gray-700 rounded-full overflow-hidden">
+<div class="h-full bg-primary w-2/3 rounded-full"></div>
+</div>
+</button>
+<button class="aspect-square bg-white dark:bg-surface-dark rounded-2xl shadow-card flex flex-col items-center justify-center p-3 relative group hover:shadow-md transition-all border border-transparent hover:-translate-y-1">
+<span class="material-symbols-outlined text-gray-400 dark:text-gray-500 text-3xl mb-1 group-hover:text-primary transition-colors">savings</span>
+<span class="text-[13px] font-bold text-text-main-light dark:text-text-main-dark">재테크</span>
+<div class="mt-2 w-10 h-1 bg-gray-100 dark:bg-gray-700 rounded-full overflow-hidden">
+<div class="h-full bg-primary w-1/5 rounded-full"></div>
+</div>
+</button>
+<div class="aspect-square bg-primary rounded-2xl shadow-glow flex flex-col items-center justify-center p-2 relative z-10 transform scale-105 ring-4 ring-white dark:ring-background-dark">
+<span class="material-symbols-outlined text-white text-3xl mb-1">emoji_events</span>
+<span class="text-[13px] font-bold text-white text-center leading-tight">핵심<br/>목표</span>
+<span class="text-[10px] text-blue-200 mt-1 font-medium px-1.5 py-0.5 rounded-full bg-black/20">D-98</span>
+</div>
+<button class="aspect-square bg-white dark:bg-surface-dark rounded-2xl shadow-card flex flex-col items-center justify-center p-3 relative group hover:shadow-md transition-all border border-transparent hover:-translate-y-1">
+<span class="material-symbols-outlined text-gray-400 dark:text-gray-500 text-3xl mb-1 group-hover:text-primary transition-colors">groups</span>
+<span class="text-[13px] font-bold text-text-main-light dark:text-text-main-dark">네트워킹</span>
+<div class="mt-2 w-10 h-1 bg-gray-100 dark:bg-gray-700 rounded-full overflow-hidden">
+<div class="h-full bg-primary w-1/6 rounded-full"></div>
+</div>
+</button>
+<button class="aspect-square bg-white dark:bg-surface-dark rounded-2xl shadow-card flex flex-col items-center justify-center p-3 relative group hover:shadow-md transition-all border border-transparent hover:-translate-y-1">
+<span class="material-symbols-outlined text-gray-400 dark:text-gray-500 text-3xl mb-1 group-hover:text-primary transition-colors">translate</span>
+<span class="text-[13px] font-bold text-text-main-light dark:text-text-main-dark">외국어</span>
+<div class="mt-2 w-10 h-1 bg-gray-100 dark:bg-gray-700 rounded-full overflow-hidden">
+<div class="h-full bg-primary w-1/2 rounded-full"></div>
+</div>
+</button>
+<button class="aspect-square bg-white dark:bg-surface-dark rounded-2xl shadow-card flex flex-col items-center justify-center p-3 relative group hover:shadow-md transition-all border border-transparent hover:-translate-y-1">
+<span class="material-symbols-outlined text-gray-400 dark:text-gray-500 text-3xl mb-1 group-hover:text-primary transition-colors">menu_book</span>
+<span class="text-[13px] font-bold text-text-main-light dark:text-text-main-dark">독서</span>
+<div class="mt-2 w-10 h-1 bg-gray-100 dark:bg-gray-700 rounded-full overflow-hidden">
+<div class="h-full bg-primary w-1/6 rounded-full"></div>
+</div>
+</button>
+<button class="aspect-square bg-white dark:bg-surface-dark rounded-2xl shadow-card flex flex-col items-center justify-center p-3 relative group hover:shadow-md transition-all border border-transparent hover:-translate-y-1">
+<span class="material-symbols-outlined text-gray-400 dark:text-gray-500 text-3xl mb-1 group-hover:text-primary transition-colors">palette</span>
+<span class="text-[13px] font-bold text-text-main-light dark:text-text-main-dark">취미</span>
+<div class="mt-2 w-10 h-1 bg-gray-100 dark:bg-gray-700 rounded-full overflow-hidden">
+<div class="h-full bg-primary w-1/12 rounded-full"></div>
+</div>
+</button>
+</div>
+<div class="flex items-center justify-center space-x-2 mb-8 opacity-70">
+<span class="material-symbols-outlined text-sm text-primary dark:text-blue-300">touch_app</span>
+<p class="text-xs text-text-sub-light dark:text-text-sub-dark font-medium">영역을 탭하여 상세 계획을 확인하세요</p>
+</div>
+<div class="grid grid-cols-2 gap-4 mb-8">
+<div class="bg-white dark:bg-surface-dark p-4 rounded-2xl shadow-card flex flex-col justify-between h-28 relative overflow-hidden group">
+<div class="absolute -right-4 -bottom-4 w-20 h-20 bg-blue-50 dark:bg-blue-900/20 rounded-full group-hover:scale-125 transition-transform duration-500"></div>
+<div class="flex items-center space-x-2 text-text-sub-light z-10">
+<span class="material-symbols-outlined text-lg text-primary">check_circle</span>
+<span class="text-xs font-bold">오늘 완료</span>
+</div>
+<div class="z-10">
+<span class="text-3xl font-extrabold text-text-main-light dark:text-text-main-dark">4</span>
+<span class="text-sm text-text-sub-light font-medium">건</span>
+</div>
+</div>
+<div class="bg-white dark:bg-surface-dark p-4 rounded-2xl shadow-card flex flex-col justify-between h-28 relative overflow-hidden group">
+<div class="absolute -right-4 -bottom-4 w-20 h-20 bg-green-50 dark:bg-green-900/20 rounded-full group-hover:scale-125 transition-transform duration-500"></div>
+<div class="flex items-center space-x-2 text-text-sub-light z-10">
+<span class="material-symbols-outlined text-lg text-green-600">trending_up</span>
+<span class="text-xs font-bold">진행률</span>
+</div>
+<div class="z-10 w-full">
+<div class="flex justify-between items-end mb-1">
+<span class="text-3xl font-extrabold text-text-main-light dark:text-text-main-dark">20</span>
+<span class="text-sm text-text-sub-light font-medium">%</span>
+</div>
+<div class="w-full h-1.5 bg-gray-100 dark:bg-gray-700 rounded-full overflow-hidden">
+<div class="h-full bg-primary w-[20%] rounded-full"></div>
+</div>
+</div>
+</div>
+</div>
+</main>
+<div class="fixed bottom-6 left-0 w-full flex justify-center z-30 pointer-events-none px-6">
+<div class="w-full max-w-md pointer-events-auto">
+<button class="w-full bg-primary text-white font-bold text-base py-4 rounded-2xl shadow-xl flex items-center justify-center space-x-2 active:scale-95 transition-transform hover:shadow-2xl hover:bg-primary-light">
+<span class="material-symbols-outlined text-lg">edit</span>
+<span>목표 편집하기</span>
+</button>
+</div>
+</div>
+</div>
+
+</body></html>

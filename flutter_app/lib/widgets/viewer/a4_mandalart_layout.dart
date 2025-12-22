@@ -45,7 +45,7 @@ class A4MandalartLayout extends StatelessWidget {
     // 화면 크기를 고려한 동적 크기 계산
     final mediaQuery = MediaQuery.of(context);
     final screenWidth = mediaQuery.size.width;
-    final screenHeight = mediaQuery.size.height;
+
     final isPortrait = mediaQuery.orientation == Orientation.portrait;
 
     // 세로 모드에서는 화면 너비에 맞춰서, 가로 모드에서는 고정 크기 사용

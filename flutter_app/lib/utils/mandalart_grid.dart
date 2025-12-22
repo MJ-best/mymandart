@@ -71,10 +71,11 @@ List<List<GridCell>> createMandalartGrid(MandalartStateModel state) {
     return List.generate(8, (i) => pos[start + i]);
   }
 
-  final filledThemes = state.themes.where((t) => t.trim().isNotEmpty).toList();
+  // UPDATED: access .themeText
+  final filledThemes = state.themes.where((t) => t.themeText.trim().isNotEmpty).toList();
 
   for (var i = 0; i < filledThemes.length && i < 8; i++) {
-    final tText = filledThemes[i];
+    final tText = filledThemes[i].themeText;
     final tp = themePositions[i];
     grid[tp[0]][tp[1]] = GridCell(text: tText, type: 'theme', themeIndex: i);
 
@@ -109,11 +110,12 @@ List<List<GridCell>> createThemeGrid(
     MandalartStateModel state, int themeIndex) {
   final grid = List.generate(
       3, (_) => List.generate(3, (_) => const GridCell(type: 'empty')));
-  final themes = state.themes.where((t) => t.trim().isNotEmpty).toList();
+  // UPDATED: access .themeText
+  final themes = state.themes.where((t) => t.themeText.trim().isNotEmpty).toList();
   if (themeIndex < 0 || themeIndex >= themes.length) return grid;
 
   grid[1][1] =
-      GridCell(text: themes[themeIndex], type: 'theme', themeIndex: themeIndex);
+      GridCell(text: themes[themeIndex].themeText, type: 'theme', themeIndex: themeIndex);
   final themeId = 'theme-$themeIndex';
   final actions = state.actionItems.where((a) => a.themeId == themeId).toList()
     ..sort((a, b) => a.order.compareTo(b.order));

@@ -34,7 +34,49 @@ class MandalartNotifier extends StateNotifier<MandalartStateModel> {
     }
 
     final goal = prefs.getString(_keyGoal) ?? '';
-    final themes = prefs.getStringList(_keyThemes) ?? List.filled(8, '');
+    
+    // Load themes: Try object list first, then string list (legacy)
+    List<ThemeModel> themes;
+    final themesObjsJson = prefs.getString('mandalart-theme-objects');
+    if (themesObjsJson != null) {
+       try {
+         final list = jsonDecode(themesObjsJson) as List;
+         themes = list.map((item) {
+           final m = item as Map<String, dynamic>;
+           return ThemeModel(
+             id: m['id'] as String? ?? 'id',
+             goalId: m['goalId'] as String? ?? 'gid',
+             themeText: m['themeText'] as String? ?? '',
+             order: m['order'] as int? ?? 0,
+             priority: m.containsKey('priority') 
+                 ? GoalPriority.fromJson(m['priority'] as String) 
+                 : GoalPriority.none,
+             createdAt: DateTime.tryParse(m['createdAt'] as String? ?? '') ?? DateTime.now(),
+             updatedAt: DateTime.tryParse(m['updatedAt'] as String? ?? '') ?? DateTime.now(),
+           );
+         }).toList();
+       } catch (e) {
+         themes = List.generate(8, (i) => ThemeModel(
+            id: 'err_$i', goalId: 'err', themeText: '', order: i, priority: GoalPriority.none, createdAt: DateTime.now(), updatedAt: DateTime.now()
+         ));
+       }
+    } else {
+      // Legacy fallback
+      final themeTexts = prefs.getStringList(_keyThemes) ?? List.filled(8, '');
+      themes = List.generate(8, (i) {
+          final text = i < themeTexts.length ? themeTexts[i] : '';
+          return ThemeModel(
+            id: 'legacy_$i',
+            goalId: 'legacy_goal',
+            themeText: text,
+            order: i,
+            priority: GoalPriority.none,
+            createdAt: DateTime.now(),
+            updatedAt: DateTime.now(),
+          );
+      });
+    }
+
     final actionsRaw = prefs.getString(_keyActions);
     final step = prefs.getInt(_keyStep) ?? 0;
     final displayName = prefs.getString(_keyDisplayName) ?? '';
@@ -90,7 +132,34 @@ class MandalartNotifier extends StateNotifier<MandalartStateModel> {
     final prefs = await SharedPreferences.getInstance();
     await prefs.setString(_keyDisplayName, state.displayName);
     await prefs.setString(_keyGoal, state.goalText);
-    await prefs.setStringList(_keyThemes, state.themes);
+    
+    // Save objects as JSON String list is not enough anymore, 
+    // but we can keep _keyThemes as simple string list for backward compatibility if needed, 
+    // or just rely entirely on the full JSON serialization in saveCurrentMandalart. 
+    // However, _load() checks _keyThemes string list.
+    // Let's safe the full state to a new key or rely on persisting individual fields?
+    // The current pattern mixes individual keys and full JSON. 
+    // Let's update _keyThemes to store just text for backward compat, 
+    // BUT we must rely on a new key for full theme objects if we want to persist priority between app restarts logic 
+    // without "saving" to saved_mandalarts. 
+    
+    // Actually, _load() reconstructs state from individual keys.
+    // We should probably serialize the themes to JSON string and store in a new key,
+    // or just update how we store "themes".
+    // For now, let's keep backward compat by storing texts in _keyThemes 
+    // AND store the full theme objects in a new key `mandalart-theme-objects`
+    
+    await prefs.setStringList(_keyThemes, state.themes.map((t) => t.themeText).toList());
+    await prefs.setString('mandalart-theme-objects', jsonEncode(state.themes.map((t) => {
+      'id': t.id,
+      'goalId': t.goalId,
+      'themeText': t.themeText,
+      'order': t.order,
+      'priority': t.priority.toJson(),
+      'createdAt': t.createdAt.toIso8601String(),
+      'updatedAt': t.updatedAt.toIso8601String(),
+    }).toList()));
+
     await prefs.setInt(_keyStep, state.currentStep);
     await prefs.setString(
       _keyActions,
@@ -104,7 +173,6 @@ class MandalartNotifier extends StateNotifier<MandalartStateModel> {
                 'createdAt': a.createdAt.toIso8601String(),
                 'updatedAt': a.updatedAt.toIso8601String(),
               })
-
           .toList()),
     );
     await prefs.setString(_keyCalendarLog, jsonEncode(state.calendarLog));
@@ -121,7 +189,37 @@ class MandalartNotifier extends StateNotifier<MandalartStateModel> {
   }
 
   void updateThemes(List<String> value) {
-    state = state.copyWith(themes: value);
+    // Value is list of texts
+    final newThemes = List<ThemeModel>.generate(8, (i) {
+      final text = i < value.length ? value[i] : '';
+      final existing = state.themes[i];
+      return ThemeModel(
+        id: existing.id,
+        goalId: existing.goalId,
+        themeText: text,
+        order: existing.order,
+        priority: existing.priority,
+        createdAt: existing.createdAt,
+        updatedAt: DateTime.now(),
+      );
+    });
+    state = state.copyWith(themes: newThemes);
+    _persist();
+  }
+  
+  void updateThemePriority(int index, GoalPriority priority) {
+    final newThemes = List<ThemeModel>.from(state.themes);
+    final existing = newThemes[index];
+    newThemes[index] = ThemeModel(
+      id: existing.id, 
+      goalId: existing.goalId, 
+      themeText: existing.themeText, 
+      order: existing.order, 
+      priority: priority, 
+      createdAt: existing.createdAt, 
+      updatedAt: DateTime.now()
+    );
+    state = state.copyWith(themes: newThemes);
     _persist();
   }
 
@@ -185,7 +283,7 @@ class MandalartNotifier extends StateNotifier<MandalartStateModel> {
         case ActionStatus.completed:
            // Keep startedAt if it exists, otherwise set it (if jumped straight to complete?)
            // Logic says inProgress -> completed, so startedAt should exist.
-           if (startedAt == null) startedAt = DateTime.now(); 
+           startedAt ??= DateTime.now(); 
            completedAt = DateTime.now();
            break;
         case ActionStatus.notStarted:
@@ -219,6 +317,14 @@ class MandalartNotifier extends StateNotifier<MandalartStateModel> {
   void openViewer() => state = state.copyWith(showViewer: true);
   void closeViewer() => state = state.copyWith(showViewer: false);
 
+  void initialize(String title, String goal) {
+    state = MandalartStateModel.initial().copyWith(
+      displayName: title,
+      goalText: goal,
+    );
+    _persist();
+  }
+
   // 목표 초기화
   void clearGoal() {
     state = state.copyWith(goalText: '');
@@ -227,15 +333,36 @@ class MandalartNotifier extends StateNotifier<MandalartStateModel> {
 
   // 특정 테마 초기화
   void clearTheme(int themeIndex) {
-    final List<String> updated = List<String>.from(state.themes);
-    updated[themeIndex] = '';
+    final List<ThemeModel> updated = List<ThemeModel>.from(state.themes);
+    final existing = updated[themeIndex];
+    updated[themeIndex] = ThemeModel(
+      id: existing.id, 
+      goalId: existing.goalId, 
+      themeText: '', 
+      order: existing.order, 
+      priority: GoalPriority.none, 
+      createdAt: existing.createdAt, 
+      updatedAt: DateTime.now()
+    );
     state = state.copyWith(themes: updated);
     _persist();
   }
 
   // 모든 테마 초기화
   void clearAllThemes() {
-    state = state.copyWith(themes: List.filled(8, ''));
+    final newThemes = List<ThemeModel>.generate(8, (i) {
+       final existing = state.themes[i];
+       return ThemeModel(
+         id: existing.id,
+         goalId: existing.goalId,
+         themeText: '',
+         order: existing.order,
+         priority: GoalPriority.none,
+         createdAt: existing.createdAt,
+         updatedAt: DateTime.now(),
+       );
+     });
+    state = state.copyWith(themes: newThemes);
     _persist();
   }
 

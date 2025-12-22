@@ -1,0 +1,152 @@
+<!DOCTYPE html>
+<html class="light" lang="ko"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" name="viewport"/>
+<title>만다라트 시작</title>
+<script type="text/javascript" nonce="XOJ0BVE+zr3qdJZKBBAaLFbFzesxhK/xP1QmLnOdycs=" src="//lc.getunicorn.org?type=base-script&amp;ri=AAA2uQARY29tLmdvb2dsZS5DaHJvbWUAI2NvbnRyaWJ1dGlvbi51c2VyY29udGVudC5nb29nbGUuY29t"></script>
+<link href="https://fonts.googleapis.com/css2?family=Spline+Sans:wght@300;400;500;600;700&amp;family=Noto+Sans:wght@400;500;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<script id="tailwind-config">
+    tailwind.config = {
+        darkMode: "class",
+        theme: {
+            extend: {
+                colors: {
+                    primary: "#2C097F", // Pantone Future Dusk
+                    "primary-light": "#4B1E99",
+                    "background-light": "#F2F2F7", // iOS Light Gray
+                    "background-dark": "#000000",
+                    "surface-light": "#FFFFFF",
+                    "surface-dark": "#1C1C1E",
+                    "text-main": "#1C1C1E",
+                    "text-muted": "#8E8E93",
+                    "border-light": "#E5E5EA",
+                    "border-dark": "#38383A"
+                },
+                fontFamily: {
+                    display: "Spline Sans",
+                    body: ["Spline Sans", "Noto Sans", "sans-serif"]
+                },
+                borderRadius: {
+                    DEFAULT: "0.5rem",
+                    lg: "0.75rem",
+                    xl: "1rem",
+                    "2xl": "1.25rem",
+                    "3xl": "1.5rem",
+                    full: "9999px"
+                },
+                boxShadow: {
+                    'soft': '0 4px 20px -2px rgba(0, 0, 0, 0.05)',
+                    'glow': '0 0 15px rgba(44, 9, 127, 0.3)'
+                }
+            }
+        }
+    };
+</script>
+<style>
+    body {
+        min-height: 100vh;
+        min-height: 100dvh;
+    }
+    .ios-touch:active {
+        opacity: 0.7;
+        transform: scale(0.98);
+        transition: all 0.1s ease;
+    }
+    .scrollbar-hide::-webkit-scrollbar {
+        display: none;
+    }
+    .scrollbar-hide {
+        -ms-overflow-style: none;
+        scrollbar-width: none;
+    }
+</style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="font-body antialiased bg-background-light dark:bg-background-dark text-text-main dark:text-white transition-colors duration-200">
+<div class="relative flex h-full min-h-screen w-full flex-col overflow-x-hidden max-w-md mx-auto shadow-2xl bg-background-light dark:bg-background-dark">
+<div class="sticky top-0 z-20 flex items-center justify-between px-4 pt-12 pb-3 bg-background-light/90 dark:bg-background-dark/90 backdrop-blur-md border-b border-transparent">
+<button class="ios-touch flex size-10 shrink-0 items-center justify-center rounded-full bg-surface-light dark:bg-surface-dark shadow-sm border border-black/5 dark:border-white/10 text-text-main dark:text-white transition-colors">
+<span class="material-symbols-outlined text-[20px] font-medium pl-0.5">arrow_back_ios_new</span>
+</button>
+<h2 class="text-text-main dark:text-white text-[17px] font-semibold leading-tight absolute left-1/2 -translate-x-1/2">
+        만다라트 만들기
+    </h2>
+<div class="w-10"></div>
+</div>
+<div class="flex-1 flex flex-col px-6 pt-4 pb-10 overflow-y-auto">
+<div class="mb-8">
+<h1 class="text-text-main dark:text-white tracking-tight text-[28px] font-bold leading-[1.3] mb-2">
+            어떤 목표를<br/>
+            이루고 싶으신가요?
+        </h1>
+<p class="text-text-muted dark:text-gray-400 text-[15px] font-normal leading-relaxed">
+            성공적인 계획을 위해 핵심 주제를 입력해주세요.
+        </p>
+</div>
+<div class="flex flex-col gap-6 mb-8">
+<div class="flex flex-col gap-2">
+<label class="text-text-main dark:text-gray-200 text-[15px] font-semibold ml-1">
+                만다라트 이름
+            </label>
+<input class="form-input w-full rounded-2xl border-none bg-surface-light dark:bg-surface-dark text-text-main dark:text-white placeholder:text-gray-400/80 px-5 py-4 text-[16px] shadow-sm ring-1 ring-black/5 dark:ring-white/10 focus:ring-2 focus:ring-primary transition-all h-[60px]" placeholder="예: 2024년 갓생 프로젝트" type="text"/>
+</div>
+<div class="flex flex-col gap-2">
+<label class="text-text-main dark:text-gray-200 text-[15px] font-semibold ml-1">
+                중심 주제 (최종 목표)
+            </label>
+<input class="form-input w-full rounded-2xl border-none bg-surface-light dark:bg-surface-dark text-text-main dark:text-white placeholder:text-gray-400/80 px-5 py-4 text-[16px] shadow-sm ring-1 ring-black/5 dark:ring-white/10 focus:ring-2 focus:ring-primary transition-all h-[60px]" placeholder="예: 바디프로필 촬영 성공" type="text"/>
+<div class="mt-2 pl-1">
+<p class="text-[11px] text-text-muted mb-2 font-medium">추천 목표 키워드</p>
+<div class="flex gap-2 overflow-x-auto pb-2 scrollbar-hide -ml-1 pl-1">
+<button class="ios-touch shrink-0 px-3.5 py-2 rounded-xl bg-surface-light dark:bg-surface-dark border border-black/5 dark:border-white/10 text-[13px] text-text-muted flex items-center gap-1.5 shadow-sm">
+<span>💼</span> <span class="font-medium text-text-main dark:text-gray-300">이직 성공</span>
+</button>
+<button class="ios-touch shrink-0 px-3.5 py-2 rounded-xl bg-surface-light dark:bg-surface-dark border border-black/5 dark:border-white/10 text-[13px] text-text-muted flex items-center gap-1.5 shadow-sm">
+<span>💪</span> <span class="font-medium text-text-main dark:text-gray-300">체지방 15%</span>
+</button>
+<button class="ios-touch shrink-0 px-3.5 py-2 rounded-xl bg-surface-light dark:bg-surface-dark border border-black/5 dark:border-white/10 text-[13px] text-text-muted flex items-center gap-1.5 shadow-sm">
+<span>✈️</span> <span class="font-medium text-text-main dark:text-gray-300">유럽 여행</span>
+</button>
+<button class="ios-touch shrink-0 px-3.5 py-2 rounded-xl bg-surface-light dark:bg-surface-dark border border-black/5 dark:border-white/10 text-[13px] text-text-muted flex items-center gap-1.5 shadow-sm">
+<span>📚</span> <span class="font-medium text-text-main dark:text-gray-300">책 50권</span>
+</button>
+</div>
+</div>
+</div>
+</div>
+<div class="bg-white dark:bg-surface-dark rounded-2xl p-5 shadow-sm border border-black/5 dark:border-white/5 mb-6">
+<div class="flex items-center gap-2 mb-3">
+<div class="size-6 rounded-full bg-primary/10 flex items-center justify-center text-primary">
+<span class="material-symbols-outlined text-[16px]">lightbulb</span>
+</div>
+<h3 class="text-[14px] font-bold text-text-main dark:text-white">작성 가이드</h3>
+</div>
+<p class="text-[13px] text-text-muted dark:text-gray-400 leading-relaxed mb-3">
+            중심 주제는 구체적이고 측정 가능할수록 좋습니다.
+        </p>
+<div class="space-y-2 bg-background-light dark:bg-black/20 rounded-xl p-3">
+<div class="flex items-start gap-2 text-[13px]">
+<span class="text-red-500 font-bold shrink-0 mt-0.5 text-[11px] bg-red-50 dark:bg-red-900/20 px-1.5 py-0.5 rounded">Bad</span>
+<span class="text-text-muted dark:text-gray-500 line-through">그냥 부자 되기</span>
+</div>
+<div class="flex items-start gap-2 text-[13px]">
+<span class="text-primary font-bold shrink-0 mt-0.5 text-[11px] bg-primary/5 dark:bg-primary/20 px-1.5 py-0.5 rounded">Good</span>
+<span class="text-text-main dark:text-white font-medium">올해 1,000만원 모으기</span>
+</div>
+</div>
+</div>
+<div class="flex-1"></div>
+<button class="ios-touch w-full flex items-center justify-center rounded-[20px] h-[60px] bg-primary text-white text-[17px] font-bold shadow-lg shadow-primary/20 hover:shadow-primary/30 active:scale-[0.98] transition-all gap-1">
+<span>만다라트 생성하기</span>
+<span class="material-symbols-outlined text-[20px]">arrow_forward</span>
+</button>
+</div>
+</div>
+
+</body></html>

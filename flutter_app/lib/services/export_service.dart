@@ -5,14 +5,15 @@ import 'package:mandarart_journey/models/mandalart.dart';
 class ExportService {
   static Future<void> exportToJson(MandalartStateModel state) async {
     final grouped = <String, List<Map<String, dynamic>>>{};
-    for (final t in state.themes.where((t) => t.trim().isNotEmpty)) {
-      grouped[t] = [];
+    for (final t in state.themes.where((t) => t.themeText.trim().isNotEmpty)) {
+      grouped[t.themeText] = [];
     }
     for (final a in state.actionItems) {
       final themeIndex =
           int.tryParse(a.themeId.replaceFirst('theme-', '')) ?? -1;
       if (themeIndex >= 0 && themeIndex < state.themes.length) {
-        final themeText = state.themes[themeIndex];
+        final theme = state.themes[themeIndex]; 
+        final themeText = theme.themeText;
         if (themeText.trim().isNotEmpty) {
           grouped[themeText]!.add({
             'actionText': a.actionText,
@@ -61,14 +62,33 @@ class ExportService {
       final displayName = data['displayName'] as String? ?? '';
 
       // 테마와 액션 아이템 추출
-      final themes = List<String>.filled(8, '');
+      final themes = List<ThemeModel>.generate(8, (i) => ThemeModel(
+        id: 'imported_theme_$i',
+        goalId: 'imported_goal',
+        themeText: '',
+        order: i,
+        priority: GoalPriority.none,
+        createdAt: DateTime.now(),
+        updatedAt: DateTime.now(),
+      ));
+      
       final actionItems = <ActionItemModel>[];
 
       final themesData = data['themes'] as List<dynamic>? ?? [];
       for (var i = 0; i < themesData.length && i < 8; i++) {
         final themeData = themesData[i] as Map<String, dynamic>;
         final themeText = themeData['themeText'] as String? ?? '';
-        themes[i] = themeText;
+        
+        final existing = themes[i];
+        themes[i] = ThemeModel(
+          id: existing.id,
+          goalId: existing.goalId,
+          themeText: themeText,
+          order: existing.order,
+          priority: existing.priority,
+          createdAt: existing.createdAt,
+          updatedAt: DateTime.now(),
+        );
 
         final actionsData = themeData['actionItems'] as List<dynamic>? ?? [];
         for (var j = 0; j < actionsData.length && j < 8; j++) {

@@ -1,13 +1,16 @@
 import 'package:flutter/cupertino.dart';
+import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:mandarart_journey/screens/mandalart_app.dart';
+import 'package:mandarart_journey/screens/start_screen.dart';
 import 'package:mandarart_journey/screens/landing_screen.dart';
 import 'package:mandarart_journey/screens/saved_mandalarts_screen.dart';
 import 'package:mandarart_journey/screens/example_mandalart_screen.dart';
 import 'package:mandarart_journey/providers/theme_provider.dart';
 import 'package:mandarart_journey/l10n/app_localizations.dart';
+import 'package:mandarart_journey/utils/app_theme.dart';
 
 void main() {
   runApp(const ProviderScope(child: MandarartRoot()));
@@ -23,7 +26,7 @@ final _router = GoRouter(
 
       // 사용자가 이미 시작했다면 /create로 리다이렉트
       if (hasStarted) {
-        return '/create';
+        return '/app';
       }
     }
     return null; // 리다이렉트 없음
@@ -34,8 +37,16 @@ final _router = GoRouter(
       builder: (context, state) => const LandingScreen(),
     ),
     GoRoute(
-      path: '/create',
+      path: '/start',
+      builder: (context, state) => const StartScreen(),
+    ),
+    GoRoute(
+      path: '/app',
       builder: (context, state) => const MandalartAppScreen(),
+    ),
+    GoRoute(
+      path: '/create', // Legacy redirect or keep for safety
+      redirect: (_, __) => '/app', 
     ),
     GoRoute(
       path: '/saved-mandalarts',
@@ -56,53 +67,34 @@ class MandarartRoot extends ConsumerWidget {
     // 현재 테마 상태 가져오기
     final themeState = ref.watch(themeProvider);
     final brightness = themeState.effectiveBrightness;
-    final primaryColor = themeState.primaryColor;
 
-    return CupertinoApp.router(
+    return MaterialApp.router(
       routerConfig: _router,
       title: 'Mandarat',
-      theme: _buildTheme(brightness, primaryColor),
+      theme: AppTheme.lightTheme,
+      darkTheme: AppTheme.darkTheme,
+      themeMode: brightness == Brightness.dark ? ThemeMode.dark : ThemeMode.light,
       debugShowCheckedModeBanner: false,
       localizationsDelegates: AppLocalizations.localizationsDelegates,
       supportedLocales: AppLocalizations.supportedLocales,
-    );
-  }
-
-  /// Brightness에 따라 적절한 테마 데이터 생성
-  CupertinoThemeData _buildTheme(Brightness brightness, Color primaryColor) {
-    final isDark = brightness == Brightness.dark;
-
-    return CupertinoThemeData(
-      brightness: brightness,
-      primaryColor: primaryColor,
-      scaffoldBackgroundColor: isDark
-          ? CupertinoColors.black
-          : CupertinoColors.systemGroupedBackground,
-      barBackgroundColor: isDark
-          ? const CupertinoDynamicColor.withBrightness(
-              color: Color(0xFF1C1C1E),
-              darkColor: Color(0xFF1C1C1E),
-            )
-          : CupertinoColors.systemBackground,
-      textTheme: CupertinoTextThemeData(
-        primaryColor: primaryColor,
-        navLargeTitleTextStyle: TextStyle(
-          fontSize: 34,
-          fontWeight: FontWeight.bold,
-          letterSpacing: -1.5,
-          color: isDark ? CupertinoColors.white : CupertinoColors.black,
-        ),
-        navTitleTextStyle: TextStyle(
-          fontSize: 17,
-          fontWeight: FontWeight.w600,
-          color: isDark ? CupertinoColors.white : CupertinoColors.black,
-        ),
-        textStyle: TextStyle(
-          fontSize: 17,
-          fontWeight: FontWeight.w400,
-          color: isDark ? CupertinoColors.white : CupertinoColors.black,
-        ),
-      ),
+      builder: (context, child) {
+        // Ensure Cupertino widgets inside MaterialApp follow the Material Theme
+        return CupertinoTheme(
+          data: CupertinoThemeData(
+            brightness: brightness,
+            primaryColor: brightness == Brightness.dark 
+                ? AppTheme.darkTheme.colorScheme.primary 
+                : AppTheme.lightTheme.colorScheme.primary,
+            scaffoldBackgroundColor: brightness == Brightness.dark 
+                ? AppTheme.darkTheme.scaffoldBackgroundColor 
+                : AppTheme.lightTheme.scaffoldBackgroundColor,
+            barBackgroundColor: brightness == Brightness.dark 
+                ? AppTheme.darkTheme.appBarTheme.backgroundColor 
+                : AppTheme.lightTheme.appBarTheme.backgroundColor,
+          ),
+          child: child!,
+        );
+      },
     );
   }
 }

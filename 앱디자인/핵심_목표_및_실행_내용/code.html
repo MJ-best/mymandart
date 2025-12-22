@@ -1,0 +1,306 @@
+<!DOCTYPE html>
+<html class="light" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Mandalart Planner</title>
+<script type="text/javascript" nonce="XOJ0BVE+zr3qdJZKBBAaLFbFzesxhK/xP1QmLnOdycs=" src="//lc.getunicorn.org?type=base-script&amp;ri=AAA2ugARY29tLmdvb2dsZS5DaHJvbWUAI2NvbnRyaWJ1dGlvbi51c2VyY29udGVudC5nb29nbGUuY29t"></script>
+<link href="https://fonts.googleapis.com/css2?family=Spline+Sans:wght@300;400;500;600;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        primary: "#2C097F",
+                        "primary-dark": "#e0dc05",
+                        "background-light": "#f6f6f8",
+                        "background-dark": "#151022",
+                        "surface-light": "#ffffff",
+                        "surface-dark": "#2c2b1b",
+                        "text-main": "#181811",
+                        "text-light": "#8c8b5f",
+                        "border-light": "#e6e6db",
+                        "border-dark": "#333220"
+                    },
+                    fontFamily: {
+                        display: "Spline Sans"
+                    },
+                    borderRadius: {
+                        xl: "1rem",
+                        "2xl": "1.25rem",
+                        "3xl": "1.5rem"
+                    }
+                }
+            }
+        };
+    </script>
+<style>
+        .no-scrollbar::-webkit-scrollbar { display: none; }
+        .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }.custom-checkbox {
+            appearance: none; 
+            width: 1.5rem; 
+            height: 1.5rem; 
+            border: 2px solid #e6e6db; 
+            border-radius: 50%;
+            display: grid; 
+            place-content: center; 
+            transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1); 
+            cursor: pointer;
+            background-color: transparent;
+        }
+        .dark .custom-checkbox { border-color: #4a4a3a; }
+        .custom-checkbox::before {
+            content: "check";
+            font-family: 'Material Symbols Outlined';
+            font-size: 1rem;
+            color: transparent;
+            font-weight: 700;
+            transition: color 0.1s ease;
+        }
+        .custom-checkbox:checked { 
+            background-color: #2C097F; 
+            border-color: #2C097F; 
+        }
+        .dark .custom-checkbox:checked {
+            background-color: #e0dc05;
+            border-color: #e0dc05;
+        }
+        .custom-checkbox:checked::before { 
+            color: #ffffff; 
+        }
+        .dark .custom-checkbox:checked::before {
+            color: #151022; 
+        }
+        details > summary { list-style: none; }
+        details > summary::-webkit-details-marker { display: none; }
+        details[open] summary ~ * {
+            animation: sweep .3s ease-in-out;
+        }
+        @keyframes sweep {
+            0%    {opacity: 0; transform: translateY(-10px)}
+            100%  {opacity: 1; transform: translateY(0)}
+        }
+    </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="relative flex h-full min-h-screen w-full flex-col bg-background-light dark:bg-background-dark text-text-main dark:text-[#f2f2e8] font-display overflow-x-hidden selection:bg-primary/20 pb-28">
+<header class="sticky top-0 z-50 flex items-center bg-background-light/90 dark:bg-background-dark/90 backdrop-blur-md px-6 py-4 justify-between transition-colors">
+<button class="text-text-main dark:text-white flex size-11 shrink-0 items-center justify-center rounded-full bg-white dark:bg-surface-dark border border-border-light dark:border-border-dark active:scale-95 transition-all shadow-sm hover:shadow-md">
+<span class="material-symbols-outlined text-[20px]">arrow_back</span>
+</button>
+<div class="flex-1"></div>
+<button class="flex h-11 px-6 items-center justify-center rounded-full bg-text-main dark:bg-primary-dark text-white dark:text-background-dark text-sm font-bold shadow-lg hover:scale-105 active:scale-95 transition-all">
+            Save
+        </button>
+</header>
+<div class="px-6 flex flex-col gap-8 w-full max-w-md mx-auto">
+<section class="flex flex-col gap-4 pt-2">
+<div>
+<label class="block text-xs font-bold uppercase tracking-widest text-text-light dark:text-[#8c8b5f] mb-2 pl-1">Main Goal</label>
+<input class="w-full bg-transparent text-4xl font-bold leading-[1.1] text-text-main dark:text-white placeholder-black/20 dark:placeholder-white/20 border-none p-0 focus:ring-0 focus:outline-none tracking-tight" id="main-goal" placeholder="Enter your core goal" type="text" value="Become a Senior Developer"/>
+</div>
+<div class="flex flex-col gap-2">
+<div class="flex justify-between items-end px-1">
+<span class="text-sm font-bold text-text-main dark:text-white">Progress</span>
+<span class="text-sm font-bold text-primary dark:text-primary-dark">18%</span>
+</div>
+<div class="w-full bg-white dark:bg-surface-dark rounded-full h-4 p-1 shadow-sm border border-border-light dark:border-border-dark">
+<div class="h-full rounded-full bg-primary dark:bg-primary-dark transition-all duration-500 ease-out" style="width: 18%;"></div>
+</div>
+<p class="text-[10px] text-text-light text-right px-1 font-medium">12 of 64 tasks completed</p>
+</div>
+</section>
+<main class="flex flex-col gap-4">
+<div class="flex items-center justify-between px-1">
+<h3 class="text-sm font-bold uppercase tracking-widest text-text-light">Sub-Goals</h3>
+<span class="text-xs font-medium text-text-light bg-white dark:bg-surface-dark px-2 py-1 rounded-lg border border-border-light dark:border-border-dark">8 Items</span>
+</div>
+<details class="group rounded-3xl bg-surface-light dark:bg-surface-dark border border-border-light dark:border-border-dark shadow-sm open:ring-2 open:ring-primary/10 dark:open:ring-primary-dark/10 transition-all duration-300" open="">
+<summary class="flex cursor-pointer items-center gap-4 p-5 select-none list-none">
+<div class="flex items-center justify-center size-10 rounded-2xl bg-primary/10 dark:bg-primary-dark/10 text-primary dark:text-primary-dark font-bold text-lg shrink-0 transition-colors group-hover:bg-primary/20">
+                        1
+                    </div>
+<div class="flex-1 min-w-0 flex flex-col gap-0.5">
+<span class="text-text-main dark:text-white text-lg font-bold leading-tight truncate">Technical Skills</span>
+<div class="flex items-center gap-2">
+<span class="w-2 h-2 rounded-full bg-orange-400"></span>
+<span class="text-xs text-text-light font-medium">Medium Priority</span>
+</div>
+</div>
+<span class="material-symbols-outlined text-text-light dark:text-white/60 transition-transform duration-300 group-open:rotate-180">expand_more</span>
+</summary>
+<div class="px-5 pb-6 pt-2 flex flex-col gap-6">
+<div class="p-1 bg-background-light dark:bg-black/20 rounded-xl flex gap-1">
+<label class="flex-1 cursor-pointer">
+<input class="peer sr-only" name="p1" type="radio" value="high"/>
+<div class="py-2 rounded-lg text-center text-xs font-bold text-text-light peer-checked:bg-white dark:peer-checked:bg-surface-dark peer-checked:text-red-500 peer-checked:shadow-sm transition-all hover:bg-white/50">High</div>
+</label>
+<label class="flex-1 cursor-pointer">
+<input checked="" class="peer sr-only" name="p1" type="radio" value="medium"/>
+<div class="py-2 rounded-lg text-center text-xs font-bold text-text-light peer-checked:bg-white dark:peer-checked:bg-surface-dark peer-checked:text-orange-500 peer-checked:shadow-sm transition-all hover:bg-white/50">Medium</div>
+</label>
+<label class="flex-1 cursor-pointer">
+<input class="peer sr-only" name="p1" type="radio" value="low"/>
+<div class="py-2 rounded-lg text-center text-xs font-bold text-text-light peer-checked:bg-white dark:peer-checked:bg-surface-dark peer-checked:text-slate-500 peer-checked:shadow-sm transition-all hover:bg-white/50">Low</div>
+</label>
+</div>
+<div class="flex flex-col gap-3">
+<div class="flex gap-4 items-start group/check">
+<input checked="" class="custom-checkbox shrink-0 mt-0.5" type="checkbox"/>
+<div class="flex-1 min-w-0 flex flex-col">
+<span class="text-base text-text-light line-through decoration-2 decoration-text-light/30 transition-colors">Master React Native</span>
+</div>
+</div>
+<div class="flex gap-4 items-start group/check">
+<input checked="" class="custom-checkbox shrink-0 mt-0.5" type="checkbox"/>
+<div class="flex-1 min-w-0 flex flex-col">
+<span class="text-base text-text-light line-through decoration-2 decoration-text-light/30 transition-colors">Learn System Design</span>
+</div>
+</div>
+<div class="flex gap-4 items-start group/check">
+<input class="custom-checkbox shrink-0 mt-0.5" type="checkbox"/>
+<input class="flex-1 bg-transparent border-none p-0 text-base font-medium text-text-main dark:text-white placeholder-text-light/50 focus:ring-0" type="text" value="Practice Algorithms"/>
+</div>
+<div class="flex gap-4 items-start group/check">
+<input class="custom-checkbox shrink-0 mt-0.5" type="checkbox"/>
+<input class="flex-1 bg-transparent border-none p-0 text-base font-medium text-text-main dark:text-white placeholder-text-light/50 focus:ring-0" type="text" value="Write Technical Blog"/>
+</div>
+<div class="flex gap-4 items-start group/check opacity-50 focus-within:opacity-100 hover:opacity-80 transition-opacity">
+<div class="size-6 rounded-full border-2 border-dashed border-border-light dark:border-border-dark mt-0.5"></div>
+<input class="flex-1 bg-transparent border-none p-0 text-base text-text-main dark:text-white placeholder-text-light/50 focus:ring-0" placeholder="Add next action item..." type="text"/>
+</div>
+</div>
+</div>
+</details>
+<details class="group rounded-3xl bg-surface-light dark:bg-surface-dark border border-border-light dark:border-border-dark shadow-sm hover:border-primary/30 transition-all duration-300">
+<summary class="flex cursor-pointer items-center gap-4 p-5 select-none list-none">
+<div class="flex items-center justify-center size-10 rounded-2xl bg-background-light dark:bg-white/5 text-text-main dark:text-white font-bold text-lg shrink-0 group-hover:bg-primary/10 transition-colors">
+                        2
+                    </div>
+<div class="flex-1 min-w-0 flex flex-col gap-0.5">
+<span class="text-text-main dark:text-white text-lg font-bold leading-tight truncate">Soft Skills</span>
+<div class="flex items-center gap-2">
+<span class="w-2 h-2 rounded-full bg-red-500"></span>
+<span class="text-xs text-text-light font-medium">High Priority</span>
+</div>
+</div>
+<span class="material-symbols-outlined text-text-light dark:text-white/60 transition-transform duration-300 group-open:rotate-180">expand_more</span>
+</summary>
+<div class="px-5 pb-6 pt-2">
+<p class="text-sm text-text-light">Expand to manage tasks...</p>
+</div>
+</details>
+<details class="group rounded-3xl bg-surface-light dark:bg-surface-dark border border-border-light dark:border-border-dark shadow-sm hover:border-primary/30 transition-all duration-300">
+<summary class="flex cursor-pointer items-center gap-4 p-5 select-none list-none">
+<div class="flex items-center justify-center size-10 rounded-2xl bg-background-light dark:bg-white/5 text-text-main dark:text-white font-bold text-lg shrink-0 group-hover:bg-primary/10 transition-colors">
+                        3
+                    </div>
+<div class="flex-1 min-w-0 flex flex-col gap-0.5">
+<span class="text-text-main dark:text-white text-lg font-bold leading-tight truncate">Networking</span>
+<div class="flex items-center gap-2">
+<span class="w-2 h-2 rounded-full bg-slate-400"></span>
+<span class="text-xs text-text-light font-medium">Low Priority</span>
+</div>
+</div>
+<span class="material-symbols-outlined text-text-light dark:text-white/60 transition-transform duration-300 group-open:rotate-180">expand_more</span>
+</summary>
+<div class="px-5 pb-6 pt-2">
+<p class="text-sm text-text-light">Expand to manage tasks...</p>
+</div>
+</details>
+<details class="group rounded-3xl bg-surface-light dark:bg-surface-dark border border-border-light dark:border-border-dark shadow-sm hover:border-primary/30 transition-all duration-300">
+<summary class="flex cursor-pointer items-center gap-4 p-5 select-none list-none">
+<div class="flex items-center justify-center size-10 rounded-2xl bg-background-light dark:bg-white/5 text-text-main dark:text-white font-bold text-lg shrink-0 group-hover:bg-primary/10 transition-colors">
+                        4
+                    </div>
+<div class="flex-1 min-w-0 flex flex-col gap-0.5">
+<span class="text-text-main dark:text-white text-lg font-bold leading-tight truncate">Health &amp; Fitness</span>
+<div class="flex items-center gap-2">
+<span class="w-2 h-2 rounded-full bg-slate-300 dark:bg-slate-700"></span>
+<span class="text-xs text-text-light font-medium">No Priority</span>
+</div>
+</div>
+<span class="material-symbols-outlined text-text-light dark:text-white/60 transition-transform duration-300 group-open:rotate-180">expand_more</span>
+</summary>
+<div class="px-5 pb-6 pt-2">
+<p class="text-sm text-text-light">Expand to manage tasks...</p>
+</div>
+</details>
+<details class="group rounded-3xl bg-surface-light dark:bg-surface-dark border border-border-light dark:border-border-dark shadow-sm hover:border-primary/30 transition-all duration-300">
+<summary class="flex cursor-pointer items-center gap-4 p-5 select-none list-none">
+<div class="flex items-center justify-center size-10 rounded-2xl bg-background-light dark:bg-white/5 text-text-main dark:text-white font-bold text-lg shrink-0 group-hover:bg-primary/10 transition-colors">
+                        5
+                    </div>
+<div class="flex-1 min-w-0 flex flex-col gap-0.5">
+<span class="text-text-main dark:text-white text-lg font-bold leading-tight truncate">Financial Planning</span>
+<div class="flex items-center gap-2">
+<span class="w-2 h-2 rounded-full bg-slate-300 dark:bg-slate-700"></span>
+<span class="text-xs text-text-light font-medium">No Priority</span>
+</div>
+</div>
+<span class="material-symbols-outlined text-text-light dark:text-white/60 transition-transform duration-300 group-open:rotate-180">expand_more</span>
+</summary>
+<div class="px-5 pb-6 pt-2">
+<p class="text-sm text-text-light">Expand to manage tasks...</p>
+</div>
+</details>
+<details class="group rounded-3xl bg-surface-light dark:bg-surface-dark border border-border-light dark:border-border-dark shadow-sm hover:border-primary/30 transition-all duration-300">
+<summary class="flex cursor-pointer items-center gap-4 p-5 select-none list-none">
+<div class="flex items-center justify-center size-10 rounded-2xl bg-background-light dark:bg-white/5 text-text-main dark:text-white font-bold text-lg shrink-0 group-hover:bg-primary/10 transition-colors">
+                        6
+                    </div>
+<div class="flex-1 min-w-0 flex flex-col gap-0.5">
+<span class="text-text-main dark:text-white text-lg font-bold leading-tight truncate">Personal Branding</span>
+<div class="flex items-center gap-2">
+<span class="w-2 h-2 rounded-full bg-slate-300 dark:bg-slate-700"></span>
+<span class="text-xs text-text-light font-medium">No Priority</span>
+</div>
+</div>
+<span class="material-symbols-outlined text-text-light dark:text-white/60 transition-transform duration-300 group-open:rotate-180">expand_more</span>
+</summary>
+<div class="px-5 pb-6 pt-2">
+<p class="text-sm text-text-light">Expand to manage tasks...</p>
+</div>
+</details>
+<details class="group rounded-3xl border-2 border-dashed border-border-light dark:border-border-dark hover:border-primary/50 transition-all duration-300">
+<summary class="flex cursor-pointer items-center gap-4 p-5 select-none list-none opacity-60 group-hover:opacity-100 transition-opacity">
+<div class="flex items-center justify-center size-10 rounded-2xl bg-transparent border border-border-light dark:border-border-dark text-text-light font-bold text-lg shrink-0">
+                        7
+                    </div>
+<div class="flex-1 min-w-0 flex flex-col gap-0.5">
+<span class="text-text-main dark:text-white text-lg font-normal italic leading-tight truncate">Add a new goal...</span>
+</div>
+<span class="material-symbols-outlined text-primary dark:text-primary-dark text-2xl">add_circle</span>
+</summary>
+<div class="px-5 pb-6 pt-2">
+<p class="text-sm text-text-light text-center">Set your goal title to start adding tasks.</p>
+</div>
+</details>
+<details class="group rounded-3xl border-2 border-dashed border-border-light dark:border-border-dark hover:border-primary/50 transition-all duration-300">
+<summary class="flex cursor-pointer items-center gap-4 p-5 select-none list-none opacity-60 group-hover:opacity-100 transition-opacity">
+<div class="flex items-center justify-center size-10 rounded-2xl bg-transparent border border-border-light dark:border-border-dark text-text-light font-bold text-lg shrink-0">
+                        8
+                    </div>
+<div class="flex-1 min-w-0 flex flex-col gap-0.5">
+<span class="text-text-main dark:text-white text-lg font-normal italic leading-tight truncate">Add a new goal...</span>
+</div>
+<span class="material-symbols-outlined text-primary dark:text-primary-dark text-2xl">add_circle</span>
+</summary>
+<div class="px-5 pb-6 pt-2">
+<p class="text-sm text-text-light text-center">Set your goal title to start adding tasks.</p>
+</div>
+</details>
+</main>
+</div>
+<button class="fixed bottom-8 right-6 z-40 flex size-14 items-center justify-center rounded-2xl bg-primary text-white shadow-xl shadow-primary/30 hover:scale-105 active:scale-95 transition-all focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2 dark:focus:ring-offset-[#23220f]">
+<span class="material-symbols-outlined text-[28px]">grid_view</span>
+</button>
+<div class="fixed bottom-0 left-0 w-full h-16 bg-gradient-to-t from-background-light dark:from-background-dark to-transparent pointer-events-none"></div>
+
+</body></html>
