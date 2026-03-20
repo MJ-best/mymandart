@@ -1,50 +1,73 @@
-# VibeFlow MVP
+# Mandarat Journey
 
-Flutter web-first multi-agent workflow platform MVP입니다. 이 앱은 채팅 앱이 아니라, 사용자의 `project_goal`을 받아 실행 계획과 구조화된 산출물(PRD, schema, UI, code, QA)을 단계적으로 생성하는 파이프라인 UI를 제공합니다.
+Flutter 기반 만다라트 앱입니다. 초기 제품의 핵심 기능은 유지하고, 화면 분위기와 사용성을 web-first 기준으로 다듬는 것이 현재 방향입니다.
 
-현재 제품 방향:
+## 현재 방향
 
-- 기본 저장은 local-first
-- 핵심 워크플로우는 비로그인 상태에서도 동작
-- 웹 버전을 먼저 완성하고 모바일은 후속 적응
-- cloud sync/Supabase 관리 기능은 추후 유료 구독 기능으로 분리
+- 기존 만다라트 흐름은 유지합니다.
+- 스타일은 부드러운 종이 질감, 크림/블루/옐로우 톤, 둥근 카드 중심으로 정리합니다.
+- 기본 저장은 local-first입니다.
+- 웹 버전을 먼저 다듬고, 모바일은 동일한 구조를 유지하는 범위에서 맞춥니다.
+- 클라우드 동기화나 서버 관리 기능은 현재 범위가 아닙니다.
 
-## MVP 범위
+## 주요 기능
 
-- Google login 스캐폴딩 + demo mode
-- workspace 시스템
-- project 생성과 실행 계획 생성
-- agent workflow 시각화
-- artifact 목록/상세 보기
-- execution log와 tool run 확인
+- 첫 진입 랜딩과 시작 화면
+- 만다라트 메인 뷰와 단계별 편집 흐름
+- 저장된 만다라트 목록
+- 오타니 예시 만다라트 보기
+- 달력 기록과 진행 상태 확인
+- JSON 내보내기/불러오기
+- 만다라트 이미지 저장 및 웹 다운로드
 
-## 앱 구조
+## 라우트
 
-- `lib/core`
-  - 앱 부트스트랩, Supabase 설정, `go_router`, 공통 레이아웃, 테마
-- `lib/features/auth`
-  - 세션 상태, 로그인 화면, Supabase Auth 저장소
-- `lib/features/workspace`
-  - workspace 도메인, 로컬 저장소, 대시보드, 전환 UI
-- `lib/features/projects`
-  - project/task 모델, 로컬 workflow 저장소, 프로젝트 목록/상세
-- `lib/features/agents`
-  - agent 정의 로드, workflow 시각화
-- `lib/features/chat`
-  - execution log와 tool run 모델/조회
-- `lib/features/artifacts`
-  - artifact 모델, 목록/상세 조회
-- `lib/features/settings`
-  - 인증 상태, workspace, theme 설정
-- `sql/local_mvp_schema.sql`
-  - local-first canonical schema draft
+- `/` - 랜딩
+- `/start` - 새 만다라트 시작
+- `/app` - 메인 만다라트 화면
+- `/create` - `/app`으로의 호환 라우트
+- `/saved-mandalarts` - 저장된 만다라트
+- `/example` - 예시 만다라트
 
-## 에이전트 정의
+## 코드 구조
 
-Codex 에이전트 계약은 아래에 있습니다.
+현재 활성 런타임은 다음 영역에 있습니다.
 
-- `../codex/agents.json`
-- `../codex/agents/*.md`
+- `lib/main.dart`
+  - 앱 진입점, 라우터, 테마 연결
+- `lib/screens`
+  - `landing_screen`, `start_screen`, `mandalart_app`, `saved_mandalarts_screen`, `example_mandalart_screen`
+- `lib/providers`
+  - 만다라트 상태, 테마 상태, streak 상태
+- `lib/widgets`
+  - 만다라트 뷰어, 단계 편집, 달력, 진행 표시, 공통 UI
+- `lib/models`
+  - 만다라트 상태와 도메인 모델
+- `lib/services`
+  - JSON export/import, 이미지 저장
+- `lib/utils`
+  - 앱 테마, 그리드, 웹 다운로드
+- `lib/data`
+  - 예시 데이터와 키워드
+- `lib/l10n`
+  - 한국어/영어 로컬라이제이션
+
+## 로컬 저장
+
+핵심 상태는 `SharedPreferences` 기반으로 저장합니다.
+
+- `has_started`
+- `theme_mode`
+- `color_theme`
+- `mandalart-goal`
+- `mandalart-themes`
+- `mandalart-actions`
+- `mandalart-current-step`
+- `mandalart-display-name`
+- `saved-mandalart-ids`
+- `current-mandalart-id`
+- `current-mandalart-created-at`
+- `mandalart-calendar-log`
 
 ## 실행
 
@@ -53,55 +76,14 @@ flutter pub get
 flutter run -d chrome
 ```
 
-Supabase를 연결해서 실행:
-
-```bash
-flutter run -d chrome \
-  --dart-define=SUPABASE_URL=YOUR_SUPABASE_URL \
-  --dart-define=SUPABASE_ANON_KEY=YOUR_SUPABASE_ANON_KEY
-```
-
-Supabase를 연결하지 않아도 로컬 모드로 바로 MVP를 확인할 수 있습니다.
-
-## 데이터 저장
-
-- 기본 런타임: 로컬 저장
-- canonical 방향: local SQL
-- 원격 동기화: 추후 premium sync 계층
-- 주요 로컬 키
-  - `platform.theme_mode`
-  - `platform.demo_mode`
-  - `platform.workspaces`
-  - `platform.active_workspace_id`
-  - `platform.project_bundles`
-
-## Supabase 스키마
-
-- `supabase/migrations/20260320_v2_init.sql`
-
-포함 테이블:
-
-- `profiles`
-- `workspaces`
-- `workspace_members`
-- `projects`
-- `agents`
-- `agent_skills`
-- `conversations`
-- `messages`
-- `tasks`
-- `artifacts`
-- `tool_runs`
-
-## Local SQL 스키마
-
-- `sql/local_mvp_schema.sql`
-
-이 파일은 web-first local MVP의 canonical schema 초안입니다. Supabase 스키마는 premium sync 단계로 올릴 때 매핑 기준으로 사용합니다.
-
-## 검증
+검증:
 
 ```bash
 flutter analyze
 flutter test
 ```
+
+## 참고
+
+- 앱 분위기는 `blue/yellow` 계열의 부드러운 카드 스타일을 따릅니다.
+- 예시와 저장/내보내기 기능은 보조 기능이며, 핵심은 만다라트 작성과 진행 기록입니다.
