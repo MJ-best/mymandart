@@ -1,0 +1,55 @@
+{
+  "version": 1,
+  "shared_context": [
+    {
+      "file": "project_principles.md",
+      "purpose": "Cross-cutting product and delivery constraints"
+    },
+    {
+      "file": "design_direction.md",
+      "purpose": "Visual system and Figma-based design workflow"
+    }
+  ],
+  "agents": [
+    {
+      "id": "orchestrator",
+      "name": "Orchestrator Agent",
+      "file": "agents/orchestrator.md",
+      "role": "Plans the workflow and assigns work",
+      "platform_priority": "web_first",
+      "storage_priority": "local_sql_first"
+    },
+    {
+      "id": "pm",
+      "name": "PM Agent",
+      "file": "agents/pm.md",
+      "role": "Generates PRD, feature list, and low-tap user flow",
+      "platform_priority": "web_first",
+      "storage_priority": "local_sql_first"
+    },
+    {
+      "id": "system_designer",
+      "name": "System Designer Agent",
+      "file": "agents/system-designer.md",
+      "role": "Designs local SQL schema, upgrade path, and data model",
+      "platform_priority": "web_first",
+      "storage_priority": "local_sql_first"
+    },
+    {
+      "id": "flutter",
+      "name": "Flutter Agent",
+      "file": "agents/flutter.md",
+      "role": "Generates web-first Flutter UI structure and code",
+      "platform_priority": "web_first",
+      "design_workflow": "figma_required_when_available"
+    },
+    {
+      "id": "qa",
+      "name": "QA Agent",
+      "file": "agents/qa.md",
+      "role": "Validates outputs, flow friction, and missing cases",
+      "platform_priority": "web_first",
+      "storage_priority": "local_sql_first"
+    }
+  ]
+}

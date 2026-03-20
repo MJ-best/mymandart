@@ -1,0 +1,20 @@
+{
+  "project_goal": "Build a workflow-based multi-agent platform MVP using Flutter and Supabase.",
+  "storage_mode": "local_sql_first",
+  "platform_priority": "web_first",
+  "execution_plan": [
+    "Orchestrator -> execution_plan",
+    "PM -> prd",
+    "System Designer -> local_sql_schema",
+    "Flutter -> ui + code",
+    "QA -> qa"
+  ],
+  "artifacts": [
+    "execution_plan",
+    "prd",
+    "schema",
+    "ui",
+    "code",
+    "qa"
+  ]
+}

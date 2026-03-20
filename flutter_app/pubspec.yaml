@@ -9,24 +9,12 @@ environment:
 dependencies:
   flutter:
     sdk: flutter
-  flutter_localizations:
-    sdk: flutter
-  intl: any
   flutter_riverpod: ^2.5.1
   shared_preferences: ^2.3.2
   uuid: ^4.4.2
   go_router: ^14.2.7
+  supabase_flutter: ^2.8.0
 
-  # Only used for mobile features; safe on web as no-op
-  share_plus: ^10.0.2
-  screenshot: ^3.0.0
-  gal: ^2.3.0
-  flutter_dynamic_icon_plus: ^1.3.1
-
-  # Cupertino icons for iOS style
-  cupertino_icons: ^1.0.8
-  responsive_builder: ^0.7.0
-  web: ^1.1.1
   google_fonts: ^6.2.1
 
 dev_dependencies:
@@ -36,11 +24,11 @@ dev_dependencies:
   flutter_launcher_icons: ^0.13.1
 
 flutter:
-  generate: true
   uses-material-design: true
 
   assets:
     - assets/icon/
+    - assets/fixtures/
 
 flutter_launcher_icons:
   android: true

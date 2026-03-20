@@ -1,0 +1,87 @@
+[
+  {
+    "key": "orchestrator",
+    "name": "Orchestrator Agent",
+    "roleName": "orchestrator",
+    "boundary": "Plans the workflow, keeps specialist execution ordered, and protects local-first web-first delivery.",
+    "systemPrompt": "Turn a product goal into a local-first, web-first execution plan and keep premium sync out of the core loop.",
+    "sortOrder": 0,
+    "outputTypes": ["execution_plan"],
+    "skills": [
+      {
+        "key": "planning",
+        "label": "Workflow planning",
+        "description": "Breaks a goal into deterministic steps."
+      }
+    ]
+  },
+  {
+    "key": "pm",
+    "name": "PM Agent",
+    "roleName": "pm",
+    "boundary": "Produces the PRD, feature list, low-tap user flow, and direct interaction model.",
+    "systemPrompt": "Generate a compact PRD and web-first user flow that minimizes taps and keeps edit, execute, progress, and complete tightly connected.",
+    "sortOrder": 1,
+    "outputTypes": ["prd"],
+    "skills": [
+      {
+        "key": "prd",
+        "label": "PRD generation",
+        "description": "Defines scope, users, flows, and acceptance criteria."
+      }
+    ]
+  },
+  {
+    "key": "system_designer",
+    "name": "System Designer Agent",
+    "roleName": "system_designer",
+    "boundary": "Designs the local SQL schema, relationships, and premium sync upgrade path.",
+    "systemPrompt": "Design local SQL data structures first, with a clean future bridge to premium cloud sync.",
+    "sortOrder": 2,
+    "outputTypes": ["schema"],
+    "skills": [
+      {
+        "key": "schema",
+        "label": "Schema design",
+        "description": "Defines tables, ownership, and relationships."
+      }
+    ]
+  },
+  {
+    "key": "flutter",
+    "name": "Flutter Agent",
+    "roleName": "flutter",
+    "boundary": "Builds the Flutter web-first UI structure and code skeleton using Figma handoff when available.",
+    "systemPrompt": "Generate a responsive Flutter web-first app shell with direct inline workflows, reduced taps, and designer-friendly Figma-driven implementation.",
+    "sortOrder": 3,
+    "outputTypes": ["ui", "code"],
+    "skills": [
+      {
+        "key": "ui",
+        "label": "UI structure",
+        "description": "Designs screens and responsive layout."
+      },
+      {
+        "key": "codegen",
+        "label": "Code skeleton",
+        "description": "Produces modular Flutter code."
+      }
+    ]
+  },
+  {
+    "key": "qa",
+    "name": "QA Agent",
+    "roleName": "qa",
+    "boundary": "Validates edge cases, missing cases, output gaps, and UX friction.",
+    "systemPrompt": "Review the plan and artifacts for correctness, low-tap flow quality, and local-first resilience.",
+    "sortOrder": 4,
+    "outputTypes": ["qa"],
+    "skills": [
+      {
+        "key": "edge_cases",
+        "label": "Edge-case review",
+        "description": "Checks auth, empty input, dedupe, permissions, and partial generation."
+      }
+    ]
+  }
+]
