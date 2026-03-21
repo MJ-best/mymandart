@@ -1,6 +1,6 @@
-# Codex Multi-Agent MVP
+# Codex Agent Workflow
 
-This folder defines the five-agent workflow used by the MVP.
+This folder defines the locked five-stage workflow used in this repository.
 
 ## Shared Context
 
@@ -12,13 +12,19 @@ This folder defines the five-agent workflow used by the MVP.
   - visual direction from reference moodboard
   - mandatory Figma-driven handoff rules for design work
 
+## Active Workflow
+
+The only active workflow is:
+
+`PM -> Design -> Flutter -> QA -> Integrator`
+
 ## Agents
 
-- `orchestrator`: plans the workflow and assigns tasks
-- `pm`: writes PRD, feature list, and user flow
-- `system-designer`: designs local SQL schema, future sync upgrade path, and ownership model
-- `flutter`: implements UI structure and code
-- `qa`: validates outputs and finds missing cases
+- `pm`: locks the work order and scope
+- `design`: produces a surface-level design brief
+- `flutter`: implements one approved surface at a time
+- `qa`: blocks or passes the work using the review gate
+- `integrator`: the only role allowed to merge, reset, restore, or push `main`
 
 ## Contract
 
@@ -31,4 +37,4 @@ Each agent definition contains:
 
 ## Machine-readable manifest
 
-Use `agents.json` to locate the canonical definition file for each agent.
+Use `agents.json` to locate the canonical definition file for each active role.
